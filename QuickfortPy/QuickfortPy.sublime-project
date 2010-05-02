@@ -1,0 +1,9 @@
+<!-- Documentation is available at http://www.sublimetext.com/docs/projects -->
+<project>
+	<mount dir="." exclude="*.png,*.jpg,*.exe,*.dll,*.obj" direxclude=".svn,.git,.hg,CVS,bin,nbproject"/>
+	<options>
+<![CDATA[
+buildFile Packages/C++/Make.sublime-build
+]]>
+	</options>
+</project>
