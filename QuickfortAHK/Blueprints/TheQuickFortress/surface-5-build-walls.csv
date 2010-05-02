@@ -1,0 +1,24 @@
+#build start(15;10; Top left corner of central stairs) Builds walls and bridges on the surface level. Note that the entrance on the southern wall juts out from the 30x20 footprint by 3 tiles; the southern bridge extends beyond the edge of the blueprint itself.\n\nYou'll need to add and connect levers yourself.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,gd(2x3),,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,Cw,Cw,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,gw(4x2),,,,Cw,,,,,Cw,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,,,,,Cw,,,,,Cw,Cw,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,,,,,Cw,,,,,ga(2x1),,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,,,,,Cw,,,,,Cw,Cw,,,,,,Cw,#
+Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,,,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,#
+,,,,,,,,,,,,Cw,,,,,Cw,,,,,,,,,,,,,#
+,,,,,,,,,,,,Cw,gw(4x2),,,,Cw,,,,,,,,,,,,,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#

@@ -1,0 +1,22 @@
+"#dig start(15;10; Top left corner of central stairs) Top-level plumbing for the fortwide waterfall system. This belongs below the surface and depot Z-levels.\n\nWater source should come from 2 tiles in lower right. All lower floors in this template have unused space in these lower right tiles, meant for pumping water up from a reservoir below the fort (this is intended to be a recirculating waterfall). There's also unused space in this blueprint for general use.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,i,,,,,,,,,,i,i,,,,,,,,,,i,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,#
+,,,,,,d,,,,,,,,,,,,,,,,,,,,,,,d,#
+,,,,,,d,,,,,,,,d,d,d,d,d,d,d,d,d,d,d,d,d,d,,d,#
+,,,,,,d,,,,,,,,h,h,,,,,,,,,,,,d,,d,#
+,,,,,,d,,,,,,,,,,,,,,,,,,,,,d,,d,#
+,,,,,,d,,,,,,,,,,,,,,,,,,,,,d,,d,#
+,,,,,,d,,,,,,,,,,,,,,,,,,,,,d,,d,#
+,,,,i,,d,d,d,d,h,,,,i,i,,,,h,d,d,d,d,,i,,d,,d,#
+,,,,i,,d,d,d,d,h,,,,i,i,,,,h,d,d,d,d,,i,,d,d,d,#
+,,,,,,,,,,,,,,,,,,,,,,,d,,,,,d,d,#
+,,,,,,,,,,,,,,,,,,,,,,,d,d,d,d,d,d,d,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,d,d,d,#
+,,,,,,,,,,,,,,h,h,,,,d,d,d,d,d,d,d,d,d,d,d,#
+,,,,,,,,,,,,,,d,d,,,,d,,,,,,,,,d,d,#
+,,,,,,,,,,,,,,d,d,d,d,d,d,,d,d,d,,d,d,d,d,d,#
+,,,,,,,,,,,,,,,,,,,,,d,d,d,d,d,,,d,d,#
+,,,,,,,,,,,,,,d,d,d,d,d,d,d,d,d,d,,d,d,d,d,d,#
+,,,,i,,,,,,,,,,i,i,,,,,,,,,,i,,,d,d,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#

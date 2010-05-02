@@ -1,0 +1,13 @@
+"#build IMPORTANT: Start this blueprint at the BOTTOM level of your tower shaft, and repeat (Alt+R) UPWARDS. The bottom pump must be placed first onto 2 floor tiles, to provide support for the pumps above. Each 2 floors requires 2 enormous corkscrews, 2 blocks, 2 pipes/tubes and 2 doors.\n\nBe careful when placing screw pumps in QF blueprints. They anchor from their bottom tile (when oriented N/S) and from their right tile (when oriented E/W).",,,,
+`,`,,`,#
+,d,~,`,#
+,`,Msm,`,#
+,`,~,`,#
+`,`,`,`,#
+#<,#,#,#,#
+`,`,~,`,#
+`,`,,`,#
+,d,Msu,`,#
+,`,,`,#
+`,`,`,`,#
+#,#,#,#,#

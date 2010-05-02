@@ -1,0 +1,155 @@
+#------------------------------------------------------------------
+# QUICKFORT USER OPTIONS
+#------------------------------------------------------------------
+
+# You can use Shift+Alt+R while QF is running to restart QF, which
+# will reload options.txt.
+
+#----------------------------
+# Keystrokes
+#----------------------------
+
+# EDIT THIS DEPENDING ON YOUR VERSION OF DWARF FORTRESS!
+# You might have to change this depending on the version of DF
+# you're running.
+#   DF v0.31.# uses {Esc} to exit menus.
+#   DF v0.28.181.40d# uses {Space} to exit menus.
+KeyExitMenu = {Esc}
+#KeyExitMenu = {Space}
+
+# Your Dwarf Fortress cursor movement keys.
+# By default NSEW movements are performed with 8246, and Z up/down
+# is performed with Shift+5/Ctrl+5.
+KeyLeft = 4
+KeyRight = 6
+KeyUp = 8
+KeyDown = 2
+KeyUpLeft = 7
+KeyUpRight = 9
+KeyDownLeft = 1
+KeyDownRight = 3
+KeyUpZ = +5
+KeyDownZ = ^5
+
+
+#----------------------------
+# Optimization options
+#----------------------------
+
+# When set to 1, QF will turn repeating cells like Cw,Cw,Cw,... into
+# single constructions up to 10 cells wide using DF resizing keys.
+# Works for building: Cw Cf CF Cr o
+# This setting can sometimes cause problems if you don't have a big
+# stockpile of a single rock/material type nearby.
+# Set to 0 if you don't want to worry about this.
+UseLongConstructions = 0
+
+# Use diagonal movement keys optimization?
+UseDiagonalMoveKeys = 1
+
+# Set to 0 to use shift-key optimizations (e.g. Shift+4 to move left
+# 10 units). DF seems to work better when this optimization is
+# disabled.
+DisableShiftOptimizations = 1
+
+# Note: the below option is irrelevant if DisableShiftOptimizations=1.
+# Set to 1 to disable converting cursor movements such as
+# {Left}x9 into {Shift+Right}{Left}. While this can be a much faster
+# method of cursor movement, it can cause problems if you're
+# building very close to the edges of the map, since QF can
+# overshoot the edges of your blueprint area and thus cause the DF
+# cursor to get off-position if close to an edge.
+DisableBacktrackingOptimization = 0
+
+# Set to 1 to disable all key-sending optimizations. This will make
+# the macro take much longer to run, but may help with weird
+# behavior or lag problems.
+DisableKeyOptimizations = 0
+
+
+#----------------------------
+# Quickfort GUI options
+#----------------------------
+
+# Set this to 0 to disable the startup balloon traytip.
+ShowStartupTrayTip = 1
+
+# Set this to 0 to disable the instructional mousetip shown when not
+# in placement or playback modes.
+ShowSplash = 1
+
+# Set to 0 to disable the mouse tooltip entirely.
+ShowMouseTooltip = 1
+
+# Set to 0 if you don't like the CSV file's comment text popup
+# appearing after loading a CSV.
+ShowCommentBox = 1
+
+# When set to 0, QF will play a sound when playback is completed.
+# Set to 1 to disable.
+MuteCompletedSound = 0
+
+# If set to 0, QF will immediately abort building if the Dwarf
+# Fortress window becomes inactive, avoiding sending keystrokes
+# intended for DF to another program. Setting this to 1 will disable
+# this feature.
+DisableSafetyAbort = 1
+
+# Try increasing these values if you have trouble with a flickering
+# mouse tooltip. Increasing MouseTooltipPlaybackUpdateEveryMs may
+# also permit use of lower values for DelayMultiplier (faster
+# building) in 40d11 (40d can have a value of 10 here without
+# issue).
+MouseTooltipInGameUpdateEveryMs = 10
+MouseTooltipPlaybackUpdateEveryMs = 500
+MouseTooltipOutOfGameUpdateEveryMs = 50
+
+
+#----------------------------
+# Key-sending controls
+#----------------------------
+
+# Determines key-sending method, one of: ControlSend Send SendEvent
+# SendInput SendPlay The default of ControlSend permits QF to send
+# keystrokes to DF even when the window is not focused, but could be
+# unreliable in certain environments.
+# Details: http://www.autohotkey.com/docs/commands/Send.htm
+SendMode = Send
+
+# Controls how long QF waits between sending keystrokes.
+# Increase this value if things go too quickly for your computer
+# when digging/building; decrease to build faster. Slower computers,
+# larger resolutions and bigger DF maps may need a larger delay.
+DelayMultiplier = 1
+
+# How long to pause after building doors, picking from materials
+# lists, etc. If QF seems to go off the rails in these
+# circumstances, try increasing this value.
+EmbeddedDelayDuration = 150
+
+# Increase this to make QF hold down the keys longer when sending
+# them to DF.
+# Details: http://www.autohotkey.com/docs/commands/SetKeyDelay.htm
+KeyPressDuration = -1
+
+
+#----------------------------
+# Paths
+#----------------------------
+
+# You can set up any number of aliases in aliases.txt. When one of
+# the below keywords is entered in a spreadsheet cell, it will be
+# replaced with the specified replacement text before execution. See
+# aliases.txt for a few examples. Path is relative to QF's starting
+# directory by default.
+AliasesPath = aliases.txt
+
+
+#----------------------------
+# Debugging
+#----------------------------
+
+# Turn on for debugging (doesn't actually send any keys to DF, just
+# writes to debug.txt)
+DebugOn = 0
+

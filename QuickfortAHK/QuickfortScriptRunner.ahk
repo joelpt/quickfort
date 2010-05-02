@@ -1,0 +1,2 @@
+Run Quickfort.ahk
+ExitApp
