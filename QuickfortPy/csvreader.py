@@ -1,5 +1,5 @@
 import re
-from grid_geometry import *
+from geometry import *
 
 class CsvLayer:
 
@@ -53,7 +53,7 @@ def parse_csv_file(filename):
 
     # break down start_command if given
     # expected format: start(x;y;start_comment)
-    if start_command is not None:
+    if start_command:
         m = re.match(r" +start\( *(\d+) *; *(\d+) *;? *(.+)? *\)",
             start_command)
 
@@ -109,6 +109,7 @@ def parse_csv_file(filename):
                     grid.add_cell(Point(x, y), cell)
                     x += 1 # for next column
             y += 1 # for next line
+        grid.fixup()
         layers.append(GridLayer(csvlayer.exit_keys, grid))
 
     return (layers, build_type, start_pos, start_comment, comment)

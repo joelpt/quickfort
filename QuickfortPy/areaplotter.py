@@ -1,4 +1,4 @@
-from grid_geometry import *
+from geometry import *
 import util
 
 class AreaPlotter:

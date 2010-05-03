@@ -1,4 +1,4 @@
-from grid_geometry import *
+from geometry import *
 from util import *
 from keystroker import Keystroker
 
@@ -41,6 +41,8 @@ class Router:
                 total_movekey_cost += len(ks.move(cursor_pos, cheapest_pos))
                 # mark the plot on the grid
                 cell = self.grid.get_cell(cheapest_pos)
+                if last_command != cell.command:
+                    total_key_cost += 1
                 last_command = cell.command
                 self.grid.set_area_plottable(cell.area, False)
                 #d = get_direction_from_to(center, cheapest_pos)
@@ -73,13 +75,11 @@ class Router:
         # check the cell we started in: if it is plottable, it becomes our starting
         # cheapest_area
         cell = self.grid.get_cell(start_pos)
-        if cell is not None:
-            area = cell.area
-            if area is not None and self.grid.is_plottable(start_pos):
-                cheapest_pos = start_pos
-                cheapest_cost = sqrt(area.diagonal_length())
-                #cheapest_cost = ks.move(area.corners[0], area.corners[1])
-                cheapest_area = area
+        if cell.plottable and cell.area:
+            cheapest_pos = start_pos
+            cheapest_cost = sqrt(cell.area.diagonal_length())
+            #cheapest_cost = ks.move(area.corners[0], area.corners[1])
+            cheapest_area = cell.area
 
         # print "starting cheapest area " + str(cheapest_area)
         # print "starting cheapest cost " + str(cheapest_cost)
@@ -109,7 +109,9 @@ class Router:
                         ## print "point is outside the grid so don't test further"
                         continue
 
-                    if not self.grid.is_plottable(pos):
+                    cell = self.grid.get_cell(pos)
+
+                    if not cell.plottable:
                         ## print "point is already plotted"
                         continue
 
@@ -119,8 +121,8 @@ class Router:
 
                     # if we have to switch commands between the last command and this one
                     # add to cost
-                    if last_command != self.grid.get_command(pos):
-                        cost += 0
+                    if last_command != cell.command:
+                        cost += 1
 
                     # halve initial move cost if it would be a move in the direction of
                     # cost_weight_delta; this biases the algorithm to continue filling in
@@ -142,13 +144,12 @@ class Router:
                         continue
 
                     # is this a area-corner cell that we can build from?
-                    area = self.grid.get_cell(pos).area
-                    if area is not None:
-                        # add this area's cost
+                    area = cell.area
+                    if area:
+                        # add this area's cost-to-plot
                         #cost += sqrt(area.diagonal_length())
                         #cost -= area.diagonal_length()
                         cost += len(ks.move(area.corners[0], area.corners[1])) + 2
-
 
                         ## print "areasize cost %f" % area.diagonal_length()
                         # is this area cheaper than the cheapest one yet found?

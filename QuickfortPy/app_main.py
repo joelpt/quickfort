@@ -1,10 +1,11 @@
 #! /usr/bin/python
 
-from grid_geometry import *
+from geometry import *
 import csvreader
 from areaplotter import AreaPlotter
 from router import Router
 import keystroker
+import sys
 
 __author__="joelt"
 __date__ ="$May 1, 2010 10:51:38 AM$"
@@ -13,7 +14,7 @@ def process_blueprint(filename):
     # parse the .csv blueprint file
     (layers, build_type, start_pos, start_comment, comment) = csvreader.parse_csv_file(filename)
 
-    if start_pos is None:
+    if not start_pos:
         start_pos = Point(0, 0)
 
     for layer in layers:
@@ -57,12 +58,21 @@ def process_blueprint(filename):
     return
 
 if __name__ == "__main__":
-    path = "d:/code/Quickfort/trunk/QuickfortAHK/Blueprints/Tests/odd-shape.csv"
+    for arg in sys.argv:
+        print 'arg: ' + str(arg)
+
+    if len(sys.argv) == 2:
+        path = sys.argv[1]
+    else:
+        path = "d:/code/Quickfort/trunk/QuickfortAHK/Blueprints/Tests/odd-shape.csv"
+
+    process_blueprint(path)
+
     # (grid, build_type, start_pos, start_comment, comment) = csvreader.parse_csv_file(path)
     # print "grid:\n%s" % grid.str_commands('')
     # print "build_type: %s" % build_type
     # print "comment: %s" % comment
 
-    process_blueprint(path)
+
 
 

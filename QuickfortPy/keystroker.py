@@ -1,4 +1,4 @@
-from grid_geometry import *
+from geometry import *
 
 """
 KEY_LIST = {
@@ -22,27 +22,59 @@ KEY_LIST = {
 }
 
 BUILD_TYPE_CFG = {
-    'd': {
+    'd': { # dig
         'init': '',
-        'designate': '<moveto><submenu><command><commit><setsize><commit>',
-        'begin': '!',
-        'commit': '!',
-        'max_edge_length': 0,
-        'setsizefun': lambda self, start, end: self.setsize_dig(start, end)
+        'designate': 'moveto cmd + setsize +',
+        'allowlarge': [],
+        'submenukeys': '',
+        'minsize': 0,
+        'maxsize': 0,
+        'custom': {},
+        'setsizefun': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
          },
-    'b': {
+    'b': { # build
         'init': '^',
-        'designate': '<command><moveto><setsize><commit><commitextra>',
-        'commit': '!',
-        'max_edge_length': 10,
-        'setsizefun': lambda self, start, end: self.setsize_build(start, end)
+        'designate': 'menu cmd moveto setsize + % ++ % exitmenu',
+        'allowlarge': ['Cw', 'CF', 'Cr', 'o'],
+        'submenukeys': 'iweCTM',
+        'minsize': 4,
+        'maxsize': 10,
+        'custom': {
+            'p': 'cmd moveto setsize +', # farm plot
+            'wf': 'cmd moveto + % + % ++ %', # metalsmith forge
+            'wv': 'cmd moveto + % + % ++ %', # magma forge
+            'D': 'cmd moveto + % + % ++ %', # trade depot
+            'Ms': 'cmd moveto + + + + %'
+            },
+        'setsizefun': lambda keystroker, start, end: keystroker.setsize_build(start, end)
+        },
+    'p': { # place (stockpiles)
+        'init': '',
+        'designate': 'moveto cmd + setsize +',
+        'allowlarge': [],
+        'submenukeys': '',
+        'minsize': 0,
+        'maxsize': 0,
+        'custom': {},
+        'setsizefun': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        },
+    'q': { # query (set building/task prefs)
+        'init': '',
+        'designate': 'moveto cmd + setsize +',
+        'allowlarge': [],
+        'submenukeys': '',
+        'minsize': 0,
+        'maxsize': 0,
+        'custom': {},
+        'setsizefun': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
         }
 }
 
-def setsize_dig(self, start, end):
+
+def setsize_standard(ks, start, end):
     return ks.move(start, end)
 
-def setsize_build(self, start, end):
+def setsize_build(ks, start, end):
     # move cursor halfway to end from start
     # this would work if i could figure out how to
     # implement division in Point vs an int instead of another Point
