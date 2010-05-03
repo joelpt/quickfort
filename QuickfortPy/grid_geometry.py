@@ -148,7 +148,7 @@ class Area:
         for i in xrange(0, 4):
             #print "comparing %s and %s" % (corner_pos, self.corners[i])
             if corner_pos == self.corners[i]:
-                #print "found it"
+                #print "found it, returning %s " % self.corners[(i + 2) % 4]
                 return self.corners[(i + 2) % 4]
         return None
 

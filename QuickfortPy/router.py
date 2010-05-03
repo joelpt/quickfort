@@ -26,12 +26,14 @@ class Router:
         self.grid.set_entire_grid_plottable(True)
 
         while (True):
+            #print "pre build pos %s" % cursor_pos
             cheapest_pos = self.get_cheapest_plottable_area_from(cursor_pos, last_command)
 
             if cheapest_pos is None:
                 # no more areas left to plot
                 break
             else:
+                #print "cheapest_pos %s %s" % (cheapest_pos, self.grid.get_cell(cheapest_pos).area)
                 # record this plot start-coordinates in plots
                 plots.append(cheapest_pos)
                 total_move_cost += cursor_pos.distance_to(cheapest_pos)
@@ -48,6 +50,7 @@ class Router:
 
                 # move cursor_pos to the ending corner of the plotted area
                 cursor_pos = self.grid.get_cell(cheapest_pos).area.opposite_corner(cheapest_pos)
+                #print "post build pos %s" % cursor_pos
                 # print "------------------ new cursor pos %s ------------------------" % cursor_pos
                 total_move_cost += cheapest_pos.distance_to(cursor_pos)
                 total_key_cost += len(ks.move(cheapest_pos, cursor_pos)) + 2
@@ -56,7 +59,8 @@ class Router:
         print "movecost %f" % total_move_cost
         print "keycost %f" % total_key_cost
         print "movekeys required between areas %f" % total_movekey_cost
-        return plots
+        print "exiting pos %s" % cursor_pos
+        return (plots, cursor_pos)
 
     def get_cheapest_plottable_area_from(self, start_pos, last_command):
         ks = Keystroker('d')
@@ -68,12 +72,14 @@ class Router:
         # print start_pos
         # check the cell we started in: if it is plottable, it becomes our starting
         # cheapest_area
-        area = self.grid.get_cell(start_pos).area
-        if area is not None and self.grid.is_plottable(start_pos):
-            cheapest_pos = start_pos
-            cheapest_cost = area.diagonal_length()
-            #cheapest_cost = ks.move(area.corners[0], area.corners[1])
-            cheapest_area = area
+        cell = self.grid.get_cell(start_pos)
+        if cell is not None:
+            area = cell.area
+            if area is not None and self.grid.is_plottable(start_pos):
+                cheapest_pos = start_pos
+                cheapest_cost = sqrt(area.diagonal_length())
+                #cheapest_cost = ks.move(area.corners[0], area.corners[1])
+                cheapest_area = area
 
         # print "starting cheapest area " + str(cheapest_area)
         # print "starting cheapest cost " + str(cheapest_cost)
@@ -141,7 +147,7 @@ class Router:
                         # add this area's cost
                         #cost += sqrt(area.diagonal_length())
                         #cost -= area.diagonal_length()
-                        cost -= len(ks.move(area.corners[0], area.corners[1])) + 2
+                        cost += len(ks.move(area.corners[0], area.corners[1])) + 2
 
 
                         ## print "areasize cost %f" % area.diagonal_length()

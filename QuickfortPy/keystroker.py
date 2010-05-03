@@ -1,13 +1,66 @@
 from grid_geometry import *
 
-class Keystroker:
-
-    keylist = {
-        'n': 'n', 'ne': 'ne', 'e': 'e', 'se': 'se', 's': 's', 'sw': 'sw', 'w': 'w', 'nw': 'nw'
+"""
+KEY_LIST = {
+        'n':config['KeyUp'],
+        'ne':config['KeyUpRight'],
+        'e':config['KeyRight'],
+        'se':config['KeyDownRight'],
+        's':config['KeyDown'],
+        'sw':config['KeyDownLeft'],
+        'w':config['KeyLeft'],
+        'nw':config['KeyUpLeft'],
+        'u':config['KeyUpZ'],
+        'd':config['KeyDownZ'],
+        '!':config['KeyCommit'],
+        '^':config['KeyExitMenu']
     }
+"""
+
+KEY_LIST = {
+    'n': 'n', 'ne': 'ne', 'e': 'e', 'se': 'se', 's': 's', 'sw': 'sw', 'w': 'w', 'nw': 'nw'
+}
+
+BUILD_TYPE_CFG = {
+    'd': {
+        'init': '',
+        'designate': '<moveto><submenu><command><commit><setsize><commit>',
+        'begin': '!',
+        'commit': '!',
+        'max_edge_length': 0,
+        'setsizefun': lambda self, start, end: self.setsize_dig(start, end)
+         },
+    'b': {
+        'init': '^',
+        'designate': '<command><moveto><setsize><commit><commitextra>',
+        'commit': '!',
+        'max_edge_length': 10,
+        'setsizefun': lambda self, start, end: self.setsize_build(start, end)
+        }
+}
+
+def setsize_dig(self, start, end):
+    return ks.move(start, end)
+
+def setsize_build(self, start, end):
+    # move cursor halfway to end from start
+    # this would work if i could figure out how to
+    # implement division in Point vs an int instead of another Point
+    midpoint = start + ((end - start) // 2)
+    keys = ks.move(start, midpoint)
+
+    # resize construction
+    area = Area(start, end)
+    keys += KEY_LIST['widen'] * (area.width() - 1)
+    keys += KEY_LIST['heighten'] * (area.height() - 1)
+    return keys
+
+class Keystroker:
 
     def __init__(self, build_type):
         self.build_type = build_type
+        self.current_menu = None
+
 
     def plot(self, grid, plots):
         keys = ""
@@ -52,7 +105,7 @@ class Keystroker:
                 steps = min([dx, dy])
 
             # render keystrokes
-            keys.extend([self.keylist[direction.compass]] * steps)
+            keys.extend([KEY_LIST[direction.compass]] * steps)
 
             # reduce remaining movement required by
             # the distance we just moved (move start closer to end)

@@ -1,7 +1,38 @@
 import re
 from grid_geometry import *
 
+class CsvLayer:
+
+    def __init__(self, exit_keys, rows=None):
+        self.exit_keys = exit_keys
+        if rows is None:
+            self.rows = []
+        else:
+            self.rows = rows
+
+class GridLayer:
+
+    def __init__(self, exit_keys, grid=None, plots=None, start_pos=None):
+        self.exit_keys = exit_keys
+        if grid is None:
+            self.grid = Grid()
+        else:
+            self.grid = grid
+
+        if plots is None:
+            self.plots = []
+        else:
+            self.plots = plots
+
+        if start_pos is None:
+            self.start_pos = Point(0, 0)
+        else:
+            self.start_pos = start_pos
+
+
 def parse_csv_file(filename):
+    layers = []
+
     # read file contents
     f = open(filename)
     lines = f.readlines()
@@ -40,26 +71,44 @@ def parse_csv_file(filename):
     else:
         comment = ''
 
-    # fill in a new Grid
-    grid = Grid()
+    # break up csv into layers of cells, with each
+    # layer separated by #> or #<
 
-    (x, y) = (0, 0)
+    csvlayers = []
+    csv = []
     for line in lines:
-        x = 0
-        # print len(line.split(','))
-        for cell in line.split(','):
-            cell = cell.strip()
-            if (cell == '#'):
-                # end of a line
-                break
-            else:
-                # Blank out marking (non-sent) chars
-                if cell in ('~', '`'): cell = ''
+        cells = line.split(',')
+        c = cells[0]
+        if c in ('#>', '#<'):
+            csvlayers.append(CsvLayer('d' if c == "#>" else 'u', csv))
+            csv = []
+        else:
+            csv.append(cells)
 
-                # print "want to add " + str(Point(x, y)) + cell
-                # add this csv cell to the grid
-                grid.add_cell(Point(x, y), cell)
-                x += 1 # for next column
-        y += 1 # for next line
+    if len(csv) > 0:
+        csvlayers.append(CsvLayer('', csv))
 
-    return (grid, build_type, start_pos, start_comment, comment)
+    layers = []
+    for csvlayer in csvlayers:
+        # fill a new Grid
+        grid = Grid()
+        (x, y) = (0, 0)
+        for row in csvlayer.rows:
+            x = 0
+            for cell in row:
+                cell = cell.strip()
+                if (cell == '#'):
+                    # end of a line
+                    break
+                else:
+                    # Blank out marking (non-sent) chars
+                    if cell in ('~', '`'): cell = ''
+
+                    # print "want to add " + str(Point(x, y)) + cell
+                    # add this csv cell to the grid
+                    grid.add_cell(Point(x, y), cell)
+                    x += 1 # for next column
+            y += 1 # for next line
+        layers.append(GridLayer(csvlayer.exit_keys, grid))
+
+    return (layers, build_type, start_pos, start_comment, comment)
