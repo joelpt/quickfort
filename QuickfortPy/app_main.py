@@ -4,21 +4,23 @@ from geometry import *
 import csvreader
 from areaplotter import AreaPlotter
 from router import Router
-import keystroker
+from keystroker import Keystroker
 import sys
 
 __author__="joelt"
 __date__ ="$May 1, 2010 10:51:38 AM$"
 
-def process_blueprint(filename):
+def process_blueprint(csv, output):
     # parse the .csv blueprint file
-    (layers, build_type, start_pos, start_comment, comment) = csvreader.parse_csv_file(filename)
+    (layers, build_type, start_pos, start_comment, comment) = csvreader.parse_csv_file(csv)
 
     if not start_pos:
         start_pos = Point(0, 0)
 
     for layer in layers:
-        print layer.grid.str_commands('') + '\n---\n'
+        print layer.grid.str_commands('') + '\n--- ^^ after parsing %s ^^ ---\n' % csv
+
+    keystr = ''
 
     for layer in layers:
         grid = layer.grid
@@ -40,9 +42,17 @@ def process_blueprint(filename):
         (plots, start_pos) = router.plan_route(start_pos)
         layer.plots = plots
         print "plot count: %d" % len(plots)
+
         # generate key sequence to render this series of plots in game
-        # ks = Keystroker(build_type)
-        # keys = ks.plot(grid, plots)
+        ks = Keystroker(grid, build_type)
+        keys = ks.plot(plots)
+        keystr += ''.join(keys)
+        print keystr
+        print len(keys)
+
+    f = open(output, 'w')
+    f.write(keystr)
+    f.close()
 
     print '\n'*20
 
@@ -61,17 +71,14 @@ if __name__ == "__main__":
     for arg in sys.argv:
         print 'arg: ' + str(arg)
 
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 3:
         path = sys.argv[1]
+        outpath = sys.argv[2]
     else:
         path = "d:/code/Quickfort/trunk/QuickfortAHK/Blueprints/Tests/odd-shape.csv"
+        outpath = "d:/code/Quickfort/trunk/pyout.txt"
 
-    process_blueprint(path)
-
-    # (grid, build_type, start_pos, start_comment, comment) = csvreader.parse_csv_file(path)
-    # print "grid:\n%s" % grid.str_commands('')
-    # print "build_type: %s" % build_type
-    # print "comment: %s" % comment
+    process_blueprint(path, outpath)
 
 
 

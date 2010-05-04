@@ -160,6 +160,25 @@ class CommandCell:
         self.plottable = True if command not in (None, '') else False
         self.label = ''
 
+class GridLayer:
+
+    def __init__(self, exit_keys, grid=None, plots=None, start_pos=None):
+        self.exit_keys = exit_keys
+        if grid is None:
+            self.grid = Grid()
+        else:
+            self.grid = grid
+
+        if plots is None:
+            self.plots = []
+        else:
+            self.plots = plots
+
+        if start_pos is None:
+            self.start_pos = Point(0, 0)
+        else:
+            self.start_pos = start_pos
+
 class Grid:
 
     def __init__(self):

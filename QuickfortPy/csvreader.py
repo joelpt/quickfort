@@ -10,32 +10,14 @@ class CsvLayer:
         else:
             self.rows = rows
 
-class GridLayer:
-
-    def __init__(self, exit_keys, grid=None, plots=None, start_pos=None):
-        self.exit_keys = exit_keys
-        if grid is None:
-            self.grid = Grid()
-        else:
-            self.grid = grid
-
-        if plots is None:
-            self.plots = []
-        else:
-            self.plots = plots
-
-        if start_pos is None:
-            self.start_pos = Point(0, 0)
-        else:
-            self.start_pos = start_pos
-
-
 def parse_csv_file(filename):
     layers = []
 
     # read file contents
     f = open(filename)
     lines = f.readlines()
+    f.close()
+
     lines = [line.strip() for line in lines]
 
     # remove all quotes
@@ -87,7 +69,7 @@ def parse_csv_file(filename):
 
     if len(csv) > 0:
         csvlayers.append(CsvLayer('', csv))
-
+    print 'csvlayers %d' % len(csvlayers)
     layers = []
     for csvlayer in csvlayers:
         # fill a new Grid
@@ -111,5 +93,5 @@ def parse_csv_file(filename):
             y += 1 # for next line
         grid.fixup()
         layers.append(GridLayer(csvlayer.exit_keys, grid))
-
+    print 'layers %d' % len(csvlayers)
     return (layers, build_type, start_pos, start_comment, comment)

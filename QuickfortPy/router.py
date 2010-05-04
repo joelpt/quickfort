@@ -14,7 +14,7 @@ class Router:
         we can plot, and we plot it. Repeat until all areas are plotted.
         """
 
-        ks = Keystroker('d')
+        ks = Keystroker(self.grid, 'd')
         plots = []
         total_move_cost = 0
         total_key_cost = 0
@@ -65,7 +65,7 @@ class Router:
         return (plots, cursor_pos)
 
     def get_cheapest_plottable_area_from(self, start_pos, last_command):
-        ks = Keystroker('d')
+        ks = Keystroker(self.grid, 'd')
 
         cheapest_pos = None
         cheapest_area = None
@@ -77,7 +77,7 @@ class Router:
         cell = self.grid.get_cell(start_pos)
         if cell.plottable and cell.area:
             cheapest_pos = start_pos
-            cheapest_cost = sqrt(cell.area.diagonal_length())
+            cheapest_cost = 1 # sqrt(cell.area.diagonal_length())
             #cheapest_cost = ks.move(area.corners[0], area.corners[1])
             cheapest_area = cell.area
 
@@ -149,7 +149,7 @@ class Router:
                         # add this area's cost-to-plot
                         #cost += sqrt(area.diagonal_length())
                         #cost -= area.diagonal_length()
-                        cost += len(ks.move(area.corners[0], area.corners[1])) + 2
+                        cost += sqrt(len(ks.move(area.corners[0], area.corners[1])) + 2)
 
                         ## print "areasize cost %f" % area.diagonal_length()
                         # is this area cheaper than the cheapest one yet found?

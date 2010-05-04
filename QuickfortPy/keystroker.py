@@ -1,4 +1,6 @@
 from geometry import *
+import re
+from itertools import takewhile
 
 """
 KEY_LIST = {
@@ -18,13 +20,13 @@ KEY_LIST = {
 """
 
 KEY_LIST = {
-    'n': 'n', 'ne': 'ne', 'e': 'e', 'se': 'se', 's': 's', 'sw': 'sw', 'w': 'w', 'nw': 'nw'
+    'n': '8', 'ne': '9', 'e': '6', 'se': '3', 's': '2', 'sw': '1', 'w': '4', 'nw': '7'
 }
 
 BUILD_TYPE_CFG = {
     'd': { # dig
         'init': '',
-        'designate': 'moveto cmd + setsize +',
+        'designate': 'moveto,cmd,+,setsize,+',
         'allowlarge': [],
         'submenukeys': '',
         'minsize': 0,
@@ -89,30 +91,55 @@ def setsize_build(ks, start, end):
 
 class Keystroker:
 
-    def __init__(self, build_type):
+    def __init__(self, grid, build_type):
+        self.grid = grid
         self.build_type = build_type
         self.current_menu = None
 
 
-    def plot(self, grid, plots):
-        keys = ""
-        cursor_pos = Point(0, 0)
+    def plot(self, plots):
+        keys = []
+        cursorpos = Point(0, 0)
+
+        replacebase = {
+            '\+': '{Enter}%',
+            '\+\+': '+{Enter}%wait%',
+            '\%': '%wait%'
+            }
+
+        last_command = ''
 
         # construct the list of keystrokes required to move to each
         # successive area and build it
-        for plot_start in plots:
-            cell = grid.get_cell(plot_start)
-            plot_end = cell.area.opposite_corner(plot_start)
+        for pos in plots:
+            cell = grid.get_cell(pos)
+            command = cell.command
+            endpos = cell.area.opposite_corner(pos)
 
-            # move to the start point
-            keys += self.move(cursor_pos, plot_start)
+            # build replacements dict
+            replacements = replacebase.copy()
 
-            # plot the area
-            #keys += ks.begin_designate(cell.command)
-            keys += ks.move(cursor_pos, plot_end)
-            #keys += ks.end_designate()
+            if command != last_command:
+                replacements['cmd'] = command
+                last_command = command
+            else:
+                replacements['cmd'] = ''
 
-            cursor_pos = plot_end
+            replacements['moveto'] = ','.join(self.move(cursorpos, pos))
+            replacements['setsize'] = ','.join(self.move(pos, endpos))
+            pattern = BUILD_TYPE_CFG['d']['designate']
+
+            # apply each replacement to our designation pattern
+            for k, v in replacements.items():
+                pattern = re.sub(k, v, pattern)
+
+            # add our transformed keys to keys
+            keys.extend([key for key in pattern.split(',') if key != ''])
+
+            # move cursor pos to end corner of built area
+            cursorpos = endpos
+
+        return keys
 
     def move(self, start, end):
         keys = []
@@ -136,13 +163,26 @@ class Keystroker:
                 # in this direction without going too far
                 steps = min([dx, dy])
 
-            # render keystrokes
-            keys.extend([KEY_LIST[direction.compass]] * steps)
+            keycode = [KEY_LIST[direction.compass]]
 
-            # reduce remaining movement required by
-            # the distance we just moved (move start closer to end)
-            # eventually putting start at the same position as end
-            start += direction.delta().magnify(steps)
+            if steps < 7:
+                # render keystrokes
+                keys.extend(keycode * steps)
+                start += direction.delta().magnify(steps)
+            else:
+                jumps = (steps // 10)
+
+                # backtracking optimization
+                if steps % 10 >= 7:
+                    jumps += 1
+
+                testpos = start + direction.delta().magnify(jumps * 10)
+
+                if not self.grid.is_out_of_bounds(testpos):
+                    # shift optimization
+                    keys.extend(
+                        "{Shift down}", keycode * jumps, "{Shift up}")
+
 
         return keys
 
