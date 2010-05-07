@@ -20,7 +20,7 @@ def process_blueprint(csv, output):
     for layer in layers:
         print layer.grid.str_commands('') + '\n--- ^^ after parsing %s ^^ ---\n' % csv
 
-    keystr = ''
+    keys = []
 
     for layer in layers:
         grid = layer.grid
@@ -30,8 +30,9 @@ def process_blueprint(csv, output):
         # plot areas to be built on the grid
         plotter = AreaPlotter(grid)
         if not plotter.mark_all_plottable_areas():
-            print "nada to plotta"
-            return None # throw an error?
+            raise
+            # print "nada to plotta"
+            # return None # throw an error?
 
         grid = plotter.grid
 
@@ -45,23 +46,23 @@ def process_blueprint(csv, output):
 
         # generate key sequence to render this series of plots in game
         ks = Keystroker(grid, build_type)
-        keys = ks.plot(plots)
-        keystr += ''.join(keys)
-        print keystr
-        print len(keys)
+        keys += ks.plot(plots) + ['^5']
 
+    keystr = ''.join(keys)
+    print keystr
     f = open(output, 'w')
     f.write(keystr)
     f.close()
 
-    print '\n'*20
+    print '\n'*4
 
     for layer in layers:
         print layer.grid.str_area_labels() + '\n'
         print "Starts at: %s" % layer.start_pos
         print "route order: %s" % ''.join([layer.grid.get_cell(plot).label for plot in layer.plots]) + '\n\n'
 
-
+    print keystr
+    print "total key cost: %d" % len(keys)
 
     # return keys
 

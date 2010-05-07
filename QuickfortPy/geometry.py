@@ -16,6 +16,17 @@ class Point:
         else:
             return -1
 
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __mul__(self, other):
+        if isinstance(other, Point):
+            return Point(self.x * other.x, self.y * other.y)
+        elif isinstance(other, int):
+            return Point(self.x * other, self.y * other)
+        else:
+            raise
+
     def __str__(self):
         return "(%d, %d)" % (self.x, self.y)
 
@@ -25,8 +36,6 @@ class Point:
     def get_coord_of_axis(self, direction):
         return self.x if direction.compass in ('n', 's') else self.y
 
-    def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
 
     def magnify(self, magnitude):
         return Point(self.x * magnitude, self.y * magnitude)

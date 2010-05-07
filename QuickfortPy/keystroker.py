@@ -26,7 +26,7 @@ KEY_LIST = {
 BUILD_TYPE_CFG = {
     'd': { # dig
         'init': '',
-        'designate': 'moveto,cmd,+,setsize,+',
+        'designate': ['moveto','cmd','+','setsize','+'],
         'allowlarge': [],
         'submenukeys': '',
         'minsize': 0,
@@ -99,12 +99,12 @@ class Keystroker:
 
     def plot(self, plots):
         keys = []
-        cursorpos = Point(0, 0)
+        cursorpos = None
 
         replacebase = {
-            '\+': '{Enter}%',
-            '\+\+': '+{Enter}%wait%',
-            '\%': '%wait%'
+            '+': ['{Enter}'], # , '%'],
+            '++': ['+{Enter}', '%wait%'],
+            '%': ['%wait%']
             }
 
         last_command = ''
@@ -112,7 +112,7 @@ class Keystroker:
         # construct the list of keystrokes required to move to each
         # successive area and build it
         for pos in plots:
-            cell = grid.get_cell(pos)
+            cell = self.grid.get_cell(pos)
             command = cell.command
             endpos = cell.area.opposite_corner(pos)
 
@@ -125,16 +125,25 @@ class Keystroker:
             else:
                 replacements['cmd'] = ''
 
-            replacements['moveto'] = ','.join(self.move(cursorpos, pos))
-            replacements['setsize'] = ','.join(self.move(pos, endpos))
-            pattern = BUILD_TYPE_CFG['d']['designate']
+            if cursorpos is not None:
+                replacements['moveto'] = self.move(cursorpos, pos)
+            else:
+                replacements['moveto'] = []
 
-            # apply each replacement to our designation pattern
-            for k, v in replacements.items():
-                pattern = re.sub(k, v, pattern)
+
+            replacements['setsize'] = self.move(pos, endpos)
+            pattern = BUILD_TYPE_CFG['d']['designate']
+            newkeys = []
+
+            # do pattern replacements (and throw away empty elements)
+            for p in pattern:
+                if p in replacements:
+                    newkeys.extend(replacements[p])
+                else:
+                    newkeys.append(p)
 
             # add our transformed keys to keys
-            keys.extend([key for key in pattern.split(',') if key != ''])
+            keys.extend(newkeys)
 
             # move cursor pos to end corner of built area
             cursorpos = endpos
@@ -143,6 +152,7 @@ class Keystroker:
 
     def move(self, start, end):
         keys = []
+        allow_backtrack = True
 
         # while there are moves left to make..
         while (start != end):
@@ -164,25 +174,47 @@ class Keystroker:
                 steps = min([dx, dy])
 
             keycode = [KEY_LIST[direction.compass]]
-
-            if steps < 7:
+            move = direction.delta()
+            # print "%s dir, %s to %s, dx %d dy %d steps %d" % (keycode, start, end, dx, dy, steps)
+            if steps < 8 or not allow_backtrack:
                 # render keystrokes
                 keys.extend(keycode * steps)
-                start += direction.delta().magnify(steps)
+                start = start + (move * steps)
+                allow_backtrack = True
             else:
                 jumps = (steps // 10)
+                leftover = steps % 10
+                jumpmove = move * 10
 
                 # backtracking optimization
-                if steps % 10 >= 7:
-                    jumps += 1
+                if leftover >= 8:
+                    # test if jumping an extra 10-unit step
+                    # would put us outside of the bounds of
+                    # the blueprint (want to prevent)
+                    test = start + (jumpmove * (jumps + 1))
 
-                testpos = start + direction.delta().magnify(jumps * 10)
+                    if self.grid.is_out_of_bounds(test):
+                        # just move there normally
+                        keys.extend(keycode * leftover)
+                        start = start + (move * steps)
+                        # don't try to do this next iteration
+                        allow_backtrack = False
+                    else:
+                        # permit overjump/backtracking movement
+                        jumps +=1
+                        start = start + (jumpmove * jumps)
+                        allow_backtrack = True
+                else:
+                    # move the last few cells needed when using
+                    # jumpmoves to land on the right spot
+                    keys.extend(keycode * leftover)
+                    start = start + (move * steps)
+                    allow_backtrack = True
 
-                if not self.grid.is_out_of_bounds(testpos):
-                    # shift optimization
-                    keys.extend(
-                        "{Shift down}", keycode * jumps, "{Shift up}")
-
+                # shift optimization
+                keys.append("{Shift down}")
+                keys.extend(keycode * jumps)
+                keys.append("{Shift up}")
 
         return keys
 

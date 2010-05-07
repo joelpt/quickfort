@@ -1,9 +1,12 @@
 # does not work?!
-def flatten(l):
-  if isinstance(l,list):
-     return sum(map(flatten,l))
-  else:
-     return l
+def flatten(ob):
+    if isinstance(ob, basestring) or not isinstance(ob, Iterable):
+        yield ob
+    else:
+        for o in ob:
+            for ob in flatten(o):
+                yield ob
+
 
 def uniquify(seq, idfun=None):
     # order preserving
