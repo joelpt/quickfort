@@ -130,6 +130,9 @@ class Area:
             Point(xs[0], ys[1])
         ]
 
+        # Estimated keystroke cost to construct this region
+        self.keycost = 2 + self.corners[0].distance_to(self.corners[2])
+
 
     def __cmp__(self, other):
         return cmp(self.size(), other.size())
@@ -163,11 +166,12 @@ class Area:
 
 class CommandCell:
 
-    def __init__(self, command):
+    def __init__(self, command, parentgrid):
         self.command = command
         self.area = None
         self.plottable = True if command not in (None, '') else False
         self.label = ''
+        self.parentgrid = parentgrid
 
 class GridLayer:
 
@@ -206,7 +210,7 @@ class Grid:
         Once added to the grid, .get_cell(..) can be used to reference
         and modify it.
         """
-        cell = CommandCell(contents)
+        cell = CommandCell(contents, point)
 
         if len(contents) == 0:
             cell.label = '.' # visual identification of empty cells
@@ -234,7 +238,7 @@ class Grid:
         for row in self.cells:
             if len(row) < self.width:
                 row.extend(
-                    [CommandCell('')] * (self.width - len(row))
+                    [CommandCell('', self)] * (self.width - len(row))
                     )
         return
 

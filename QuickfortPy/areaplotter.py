@@ -80,7 +80,7 @@ class AreaPlotter:
                     and self.grid.is_corner(point):
                     areas.append(self.find_largest_area_from_point(point))
 
-        areas = util.uniquify(areas, lambda area: ''.join([str(c) for c in area.corners]))
+        areas = util.uniquify(areas) #, lambda area: ''.join([str(c) for c in area.corners]))
         # print "results of find largest areas pass after uniquify:"
         # print len(areas)
         # print '\n'.join([str(a) for a in areas])

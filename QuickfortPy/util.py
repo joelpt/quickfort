@@ -11,7 +11,7 @@ def flatten(ob):
 def uniquify(seq, idfun=None):
     # order preserving
     if idfun is None:
-        def idfun(x): return x
+        def idfun(x): return id(x)
     seen = {}
     result = []
     for item in seq:

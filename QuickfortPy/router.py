@@ -93,28 +93,32 @@ class Router:
         print "exiting pos %s" % cursor_pos
         return (plots, cursor_pos)
 
-    # def new_find_cheapest():
-    #     # buid list of all cells
-    #     cells = flatten(grid.cells)
+    def new_find_cheapest(self, start_pos, last_command):
+        # buid list of all cells
+        cells = flatten(self.grid.cells)
 
-    #     # collect all areas
-    #     areacells = [c for c in cells if c.area]
+        # collect all the area-corners
+        areacells = [c for c in cells if c.area]
 
-    #     while areas:
-    #         # get the cheapest one from here
-    #         cell = min(areacells, key=lambda c: get_cost(cstart_pos, last_command, cell))
+        while areacells:
+            # get the cheapest area-corner cell to build from here
+            cell = min(areacells, key=lambda c: get_cost(start_pos, last_command, cell))
+            pos = cell.parentgrid
+            # remove the 4 area-corners that make up this area from areacells
+            for corner in cell.area.corners:
+                areacells.remove(corner)
 
-    #         # find the cheapest one from here
-    #         # include command-switching cost,
-    #         # move cost, and area construction
-    #         # cost (or odd ass variation of it)
+            # find the cheapest one from here
+            # include command-switching cost,
+            # move cost, and area construction
+            # cost (or odd ass variation of it)
 
-    #         # optimization: break upon finding
-    #         #  one that's larger than this one
+            # optimization: break upon finding
+            #  one that's larger than this one
 
-    #         # plot it? should not be needed if
-    #         # just working off areas list;
-    #         # remove the other corners from areas
+            # plot it? should not be needed if
+            # just working off areas list;
+            # remove the other corners from areas
 
 
 
@@ -138,7 +142,7 @@ class Router:
         # expand outward ring by ring
         ks = Keystroker(self.grid, 'd')
 
-        for ring in xrange(1, max([self.grid.width, self.grid.height])):
+        for ring in xrange(1, 1 + max([self.grid.width, self.grid.height])):
 
             # if the minimum number of moves that would be required just to get to this ring
             # is more than the total cost of plotting the cheapest area found so far, stop
@@ -148,7 +152,7 @@ class Router:
 
             pos = start_pos + Point(-ring, -ring) # starting position in ring (NW corner cell)
 
-            for dir in [Direction(d) for d in ['e','s','w','n']]:
+            for dir in (Direction(d) for d in ['e','s','w','n']):
                 for step in xrange(0, 2*ring):
 
                     # step once in the direction of dir
