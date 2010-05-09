@@ -1,86 +1,110 @@
 #! /usr/bin/python
 
+import sys
+import re
+from optparse import OptionParser
+
 from geometry import *
 import csvreader
 from areaplotter import AreaPlotter
 from router import Router
 from keystroker import Keystroker
-import sys
+from transformer import Transformer
 
-__author__="joelt"
-__date__ ="$May 1, 2010 10:51:38 AM$"
+def process_blueprint(csvpath, options):
+    if options.debugcsv: print ">>>> BEGIN CSV PARSING"
 
-def process_blueprint(csv, output):
     # parse the .csv blueprint file
-    (layers, build_type, start_pos, start_comment, comment) = csvreader.parse_csv_file(csv)
+    (layers, build_type, start, start_comment, comment) = csvreader.parse_csv_file(csvpath)
 
-    if not start_pos:
-        start_pos = Point(0, 0)
+    if not start:
+        start = Point(0, 0)
 
-    for layer in layers:
-        print layer.grid.str_commands('') + '\n--- ^^ after parsing %s ^^ ---\n' % csv
+    if options.debugcsv:
+        print '#### Parsed %s' % csvpath
+        for layer in layers:
+            print layer.grid.str_commands('') + '\n'
+
+    if options.transform:
+        print "#### Transforming using transformation: %s" % options.transform
+        layers = Transformer(layers, options.transform).transform()
+        for layer in layers:
+            print layer.grid.str_commands('') + '\n'
+
+    if options.debugcsv: print ">>>> END CSV PARSING"
 
     keys = []
 
     for layer in layers:
         grid = layer.grid
-        layer.start_pos = start_pos
-        ## plot_predefined_areas()
+        layer.start = start
+
+        ## TODO plot_predefined_areas()
 
         # plot areas to be built on the grid
-        plotter = AreaPlotter(grid)
+        plotter = AreaPlotter(grid, options.debugarea)
         if not plotter.mark_all_plottable_areas():
             raise
-            # print "nada to plotta"
-            # return None # throw an error?
 
         grid = plotter.grid
 
-        # starting from start_pos, discover the order we will
+        # starting from start, discover the order we will
         # plot the areas in using a sort of cheapest-route algorithm
 
-        router = Router(grid)
-        (plots, start_pos) = router.plan_route(start_pos)
+        router = Router(grid, options.debugrouter)
+        plots, start = router.plan_route(start)
         layer.plots = plots
-        print "plot count: %d" % len(plots)
 
         # generate key sequence to render this series of plots in game
         ks = Keystroker(grid, build_type)
         keys += ks.plot(plots) + ['^5']
 
-    keystr = ''.join(keys)
-    print keystr
-    f = open(output, 'w')
-    f.write(keystr)
-    f.close()
+    if options.debugsummary:
+        print ">>>> BEGIN SUMMARY"
+        for layer in layers:
+            print layer.grid.str_area_labels() + '\n'
+            print "Initial cursor position: %s" % layer.start
+            print "Route order: %s" % ''.join([layer.grid.get_cell(plot).label for plot in layer.plots])
+            print "Total key cost: %d" % len(keys)
+        print "<<<< END SUMMARY"
 
-    print '\n'*4
+    return ''.join(keys)
 
-    for layer in layers:
-        print layer.grid.str_area_labels() + '\n'
-        print "Starts at: %s" % layer.start_pos
-        print "route order: %s" % ''.join([layer.grid.get_cell(plot).label for plot in layer.plots]) + '\n\n'
 
-    print keystr
-    print "total key cost: %d" % len(keys)
+def main():
+    usage = "usage: %prog [options] csv_file [output_file]"
+    parser = OptionParser(usage=usage, version="%prog 1.0")
+    parser.add_option("-t", "--transform",
+                      action="store", dest="transform", default=False,
+                      help="transformation rules, e.g. -t 2e;flipv;2s")
+    parser.add_option("-c", "--show-csv",
+                      action="store_true", dest="debugcsv", default=False,
+                      help="show parsed blueprint on stdout after reading")
+    parser.add_option("-a", "--show-area",
+                      action="store_true", dest="debugarea", default=False,
+                      help="show area-discovery steps on stdout")
+    parser.add_option("-r", "--show-route",
+                      action="store_true", dest="debugrouter", default=False,
+                      help="show route-planning steps on stdout")
+    parser.add_option("-s", "--show-summary",
+                      action="store_true", dest="debugsummary", default=False,
+                      help="show summary output")
+    (options, args) = parser.parse_args()
 
-    # return keys
+    if len(args) < 1:
+        parser.print_help()
+        return
+
+    keystr = process_blueprint(args[0], options)
+
+    if len(args) > 1:
+        f = open(args[1], 'w')
+        f.write(keystr)
+        f.close()
+    else:
+        print keystr
 
     return
 
 if __name__ == "__main__":
-    for arg in sys.argv:
-        print 'arg: ' + str(arg)
-
-    if len(sys.argv) == 3:
-        path = sys.argv[1]
-        outpath = sys.argv[2]
-    else:
-        path = "d:/code/Quickfort/trunk/QuickfortAHK/Blueprints/Tests/odd-shape.csv"
-        outpath = "d:/code/Quickfort/trunk/pyout.txt"
-
-    process_blueprint(path, outpath)
-
-
-
-
+    main()

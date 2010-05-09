@@ -1,17 +1,17 @@
-# does not work?!
-def flatten(ob):
-    if isinstance(ob, basestring) or not isinstance(ob, Iterable):
-        yield ob
+def flatten(l):
+  out = []
+  for item in l:
+    if isinstance(item, (list, tuple)):
+      out.extend(flatten(item))
     else:
-        for o in ob:
-            for ob in flatten(o):
-                yield ob
+      out.append(item)
+  return out
 
 
 def uniquify(seq, idfun=None):
     # order preserving
     if idfun is None:
-        def idfun(x): return id(x)
+        def idfun(x): return x
     seen = {}
     result = []
     for item in seq:

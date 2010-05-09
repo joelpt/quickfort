@@ -26,68 +26,52 @@ KEY_LIST = {
 BUILD_TYPE_CFG = {
     'd': { # dig
         'init': '',
-        'designate': ['moveto','cmd','+','setsize','+'],
+        'designate': 'moveto cmd + setsize +'.split(),
         'allowlarge': [],
         'submenukeys': '',
         'minsize': 0,
         'maxsize': 0,
         'custom': {},
-        'setsizefun': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
          },
     'b': { # build
         'init': '^',
-        'designate': 'menu cmd moveto setsize + % ++ % exitmenu',
+        'designate': 'menu cmd moveto setsize + % ++ % exitmenu'.split(),
         'allowlarge': ['Cw', 'CF', 'Cr', 'o'],
         'submenukeys': 'iweCTM',
         'minsize': 4,
         'maxsize': 10,
         'custom': {
-            'p': 'cmd moveto setsize +', # farm plot
-            'wf': 'cmd moveto + % + % ++ %', # metalsmith forge
-            'wv': 'cmd moveto + % + % ++ %', # magma forge
-            'D': 'cmd moveto + % + % ++ %', # trade depot
-            'Ms': 'cmd moveto + + + + %'
+            'p':    'cmd moveto setsize +'.split(), # farm plot
+            'wf':   'cmd moveto + % + % ++ %'.split(), # metalsmith forge
+            'wv':   'cmd moveto + % + % ++ %'.split(), # magma forge
+            'D':    'cmd moveto + % + % ++ %'.split(), # trade depot
+            'Ms':   'cmd moveto + + + + %'.split()
             },
-        'setsizefun': lambda keystroker, start, end: keystroker.setsize_build(start, end)
+        'setsize': lambda keystroker, start, end: keystroker.setsize_build(start, end)
         },
     'p': { # place (stockpiles)
         'init': '',
-        'designate': 'moveto cmd + setsize +',
+        'designate': 'moveto cmd + setsize +'.split(),
         'allowlarge': [],
         'submenukeys': '',
         'minsize': 0,
         'maxsize': 0,
         'custom': {},
-        'setsizefun': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
         },
     'q': { # query (set building/task prefs)
         'init': '',
-        'designate': 'moveto cmd + setsize +',
+        'designate': 'moveto cmd + setsize +'.split(),
         'allowlarge': [],
         'submenukeys': '',
         'minsize': 0,
         'maxsize': 0,
         'custom': {},
-        'setsizefun': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
         }
 }
 
-
-def setsize_standard(ks, start, end):
-    return ks.move(start, end)
-
-def setsize_build(ks, start, end):
-    # move cursor halfway to end from start
-    # this would work if i could figure out how to
-    # implement division in Point vs an int instead of another Point
-    midpoint = start + ((end - start) // 2)
-    keys = ks.move(start, midpoint)
-
-    # resize construction
-    area = Area(start, end)
-    keys += KEY_LIST['widen'] * (area.width() - 1)
-    keys += KEY_LIST['heighten'] * (area.height() - 1)
-    return keys
 
 class Keystroker:
 
@@ -96,10 +80,9 @@ class Keystroker:
         self.build_type = build_type
         self.current_menu = None
 
-
     def plot(self, plots):
         keys = []
-        cursorpos = None
+        cursor = None
 
         replacebase = {
             '+': ['{Enter}'], # , '%'],
@@ -120,21 +103,25 @@ class Keystroker:
             replacements = replacebase.copy()
 
             if command != last_command:
-                replacements['cmd'] = command
+                cmdedit = re.sub(r'\{', '|{', command)
+                cmdedit = re.sub(r'\}', '}|', cmdedit)
+                cmdedit = re.sub(r'\!', '|!|', cmdedit)
+                cmdkeys = re.split(r'\|', cmdedit)
+                replacements['cmd'] = cmdkeys
                 last_command = command
             else:
                 replacements['cmd'] = ''
 
-            if cursorpos is not None:
-                replacements['moveto'] = self.move(cursorpos, pos)
+            if cursor is not None:
+                replacements['moveto'] = self.move(cursor, pos)
             else:
                 replacements['moveto'] = []
 
+            setsize, newpos = BUILD_TYPE_CFG['d']['setsize'](self, pos, endpos)
+            replacements['setsize'] = setsize
 
-            replacements['setsize'] = self.move(pos, endpos)
             pattern = BUILD_TYPE_CFG['d']['designate']
             newkeys = []
-
             # do pattern replacements (and throw away empty elements)
             for p in pattern:
                 if p in replacements:
@@ -146,7 +133,7 @@ class Keystroker:
             keys.extend(newkeys)
 
             # move cursor pos to end corner of built area
-            cursorpos = endpos
+            cursor = newpos
 
         return keys
 
@@ -156,9 +143,7 @@ class Keystroker:
 
         # while there are moves left to make..
         while (start != end):
-            # get the compass direction from start to end,
-            # with nw/ne/sw/se taking priority over n/s/e/w
-            direction = get_direction_from_to(start, end)
+            direction = Direction.get_direction(start, end)
 
             # Get x and y component of distance between start and end
             dx = abs(start.x - end.x)
@@ -175,7 +160,6 @@ class Keystroker:
 
             keycode = [KEY_LIST[direction.compass]]
             move = direction.delta()
-            # print "%s dir, %s to %s, dx %d dy %d steps %d" % (keycode, start, end, dx, dy, steps)
             if steps < 8 or not allow_backtrack:
                 # render keystrokes
                 keys.extend(keycode * steps)
@@ -212,9 +196,51 @@ class Keystroker:
                     allow_backtrack = True
 
                 # shift optimization
-                keys.append("{Shift down}")
-                keys.extend(keycode * jumps)
-                keys.append("{Shift up}")
+                # this needs to be configured somewhere based
+                # on the output-mode (macros vs ahkeys)
+                # for ahkeys output should probably look like
+                # +6 +6 +6
+                # rather than
+                # +{6 3}
+                # only because the former is easier to
+                # express in a template form easily modifiable
+                # by an end user
+                # might be best to use this template style:
+                    # jump_begin: '{Shift down}'
+                    # jump_step: '<key>'
+                    # jump_end: '{Shift up}'
+                if jumps > 0:
+                    keys.append("{Shift down}")
+                    keys.extend(keycode * jumps)
+                    keys.append("{Shift up}")
+                #keys.append("+{%s %d}" % (keycode[0], jumps))
 
         return keys
 
+    def setsize_standard(self, start, end):
+        """
+        Standard sizing mechanism for dig, place, query buildtypes.
+        Returns keys, newpos:
+            keys needed to make the currently-designating area the correct size
+            newpos is where the cursor ends up after sizing the area
+        """
+        return self.move(start, end), end
+
+    def setsize_build(self, start, end):
+        """
+        Standard sizing mechanism for the build buildtype.
+        Returns keys, newpos:
+            keys needed to make the currently-designating area the correct size
+            newpos is where the cursor ends up after sizing the area
+        """
+        # move cursor halfway to end from start
+
+        # TODO will not work
+        midpoint = start + ((end - start) // 2)
+        keys = ks.move(start, midpoint)
+
+        # resize construction
+        area = Area(start, end)
+        keys += KEY_LIST['widen'] * (area.width() - 1)
+        keys += KEY_LIST['heighten'] * (area.height() - 1)
+        return keys

@@ -5,8 +5,7 @@ from math import sqrt
 class Point:
 
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
 
     def __cmp__(self, other):
         if self.x == other.x and self.y == other.y:
@@ -72,7 +71,7 @@ class Direction:
             return 'y'
         if self.compass in ('e', 'w'):
             return 'x'
-        return 'xy' # should probably throw an error here
+        return 'xy'
 
     def delta(self):
         return DIRECTIONS[self.compass]['delta']
@@ -89,24 +88,25 @@ class Direction:
     def clockwise(self, steps):
         return Direction(DIRECTIONS_ORDERED[(self.index() + steps) % 8])
 
-def get_direction_from_to(start, end):
-    # get the compass direction from start to end,
-    # with nw/ne/sw/se taking priority over n/s/e/w
-    d = ""
-    if start.y < end.y:
-        d += "s"
-    elif start.y > end.y:
-        d += "n"
+    @staticmethod
+    def get_direction(frompos, topos):
+        # get the compass direction point from frompos to topos
+        # with nw/ne/sw/se taking priority over n/s/e/w
+        d = ""
+        if frompos.y < topos.y:
+            d += "s"
+        elif frompos.y > topos.y:
+            d += "n"
 
-    if start.x < end.x:
-        d += "e"
-    elif start.x > end.x:
-        d += "w"
+        if frompos.x < topos.x:
+            d += "e"
+        elif frompos.x > topos.x:
+            d += "w"
 
-    if d == "":
-        return None
-    else:
-        return Direction(d)
+        if d == "":
+            return None
+        else:
+            return Direction(d)
 
 
 class Area:
@@ -130,10 +130,6 @@ class Area:
             Point(xs[0], ys[1])
         ]
 
-        # Estimated keystroke cost to construct this region
-        self.keycost = 2 + self.corners[0].distance_to(self.corners[2])
-
-
     def __cmp__(self, other):
         return cmp(self.size(), other.size())
 
@@ -147,22 +143,17 @@ class Area:
         return self.corners[2].y - self.corners[0].y + 1
 
     def size(self):
-        ## print "area size check width: %d height: %d size: %d" % (self.width(), self.height(), self.width() * self.height()) + " " + ' | '.join([str(c) for c in self.corners])
         return self.width() * self.height()
 
     def diagonal_length(self):
         return sqrt(self.width()**2 + self.height()**2)
 
-    def opposite_corner(self, corner_pos):
-        # find this corner
-        #print 'look for corner opposite to %s in area %s' % (corner_pos, self)
-
+    def opposite_corner(self, corner):
         for i in xrange(0, 4):
-            #print "comparing %s and %s" % (corner_pos, self.corners[i])
-            if corner_pos == self.corners[i]:
-                #print "found it, returning %s " % self.corners[(i + 2) % 4]
+            if corner == self.corners[i]:
                 return self.corners[(i + 2) % 4]
         return None
+
 
 class CommandCell:
 
@@ -173,24 +164,15 @@ class CommandCell:
         self.label = ''
         self.parentgrid = parentgrid
 
+
 class GridLayer:
 
-    def __init__(self, exit_keys, grid=None, plots=None, start_pos=None):
-        self.exit_keys = exit_keys
-        if grid is None:
-            self.grid = Grid()
-        else:
-            self.grid = grid
+    def __init__(self, onexit, grid=None, plots=None, start=None):
+        self.onexit = onexit
+        self.grid = grid or Grid()
+        self.plots = plots or []
+        self.start = start or Point(0, 0)
 
-        if plots is None:
-            self.plots = []
-        else:
-            self.plots = plots
-
-        if start_pos is None:
-            self.start_pos = Point(0, 0)
-        else:
-            self.start_pos = start_pos
 
 class Grid:
 
@@ -202,7 +184,6 @@ class Grid:
     def __str__(self):
         rowstrings = [','.join([c.command for c in row]) for row in self.cells]
         return '\n'.join(rowstrings)
-
 
     def add_cell(self, point, contents):
         """
@@ -257,10 +238,7 @@ class Grid:
 
     def is_plottable(self, pos):
         cell = self.get_cell(pos)
-        if cell is None:
-            return False
-        else:
-            return cell.plottable
+        return False if cell is None else cell.plottable
 
     def is_out_of_bounds(self, point):
         if point.x < 0 or \
@@ -268,7 +246,8 @@ class Grid:
             point.x >= self.width or \
             point.y >= self.height:
             return True
-        return False
+        else:
+            return False
 
     def get_row(self, y):
         return self.cells[y]
@@ -302,17 +281,15 @@ class Grid:
                 self.get_cell(Point(x, y)).plottable = plottable
         return
 
-    """
-    Test the given area against the grid cells to see if it is plottable.
-    If any_plottable is False, we return False if any cell is unplottable, True otherwise.
-    If any_plottable is True, we return True if any cell is plottable, False otherwise.
-    """
     def is_area_plottable(self, area, any_plottable=False):
-        # print "is area plottable?: " + str(area)
+        """
+        Test the given area against the grid cells to see if it is plottable.
+        If any_plottable is False, we return False if any cell is unplottable, True otherwise.
+        If any_plottable is True, we return True if any cell is plottable, False otherwise.
+        """
         for x in range(area.corners[0].x, area.corners[1].x + 1): # NW to NE corner
             for y in range(area.corners[0].y, area.corners[3].y + 1): # NW to SW corner
                 pos = Point(x, y)
-                # print "point %s plottable=%s assignedarea=%s" % (str(pos), self.get_cell(pos).plottable, str(self.get_cell(pos).area))
                 if any_plottable:
                     if self.get_cell(pos).plottable:
                         return True
@@ -326,94 +303,53 @@ class Grid:
             return True
 
 
-    # returns true if start_point's cell forms the corner of a contiguous area,
-    # including just a 1x1 area
-    def is_corner(self, start_point):
-        # print "checking for corner at " + str(start_point)
-        cell = self.get_cell(start_point)
+    def is_corner(self, pos):
+        """
+        Returns True if pos's cell forms the corner of a contiguous area,
+        including just a 1x1 area.
+        """
+        cell = self.get_cell(pos)
         if cell is None:
-            # print "no cell at point " + str(start_point)
             return False
 
         command = cell.command
 
         if command == '':
-            # print "empty cell"
             return False # empty cell; not a part of any area
 
-        dirs = [Direction(d) for d in ['n', 's', 'e', 'w']]
+        dirs = (Direction(d) for d in ['n', 's', 'e', 'w'])
 
         # if cell can not extend in any of NSEW directions, consider it a corner cell
-        matches4 = sum([self.is_plottable(start_point + d.delta()) and command == self.get_command(start_point + d.delta()) for d in dirs])
-        # print [command == self.get_command(start_point + d.delta()) for d in dirs]
+        matches4 = sum(self.is_plottable(pos + d.delta()) and command == self.get_command(pos + d.delta()) for d in dirs)
         if matches4 == 0:
-            # print "solo corner"
+            # solo corner
             return True
         elif matches4 == 4:
-            # print "at intersection or interior point"
+            # at intersection or interior point
             return False
 
-        # print "matches4 %d" % matches4
-
-        dirs = [Direction(d) for d in ['n', 'e']]
-
-
         # see if this cell is an edge of an area
+        dirs = (Direction(d) for d in ['n', 'e'])
         for d in dirs:
-            # # print 'edge test to %s' % d.compass
-
-            # # print command == self.get_command(start_point + d.delta())
-            # # print command == self.get_command(start_point + d.opposite().delta())
-            # # print command == self.get_command(start_point + d.right_turn().delta())
-            # # print command == self.get_command(start_point + d.left_turn().delta())
-
-            if command == self.get_command(start_point + d.delta()) \
-                and self.is_plottable(start_point + d.delta()) \
-                and command == self.get_command(start_point + d.opposite().delta()) \
-                and self.is_plottable(start_point + d.opposite().delta()):
-                #      \
-                # and command != self.get_command(start_point + d.right_turn().delta()) \
-                # and command != self.get_command(start_point + d.left_turn().delta())
-                # print "part of %s edge or interior point" % d.compass
+            if command == self.get_command(pos + d.delta()) \
+                and self.is_plottable(pos + d.delta()) \
+                and command == self.get_command(pos + d.opposite().delta()) \
+                and self.is_plottable(pos + d.opposite().delta()):
                 return False
 
-        # print "is corner"
+        # it's not an intersection, interior point, edge, or empty cell, so
+        # it must be a corner
         return True
 
-
-
-        # see if this cell forms a corner for any areas
-        for d in dirs:
-            if command == self.get_command(start_point + d.delta()) \
-                and command == self.get_command(start_point + d.clockwise(1).delta()) \
-                and command == self.get_command(start_point + d.clockwise(2).delta()) \
-                and  (command != self.get_command(start_point + d.clockwise(3).delta()) \
-                    or command != self.get_command(start_point + d.clockwise(4).delta()) \
-                    ):
-                # print "is corner"
-                return True
-            elif (command == self.get_command(start_point + d.delta())
-                and command != self.get_command(start_point + d.opposite().delta())
-                ):
-                # print "is corner"
-                return True
-
-        # not a corner
-        # print "non corner"
-        return False
-
-    def count_repeating_cells(self, start_point, direction):
-        # # print "counting----------------"
-        # # print start_point
-        # # print direction
-        command = self.get_command(start_point)
-        start = start_point.get_coord_crossing_axis(direction)
+    def count_repeating_cells(self, pos, direction):
+        command = self.get_command(pos)
+        start = pos.get_coord_crossing_axis(direction)
 
         # determine sign of direction to move in for testing
         step = direction.delta().get_coord_crossing_axis(direction)
 
-        # Get the row|col (determined by direction) which start_point is on
-        axis = self.get_axis(start_point.get_coord_of_axis(direction), direction)
+        # Get the row|col (determined by direction) which pos is on
+        axis = self.get_axis(pos.get_coord_of_axis(direction), direction)
 
         # get just the segment of the axis we want, ordered in the direction we want
         if step == 1:
@@ -423,10 +359,9 @@ class Grid:
 
         # Count the number of cells whose command matches our starting cell's command,
         # until we encounter one that doesn't. Operates on just those cells in axis
-        # which start at start_point and continue to the grid edge in the given direction.
+        # which start at pos and continue to the grid edge in the given direction.
         count = len(list(takewhile(lambda cell: cell.plottable and cell.command == command, axis)))
 
-        # # print "dir %s start %d step %d end %d axislength %d repcount=%d" % (direction.compass, start, step, end, len(axis), count)
         return count
 
     def str_commands(self, column_separator):
@@ -434,11 +369,11 @@ class Grid:
         return '\n'.join(rowstrings)
 
     def str_plottable(self):
-        rowstrings = [''.join(['.' if c.plottable == True else 'x' for c in row])  + '|' for row in self.cells]
+        rowstrings = [''.join(['.' if c.plottable == True else 'x' for c in row]) + '|' for row in self.cells]
         return '\n'.join(rowstrings)
 
     def str_area_corners(self):
-        rowstrings = [''.join(['x' if c.area else '.' for c in row])  + '|' for row in self.cells]
+        rowstrings = [''.join(['x' if c.area else '.' for c in row]) + '|' for row in self.cells]
         return '\n'.join(rowstrings)
 
     def str_area_labels(self):

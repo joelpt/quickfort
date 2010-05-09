@@ -3,12 +3,9 @@ from geometry import *
 
 class CsvLayer:
 
-    def __init__(self, exit_keys, rows=None):
-        self.exit_keys = exit_keys
-        if rows is None:
-            self.rows = []
-        else:
-            self.rows = rows
+    def __init__(self, onexit, rows=None):
+        self.onexit = onexit
+        self.rows = rows or []
 
 def parse_csv_file(filename):
     layers = []
@@ -69,7 +66,7 @@ def parse_csv_file(filename):
 
     if len(csv) > 0:
         csvlayers.append(CsvLayer('', csv))
-    print 'csvlayers %d' % len(csvlayers)
+
     layers = []
     for csvlayer in csvlayers:
         # fill a new Grid
@@ -86,12 +83,11 @@ def parse_csv_file(filename):
                     # Blank out marking (non-sent) chars
                     if cell in ('~', '`'): cell = ''
 
-                    # print "want to add " + str(Point(x, y)) + cell
                     # add this csv cell to the grid
                     grid.add_cell(Point(x, y), cell)
                     x += 1 # for next column
             y += 1 # for next line
         grid.fixup()
-        layers.append(GridLayer(csvlayer.exit_keys, grid))
-    print 'layers %d' % len(csvlayers)
+        layers.append(GridLayer(csvlayer.onexit, grid))
+
     return (layers, build_type, start_pos, start_comment, comment)
