@@ -1,4 +1,5 @@
 from geometry import *
+import util
 import re
 from itertools import takewhile
 
@@ -20,77 +21,24 @@ KEY_LIST = {
 """
 
 KEY_LIST = {
-    'n': '8', 'ne': '9', 'e': '6', 'se': '3', 's': '2', 'sw': '1', 'w': '4', 'nw': '7'
+    'n': '8', 'ne': '9', 'e': '6', 'se': '3', 's': '2', 'sw': '1', 'w': '4', 'nw': '7',
+    'widen': 'k', 'heighten': 'u', 'exitmenu': '^'
 }
 
-BUILD_TYPE_CFG = {
-    'd': { # dig
-        'init': '',
-        'designate': 'moveto cmd + setsize +'.split(),
-        'allowlarge': [],
-        'submenukeys': '',
-        'minsize': 0,
-        'maxsize': 0,
-        'custom': {},
-        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
-         },
-    'b': { # build
-        'init': '^',
-        'designate': 'menu cmd moveto setsize + % ++ % exitmenu'.split(),
-        'allowlarge': ['Cw', 'CF', 'Cr', 'o'],
-        'submenukeys': 'iweCTM',
-        'minsize': 4,
-        'maxsize': 10,
-        'custom': {
-            'p':    'cmd moveto setsize +'.split(), # farm plot
-            'wf':   'cmd moveto + % + % ++ %'.split(), # metalsmith forge
-            'wv':   'cmd moveto + % + % ++ %'.split(), # magma forge
-            'D':    'cmd moveto + % + % ++ %'.split(), # trade depot
-            'Ms':   'cmd moveto + + + + %'.split()
-            },
-        'setsize': lambda keystroker, start, end: keystroker.setsize_build(start, end)
-        },
-    'p': { # place (stockpiles)
-        'init': '',
-        'designate': 'moveto cmd + setsize +'.split(),
-        'allowlarge': [],
-        'submenukeys': '',
-        'minsize': 0,
-        'maxsize': 0,
-        'custom': {},
-        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
-        },
-    'q': { # query (set building/task prefs)
-        'init': '',
-        'designate': 'moveto cmd + setsize +'.split(),
-        'allowlarge': [],
-        'submenukeys': '',
-        'minsize': 0,
-        'maxsize': 0,
-        'custom': {},
-        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
-        }
-}
 
 
 class Keystroker:
 
-    def __init__(self, grid, build_type):
+    def __init__(self, grid, buildconfig):
         self.grid = grid
-        self.build_type = build_type
+        self.buildconfig = buildconfig
         self.current_menu = None
 
-    def plot(self, plots):
-        keys = []
-        cursor = None
-
-        replacebase = {
-            '+': ['{Enter}'], # , '%'],
-            '++': ['+{Enter}', '%wait%'],
-            '%': ['%wait%']
-            }
-
+    def plot(self, plots, cursor):
+        submenukeys = self.buildconfig.get('submenukeys')
         last_command = ''
+        last_submenu = ''
+        keys = self.buildconfig.get('init')
 
         # construct the list of keystrokes required to move to each
         # successive area and build it
@@ -98,34 +46,97 @@ class Keystroker:
             cell = self.grid.get_cell(pos)
             command = cell.command
             endpos = cell.area.opposite_corner(pos)
+            subs = {}
 
-            # build replacements dict
-            replacements = replacebase.copy()
+            # only want to send (nonmenu) key command when we
+            # need to switch modes for dig, but for build
+            # we have to press the command key every time
+            # new config vars 'samecmd', 'diffcmd'
+            #  for 'd': [], ['cmd']
+            #  for 'b': ['cmd'], ['cmd']
+            # so when processing the 'cmd' replacement, get
+            # one of these from cfg, and replace into that
+            # .. plus submenu in/out logic, where if we change
+            #    submenus (indeed if the last_command does not
+            #    exactly match command), reset last_command to ''
 
-            if command != last_command:
-                cmdedit = re.sub(r'\{', '|{', command)
-                cmdedit = re.sub(r'\}', '}|', cmdedit)
-                cmdedit = re.sub(r'\!', '|!|', cmdedit)
-                cmdkeys = re.split(r'\|', cmdedit)
-                replacements['cmd'] = cmdkeys
+            # get samecmd or diffcmd depending
+            if command == last_command:
+                nextcmd = self.buildconfig.get('samecmd', command)
+            else:
+                nextcmd = self.buildconfig.get('diffcmd', command)
                 last_command = command
-            else:
-                replacements['cmd'] = ''
 
-            if cursor is not None:
-                replacements['moveto'] = self.move(cursor, pos)
-            else:
-                replacements['moveto'] = []
+            # moveto = keys to move cursor to starting area-corner
+            subs['moveto'] = self.move(cursor, pos)
 
-            setsize, newpos = BUILD_TYPE_CFG['d']['setsize'](self, pos, endpos)
-            replacements['setsize'] = setsize
+            # setsize = keys to set area to desired dimensions
+            setsizefun = self.buildconfig.get('setsize', command)
+            setsize, newpos = setsizefun(self, pos, endpos)
+            subs['setsize'] = setsize
 
-            pattern = BUILD_TYPE_CFG['d']['designate']
+            # submenu?
+            for k in submenukeys:
+                if re.match(k, command):
+                    submenu = command[0]
+                    # print '(*****' + submenu + ' - ' + last_submenu
+
+                    # entering a submenu from not being in one?
+                    if not last_submenu:
+                        # print 'ENTER NEW MENU FROM NOT BEING IN ONE ' + submenu
+                        subs['menu'] = submenu
+                        subs['exitmenu'] = []
+                        last_submenu = submenu
+                    elif last_submenu != submenu:
+                        # print 'DIFFERS, using ' + submenu
+                        # exit previous submenu
+                        subs['exitmenu'] = KEY_LIST['exitmenu']
+                        # enter new menu
+                        subs['menu'] = submenu
+                        last_submenu = submenu
+                    else:
+                        # print 'SAME SUBMENU DO NADA ' + submenu
+                        subs['menu'] = []
+                        subs['exitmenu'] = []
+
+                    # drop the submenu key from command
+                    command = command[1:]
+                    continue
+            if 'menu' not in subs:
+                # print 'NO SUBMENU WITH COMMAND: ' + command
+                if last_submenu:
+                    # print 'EXITING THE LAST MENU WHICH WAS %s' % last_submenu
+                    subs['exitmenu'] = KEY_LIST['exitmenu']
+                else:
+                    # print 'NO SUBMENU OR LAST SUBMENU, DOING NADA'
+                    subs['exitmenu'] = []
+                subs['menu'] = []
+                last_submenu = ''
+
+            # break command into keys
+            cmdedit = re.sub(r'\{', '|{', command)
+            cmdedit = re.sub(r'\}', '}|', cmdedit)
+            cmdedit = re.sub(r'\!', '|!|', cmdedit)
+            cmdkeys = re.split(r'\|', cmdedit)
+
+            # substitute cmdkeys into nextcmd
+            nextcmds = []
+            for c in nextcmd:
+                if c == 'cmd':
+                    nextcmds.extend(cmdkeys)
+                else:
+                    nextcmd.append(c)
+
+            # nextcmds is now our command-key string
+            subs['cmd'] = nextcmds
+
+
+            pattern = self.buildconfig.get('designate', command)
             newkeys = []
-            # do pattern replacements (and throw away empty elements)
+            # do pattern subs (and throw away empty elements)
             for p in pattern:
-                if p in replacements:
-                    newkeys.extend(replacements[p])
+                if p in subs:
+                    newkeys.extend(subs[p])
                 else:
                     newkeys.append(p)
 
@@ -135,7 +146,25 @@ class Keystroker:
             # move cursor pos to end corner of built area
             cursor = newpos
 
-        return keys
+        return self.translate(keys)
+
+    def translate(self, keys):
+        return util.flatten([self.translate_key(k) for k in keys])
+
+    def translate_key(self, key):
+        subs = {
+            '!': ['{Enter}'],
+            '+!': ['+{Enter}'],
+            #'+!': ['+{Enter}'],
+            '%': ['%wait%'],
+            #'%': [],
+            '^': ['{Esc}']
+            }
+
+        if key in subs:
+            return subs[key]
+        else:
+            return [key]
 
     def move(self, start, end):
         keys = []
@@ -222,25 +251,40 @@ class Keystroker:
         Standard sizing mechanism for dig, place, query buildtypes.
         Returns keys, newpos:
             keys needed to make the currently-designating area the correct size
-            newpos is where the cursor ends up after sizing the area
+            pos is where the cursor ends up after sizing the area
         """
         return self.move(start, end), end
 
     def setsize_build(self, start, end):
         """
         Standard sizing mechanism for the build buildtype.
-        Returns keys, newpos:
+        Returns keys, pos:
             keys needed to make the currently-designating area the correct size
-            newpos is where the cursor ends up after sizing the area
+            pos is where the cursor ends up after sizing the area
         """
         # move cursor halfway to end from start
-
-        # TODO will not work
-        midpoint = start + ((end - start) // 2)
-        keys = ks.move(start, midpoint)
+        midpoint = start.midpoint(end)
+        keys = self.move(start, midpoint)
 
         # resize construction
         area = Area(start, end)
         keys += KEY_LIST['widen'] * (area.width() - 1)
         keys += KEY_LIST['heighten'] * (area.height() - 1)
-        return keys
+
+        return keys, midpoint
+
+    def setsize_fixed(self, start, end):
+        """
+        Sizing mechanism for fixed size buildings like 3x3 workshops,
+        5x5 trade depots and 5x5 siege workshops. Here we just move to
+        the center of the building and deploy it. This allows for e.g.
+        a 3x3 grid of 'wc' cells indicating a single carpenter's workshop.
+        Returns keys, pos:
+            keys needed to make the currently-designating area the correct size
+            pos is where the cursor ends up after sizing the area
+        """
+        # move cursor halfway to end from start
+        midpoint = start.midpoint(end)
+        keys = self.move(start, midpoint)
+
+        return keys, midpoint

@@ -42,6 +42,13 @@ class Point:
     def distance_to(self, other):
         return sqrt( (other.x - self.x)**2 + (other.y - self.y)**2  )
 
+    def midpoint(self, other):
+        return Point(
+            self.x + (other.x - self.x + 1) // 2,
+            self.y + (other.y - self.y + 1) // 2
+            )
+
+
 DIRECTIONS = {
     'n':  { 'index': 0, 'delta': Point( 0, -1) },
     'ne': { 'index': 1, 'delta': Point( 1, -1) },

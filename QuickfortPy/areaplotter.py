@@ -3,9 +3,10 @@ import util
 
 class AreaPlotter:
 
-    def __init__(self, grid, debug):
+    def __init__(self, grid, buildconfig, debug):
         self.grid = grid
         self.debug = debug
+        self.buildconfig = buildconfig
 
     def mark_all_plottable_areas(self):
         """
@@ -80,16 +81,16 @@ class AreaPlotter:
 
         for y in range(0, self.grid.height):
             for x in range(0, self.grid.width):
-                point = Point(x, y)
-                if self.grid.get_cell(point).plottable \
-                    and len(self.grid.get_command(point)) > 0 \
-                    and self.grid.is_corner(point):
-                    areas.append(self.find_largest_area_from_point(point))
+                pos = Point(x, y)
+                if self.grid.get_cell(pos).plottable \
+                    and len(self.grid.get_command(pos)) > 0 \
+                    and self.grid.is_corner(pos):
+                    areas.append(self.find_largest_area_from(pos))
 
         areas = util.uniquify(areas, lambda area: ''.join([str(c) for c in area.corners]))
         return areas
 
-    def find_largest_area_from_point(self, start_point):
+    def find_largest_area_from(self, pos):
         """
         Build a list of direction pairs we'll want to test.
         We need to check each compass direction paired with both
@@ -97,7 +98,7 @@ class AreaPlotter:
         NE, NW, EN, ES, ...
 
         These represent the 4 quadrants created by partitioning the
-        grid through the 2 axes which start_point sits on, and
+        grid through the 2 axes which pos sits on, and
         the inversions of each quadrant (e.g. the pair SE & ES).
         Each quadrant includes the origin (0, 0); similarly, each
         quadrant overlaps on two edges with adjacent quadrants.
@@ -108,59 +109,84 @@ class AreaPlotter:
             dir_pairs.append([direction, direction.right_turn()])
             dir_pairs.append([direction, direction.left_turn()])
 
-        best_area = Area(start_point, start_point)
+        bestarea = Area(pos, pos)
 
         # find the biggest area(s) formable from each dir_pair quadrant
         for dirs in dir_pairs:
-            area = self.find_largest_area_in_quadrant(start_point, dirs[0], dirs[1], best_area)
+            area = self.find_largest_area_in_quadrant(pos, dirs[0], dirs[1], bestarea)
             if area is not None:
-                best_area = area
+                bestarea = area
 
-        return best_area
+        return bestarea
 
-    def find_largest_area_in_quadrant(self, start_point, primary, secondary, best_area):
+    def find_largest_area_in_quadrant(self, pos, primary, secondary, bestarea):
         # width and height are conceptually aligned to an
         # east(primary) x south(secondary) quadrant below.
 
+        # Get the min/max size that this area may be, based on the command
+        command = self.grid.get_cell(pos).command
+        sizebounds = self.buildconfig.get('sizebounds', command)
+
         # Get the max width of this area on the axis defined by
-        # start_point and primary direction, and max width from
+        # pos and primary direction, and max width from
         # the secondary
-        max_width = self.grid.count_repeating_cells(start_point, primary)
-        max_height = self.grid.count_repeating_cells(start_point, secondary)
+        maxwidth = self.grid.count_repeating_cells(pos, primary)
+        maxheight = self.grid.count_repeating_cells(pos, secondary)
 
-        if max_width * max_height < best_area.size():
-            return None
+        if maxwidth < sizebounds[0]:
+            # constructions narrower than the minimum width for this
+            # command are ineligible to be any larger than 1 wide
+            maxwidth = 1
+        elif maxwidth > sizebounds[1]:
+            # don't let constructions be wider than allowed
+            maxwidth = sizebounds[1]
 
-        # Get the coordinate of start_point which the primary axis lies on
-        start = start_point.get_coord_of_axis(primary)
+        if maxheight < sizebounds[2]:
+            # constructions shorter than the minimum height for this
+            # command are ineligible to be any larger than 1 tall
+            maxheight = 1
+        elif maxheight > sizebounds[3]:
+            # don't let constructions be taller than allowed
+            maxheight = sizebounds[3]
+
+        if maxwidth * maxheight < bestarea.size():
+            return None # couldn't be larger than the best one yet found
+
+        if maxheight == 1 and maxwidth == 1:
+            # 1x1 area, just return it
+            return Area(pos, pos)
+
+
+        # Get the coordinate of pos which the primary axis lies on
+        start = pos.get_coord_of_axis(primary)
 
         # Determine which edge we're moving towards as we move along
         # the secondary axis
         step = secondary.delta().get_coord_crossing_axis(secondary)
-        end = start + (step * (max_height - 1))
+        end = start + (step * (maxheight - 1))
 
         # (width x 1) sized area
-        best_area = Area(
-            start_point,
-            start_point + primary.delta().magnify(max_width - 1)
+        bestarea = Area(
+            pos,
+            pos + primary.delta().magnify(maxwidth - 1)
             )
 
-        for dy in range(1, max_height):
-            check_point = start_point + secondary.delta().magnify(dy)
+        for dy in range(1, maxheight):
+            check_point = pos + secondary.delta().magnify(dy)
 
             height = dy + 1
             width = self.grid.count_repeating_cells(check_point, primary)
 
-            if width > max_width:
+            if width > maxwidth:
                 # this row can't be wider than previous rows
-                width = max_width
-            elif width < max_width:
+                width = maxwidth
+            elif width < maxwidth:
                 # successive rows can't be wider than this row
-                max_width = width
+                maxwidth = width
 
-            if width * height > best_area.size():
-                best_area = Area(start_point, check_point + primary.delta().magnify(width - 1))
+            if width * height > bestarea.size():
+                bestarea = Area(pos, check_point + primary.delta().magnify(width - 1))
             else:
                 continue
 
-        return best_area
+        return bestarea

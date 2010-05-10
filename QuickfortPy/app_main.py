@@ -10,6 +10,7 @@ from areaplotter import AreaPlotter
 from router import Router
 from keystroker import Keystroker
 from transformer import Transformer
+from buildconfig import BuildConfig
 
 def process_blueprint(csvpath, options):
     if options.debugcsv: print ">>>> BEGIN CSV PARSING"
@@ -19,6 +20,8 @@ def process_blueprint(csvpath, options):
 
     if not start:
         start = Point(0, 0)
+
+    buildconfig = BuildConfig(build_type, options)
 
     if options.debugcsv:
         print '#### Parsed %s' % csvpath
@@ -42,7 +45,7 @@ def process_blueprint(csvpath, options):
         ## TODO plot_predefined_areas()
 
         # plot areas to be built on the grid
-        plotter = AreaPlotter(grid, options.debugarea)
+        plotter = AreaPlotter(grid, buildconfig, options.debugarea)
         if not plotter.mark_all_plottable_areas():
             raise
 
@@ -52,12 +55,13 @@ def process_blueprint(csvpath, options):
         # plot the areas in using a sort of cheapest-route algorithm
 
         router = Router(grid, options.debugrouter)
-        plots, start = router.plan_route(start)
+        plots, end = router.plan_route(start)
         layer.plots = plots
 
         # generate key sequence to render this series of plots in game
-        ks = Keystroker(grid, build_type)
-        keys += ks.plot(plots) + ['^5']
+        ks = Keystroker(grid, buildconfig)
+        keys += ks.plot(plots, start) + layer.onexit
+        start = end
 
     if options.debugsummary:
         print ">>>> BEGIN SUMMARY"

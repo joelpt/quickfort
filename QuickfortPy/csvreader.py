@@ -27,7 +27,7 @@ def parse_csv_file(filename):
     top_line = re.sub(r',+$', '', top_line)
 
     # extract build type, start() command if any, and comment if any
-    m = re.match(r'^#(\w+)( +start\(.+?\))?( .+)?$', top_line)
+    m = re.match(r'^#([bdpq])\w*( +start\(.+?\))?( .+)?$', top_line)
     (build_type, start_command, comment) = m.group(1, 2, 3)
 
     # break down start_command if given
@@ -59,13 +59,14 @@ def parse_csv_file(filename):
         cells = line.split(',')
         c = cells[0]
         if c in ('#>', '#<'):
-            csvlayers.append(CsvLayer('d' if c == "#>" else 'u', csv))
+            newlayer = CsvLayer(['^5' if c == "#>" else '+5'], csv)
+            csvlayers.append(newlayer)
             csv = []
         else:
             csv.append(cells)
 
     if len(csv) > 0:
-        csvlayers.append(CsvLayer('', csv))
+        csvlayers.append(CsvLayer([], csv))
 
     layers = []
     for csvlayer in csvlayers:
