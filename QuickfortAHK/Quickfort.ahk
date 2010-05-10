@@ -1,5 +1,7 @@
 #SingleInstance force
-Version := "1.11"
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+Version := "2.00"
+
 
 SetTitleMatchMode, 3
 ;Menu, Tray, MainWindow
@@ -927,9 +929,24 @@ BuildRoutine()
 
   Log("`n`nFinal output: " . output)
 
-
   if (!Visualizing)
   {
+    Tooltip = Thinking...
+    TurnMouseTipOn()
+
+    FileDelete, %A_ScriptDir%\pyout.txt
+    RunWait %comspec% /c ""c:\lang\Python26\python" "d:\code\Quickfort\trunk\QuickfortPy\app_main.py" "%SelectedFile%" "%A_ScriptDir%\pyout.txt"", , Hide
+
+    If FileExist(A_ScriptDir "\pyout.txt")
+    {
+      FileRead, output, %A_ScriptDir%\pyout.txt
+    }
+    Else
+    {
+      MsgBox, Error: QuickfortPy did not return any results.
+      return
+    }
+
     ; Migrate SelectedFile to LastSelected file now, so if the user cancels we'll still have it for use with Alt+E (redo).
     LastSelectedFile := SelectedFile
     SelectedFile := ""
@@ -938,7 +955,6 @@ BuildRoutine()
     Tooltip = Quickfort running... (hold Alt+C to cancel)
     TurnMouseTipOn()
   }
-
 
   ; Send it chunk style, breaking up Sends between % chars to give user a chance to cancel with Alt+C
   ; If a chunk is just "wait" (i.e. %wait%) we'll sleep for a bit (for those CPU intensive actions in DF).
