@@ -1,7 +1,0 @@
-#dig A simple spiral staircase.,,
-j,u,#
-u,j,#
-#>,#,#
-u,j,#
-j,u,#
-#,#,#
