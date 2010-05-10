@@ -1,0 +1,22 @@
+"#query start(15;10; Top left corner of central stairs) Configures food stockpiles around stairway as booze only, using the 'booze' alias. See aliases.txt. We then set each stockpile to take booze from the stockpile one Z-level above it, ensuring a good distribution of booze through these stockpiles. Note that we execute two commands against each stockpile here, taking advantage of the fact that these stockpiles are 2 tiles in area.",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,`,,,,,,,,,,`,`,,,,,,,,,,`,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,booze,t<{Enter}>,,,,,,,,,,,,,,,#
+,,,,`,,,,,,,,,booze,`,`,booze,,,,,,,,,`,,,,,#
+,,,,`,,,,,,,,,t<{Enter}>,`,`,t<{Enter}>,,,,,,,,,`,,,,,#
+,,,,,,,,,,,,,,booze,t<{Enter}>,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#
+,,,,`,,,,,,,,,,`,`,,,,,,,,,,`,,,,,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#

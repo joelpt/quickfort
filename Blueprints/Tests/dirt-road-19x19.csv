@@ -1,0 +1,21 @@
+"#build Covers a 19x19 area with dirt road tiles, one by one. Used for testing unbuild-19x19.csv. Normally you'd want to use something like O(10x10) to really do this",,,,,,,,,,,,,,,,,,,
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,O,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#

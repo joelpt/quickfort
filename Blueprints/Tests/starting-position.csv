@@ -1,0 +1,6 @@
+#dig start(3; 3; Center tile of a 5-tile square) Starting point test.,,,,
+d,d,d,d,d
+d,d,d,d,d
+d,d,h,d,d
+d,d,d,d,d
+d,d,d,d,d

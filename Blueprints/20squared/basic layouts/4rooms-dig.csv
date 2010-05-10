@@ -1,0 +1,22 @@
+#dig start(10;10;Top left corner of central staircase) A basic 4-room dig blueprint based on the 20squared template.,,,,,,,,,,,,,,,,,,,,
+`,`,`,`,`,`,`,`,`,d,d,`,`,`,`,`,`,`,`,`,#
+`,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,`,#
+`,d,,,,,,d,,d,d,,d,,,,,,d,`,#
+d,d,d,d,d,d,d,d,d,i,i,d,d,d,d,d,d,d,d,d,#
+d,d,d,d,d,d,d,d,d,i,i,d,d,d,d,d,d,d,d,d,#
+`,d,,,,,,d,,d,d,,d,,,,,,d,`,#
+`,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,,d,d,,d,d,d,d,d,d,d,`,#
+`,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,d,`,#
+`,`,`,`,`,`,`,`,`,d,d,`,`,`,`,`,`,`,`,`,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#

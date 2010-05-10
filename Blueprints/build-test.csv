@@ -1,0 +1,10 @@
+#build Build test,,,,,,,,
+,,,Cf,ga,ga,,gs,gs
+,wc,,Cf,ga,ga,ga,gs,gs
+,,,Cf,,ga,ga,ga,
+Cf,Cf,Cf,Cf,Cf,Cf,Cf,Cf,Cf
+wb,wb,wb,Cf,D,D,D,D,D
+wb,wb,wb,Cf,D,D,D,D,D
+wb,wb,wb,Cf,D,D,D,D,D
+,,,Cf,D,D,D,D,D
+,,,Cf,D,D,D,D,D
