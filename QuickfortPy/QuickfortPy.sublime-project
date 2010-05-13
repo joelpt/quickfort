@@ -1,6 +1,6 @@
 <!-- Documentation is available at http://www.sublimetext.com/docs/projects -->
 <project>
-	<mount dir=".." exclude="*.png,*.jpg,*.exe,*.dll,*.obj,*.pyc,*.csv,*.zip" direxclude="Blueprints,.svn,.git,.hg,CVS,bin,nbproject"/>
+	<mount dir=".." exclude="*.png,*.jpg,*.exe,*.dll,*.obj,*.pyc,*.pyo,*.csv,*.zip,debug.txt" direxclude="Blueprints,.svn,.git,.hg,CVS,bin,nbproject"/>
 	<options>
 <![CDATA[
 buildFile Packages/C++/Make.sublime-build

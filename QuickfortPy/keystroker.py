@@ -5,24 +5,30 @@ from itertools import takewhile
 
 """
 KEY_LIST = {
-        'n':config['KeyUp'],
-        'ne':config['KeyUpRight'],
-        'e':config['KeyRight'],
-        'se':config['KeyDownRight'],
-        's':config['KeyDown'],
-        'sw':config['KeyDownLeft'],
-        'w':config['KeyLeft'],
-        'nw':config['KeyUpLeft'],
-        'u':config['KeyUpZ'],
-        'd':config['KeyDownZ'],
+        '[n]':config['KeyUp'],
+        '[ne]':config['KeyUpRight'],
+        '[e]':config['KeyRight'],
+        '[se]':config['KeyDownRight'],
+        '[s]':config['KeyDown'],
+        '[sw]':config['KeyDownLeft'],
+        '[w]':config['KeyLeft'],
+        '[nw]':config['KeyUpLeft'],
+        '[u]':config['KeyUpZ'],
+        '[d]':config['KeyDownZ'],
         '!':config['KeyCommit'],
         '^':config['KeyExitMenu']
     }
 """
 
 KEY_LIST = {
-    'n': '8', 'ne': '9', 'e': '6', 'se': '3', 's': '2', 'sw': '1', 'w': '4', 'nw': '7',
-    'widen': 'k', 'heighten': 'u', 'exitmenu': '^'
+    '[n]': '8', '[ne]': '9', '[e]': '6', '[se]': '3', '[s]': '2', '[sw]': '1', '[w]': '4', '[nw]': '7',
+    '[widen]': 'k',
+    '[heighten]': 'u',
+    '[menudown]': '{NumpadAdd}',
+    '!': '{Enter}',
+    '#': '+{Enter}',
+    '%': '%wait%',
+    '^': '{Esc}'
 }
 
 
@@ -38,8 +44,10 @@ class Keystroker:
         submenukeys = self.buildconfig.get('submenukeys')
         last_command = ''
         last_submenu = ''
-        keys = self.buildconfig.get('init')
-
+        keys = self.buildconfig.get('init') or []
+        # print 'starting plot in keystroker'
+        # print [str(p) for p in plots]
+        # print keys
         # construct the list of keystrokes required to move to each
         # successive area and build it
         for pos in plots:
@@ -62,12 +70,16 @@ class Keystroker:
 
             # get samecmd or diffcmd depending
             if command == last_command:
-                nextcmd = self.buildconfig.get('samecmd', command)
+                nextcmd = self.buildconfig.get('samecmd', command) or []
             else:
-                nextcmd = self.buildconfig.get('diffcmd', command)
+                nextcmd = self.buildconfig.get('diffcmd', command) or []
                 last_command = command
 
             # moveto = keys to move cursor to starting area-corner
+            # TODO self.move should return special movement symbols
+            # to be looked up in KEY_LIST; use a format in KEY_LIST
+            # of [n], [s], [menudown], etc. to distinguish key-aliases
+            # from {AHKKeys} and bare keystrokes
             subs['moveto'] = self.move(cursor, pos)
 
             # setsize = keys to set area to desired dimensions
@@ -75,7 +87,13 @@ class Keystroker:
             setsize, newpos = setsizefun(self, pos, endpos)
             subs['setsize'] = setsize
 
+            # setmats - keys to select mats for an area
+            setmatsfun = self.buildconfig.get('setmats', command)
+            if setmatsfun:
+                subs['setmats'] = self.setmats(cell.area.size())
+
             # submenu?
+            justcommand = None
             for k in submenukeys:
                 if re.match(k, command):
                     submenu = command[0]
@@ -90,7 +108,7 @@ class Keystroker:
                     elif last_submenu != submenu:
                         # print 'DIFFERS, using ' + submenu
                         # exit previous submenu
-                        subs['exitmenu'] = KEY_LIST['exitmenu']
+                        subs['exitmenu'] = KEY_LIST['^']
                         # enter new menu
                         subs['menu'] = submenu
                         last_submenu = submenu
@@ -100,38 +118,39 @@ class Keystroker:
                         subs['exitmenu'] = []
 
                     # drop the submenu key from command
-                    command = command[1:]
+                    justcommand = command[1:]
                     continue
-            if 'menu' not in subs:
+            if not justcommand:
                 # print 'NO SUBMENU WITH COMMAND: ' + command
                 if last_submenu:
                     # print 'EXITING THE LAST MENU WHICH WAS %s' % last_submenu
-                    subs['exitmenu'] = KEY_LIST['exitmenu']
+                    subs['exitmenu'] = KEY_LIST['^']
                 else:
                     # print 'NO SUBMENU OR LAST SUBMENU, DOING NADA'
                     subs['exitmenu'] = []
                 subs['menu'] = []
                 last_submenu = ''
+                justcommand = command[:]
 
             # break command into keys
-            cmdedit = re.sub(r'\{', '|{', command)
+            cmdedit = re.sub(r'\{', '|{', justcommand)
             cmdedit = re.sub(r'\}', '}|', cmdedit)
             cmdedit = re.sub(r'\!', '|!|', cmdedit)
             cmdkeys = re.split(r'\|', cmdedit)
 
             # substitute cmdkeys into nextcmd
-            nextcmds = []
+            nextcmdkeys = []
             for c in nextcmd:
                 if c == 'cmd':
-                    nextcmds.extend(cmdkeys)
+                    nextcmdkeys.extend(cmdkeys)
                 else:
                     nextcmd.append(c)
 
-            # nextcmds is now our command-key string
-            subs['cmd'] = nextcmds
-
+            # nextcmdkeys is now our command-key string
+            subs['cmd'] = nextcmdkeys
 
             pattern = self.buildconfig.get('designate', command)
+
             newkeys = []
             # do pattern subs (and throw away empty elements)
             for p in pattern:
@@ -145,26 +164,16 @@ class Keystroker:
 
             # move cursor pos to end corner of built area
             cursor = newpos
-
-        return self.translate(keys)
+        # print 'out of keystroker:'
+        # print keys
+        # print self.translate(keys)
+        return keys
 
     def translate(self, keys):
         return util.flatten([self.translate_key(k) for k in keys])
 
     def translate_key(self, key):
-        subs = {
-            '!': ['{Enter}'],
-            '+!': ['+{Enter}'],
-            #'+!': ['+{Enter}'],
-            '%': ['%wait%'],
-            #'%': [],
-            '^': ['{Esc}']
-            }
-
-        if key in subs:
-            return subs[key]
-        else:
-            return [key]
+        return KEY_LIST.get(key) or key
 
     def move(self, start, end):
         keys = []
@@ -187,7 +196,7 @@ class Keystroker:
                 # in this direction without going too far
                 steps = min([dx, dy])
 
-            keycode = [KEY_LIST[direction.compass]]
+            keycode = ['[' + direction.compass + ']']
             move = direction.delta()
             if steps < 8 or not allow_backtrack:
                 # render keystrokes
@@ -236,7 +245,7 @@ class Keystroker:
                 # by an end user
                 # might be best to use this template style:
                     # jump_begin: '{Shift down}'
-                    # jump_step: '<key>'
+                    # jump_step: '[key]'
                     # jump_end: '{Shift up}'
                 if jumps > 0:
                     keys.append("{Shift down}")
@@ -268,8 +277,8 @@ class Keystroker:
 
         # resize construction
         area = Area(start, end)
-        keys += KEY_LIST['widen'] * (area.width() - 1)
-        keys += KEY_LIST['heighten'] * (area.height() - 1)
+        keys += KEY_LIST['[widen]'] * (area.width() - 1)
+        keys += KEY_LIST['[heighten]'] * (area.height() - 1)
 
         return keys, midpoint
 
@@ -288,3 +297,19 @@ class Keystroker:
         keys = self.move(start, midpoint)
 
         return keys, midpoint
+
+    def setmats(self, areasize):
+        """
+        Tries to avoid running out of a given material type by blithely
+        attempting to all-select from DF's materials list repeatedly.
+        qfconvert will attempt this 1+sqrt(areasize) times, which should
+        be good enough most of the time.
+        """
+        if areasize == 1: return ['#']
+
+        # reps = 1 + int(sqrt(areasize))
+        reps = 2 * int(sqrt(areasize))
+        keys = ['#', '[menudown]'] * (reps - 1)
+        keys.append('#')
+        # print 'setmats ' + `keys`
+        return keys

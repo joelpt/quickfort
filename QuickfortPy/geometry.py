@@ -203,10 +203,11 @@ class Grid:
         if len(contents) == 0:
             cell.label = '.' # visual identification of empty cells
 
+        # print 'addcell %s point %s height %d' % (contents, point, self.height)
         if point.y + 1 > self.height:
             self.cells.append([]) # new row
             self.height = point.y + 1
-
+        # print 'addcell %s point %s height %d' % (contents, point, self.height)
         row = self.cells[point.y]
 
         if point.x + 1 > len(row):
@@ -232,7 +233,7 @@ class Grid:
 
     def get_cell(self, pos):
         if self.is_out_of_bounds(pos):
-            return None
+            return CommandCell('', self)
         else:
             return self.cells[pos.y][pos.x]
 

@@ -2,21 +2,20 @@ import re
 
 BUILD_TYPE_CFG = {
 
-    'd': { # dig
-        'init': [],
+    'dig': {
+        'init': None,
         'designate': 'moveto cmd ! setsize !'.split(),
-        'samecmd': [],
+        'samecmd': None,
         'diffcmd': ['cmd'],
-        'allowlarge': [],
         'submenukeys': '',
-        'sizebounds': (1, 1000, 1, 1000), # minwidth, maxwidth, minheight, maxheight
-        'custom': {},
+        'sizebounds': None,
+        'custom': None,
         'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
      },
 
-    'b': { # build
+    'build': {
         'init': ['^'],
-        'designate': 'exitmenu menu cmd moveto setsize ! % +! %'.split(),
+        'designate': 'exitmenu menu cmd moveto setsize ! % # %'.split(),
         'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
         'submenukeys': ['i', 'w', 'e', 'C', 'T', 'M'],
@@ -25,71 +24,69 @@ BUILD_TYPE_CFG = {
         'custom': {
 
             # farm plot
-            'p':        { 'sizebounds': (1, 10, 1, 10),
+            r'p':       { 'sizebounds': (1, 10, 1, 10),
                           'designate': 'exitmenu cmd moveto setsize !'.split() },
 
-            # all constructions, un/paved roads, and bridges
-            #'C.|o|O|g': { 'sizebounds': (1, 10, 1, 10)#,
-                          #'designate': 'exitmenu menu cmd moveto setsize ! % +! {Down} +! {Down} +! {Down} %'.split(),
-            #            },
-            # TODO try to get the multi-mats selection logic working like above 'designate'
-            # probably it did not work because {Down} should be {NumpadAdd}
+            # all constructions
+            r'C.':      { 'sizebounds': (1, 10, 1, 10),
+                          'designate': 'exitmenu menu cmd moveto setsize ! % setmats'.split(),
+                          'setmats': lambda keystroker, start, end: keystroker.setmats(areasize)
+                        },
 
             # un/paved roads and bridges
-            'o|O|g':     { 'sizebounds': (1, 10, 1, 10) },
+            r'o|O|g':   { 'sizebounds': (1, 10, 1, 10) },
 
             # 5x5 siege workshop
-            'ws':       { 'sizebounds': (5, 5, 5, 5),
+            r'ws':      { 'sizebounds': (5, 5, 5, 5),
                           'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
                         },
 
             # metalsmith forge, magma forge
-            'w[fv]':    { 'designate': 'exitmenu menu cmd moveto setsize ! % ! % +! %'.split(),
+            r'w[fv]':   { 'designate': 'exitmenu menu cmd moveto setsize ! % ! % # %'.split(),
                           'sizebounds': (3, 3, 3, 3),
                           'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
                         },
 
+            # 3x3 workshops other than those already accounted for
+            r'w[^sfv]': { 'sizebounds': (3, 3, 3, 3),
+                          'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
+                        },
+
             # trade depot
-            'D':        { 'designate': 'exitmenu cmd moveto setsize ! % ! % +! %'.split(),
+            r'D':       { 'designate': 'exitmenu cmd moveto setsize ! % ! % # %'.split(),
                           'sizebounds': (5, 5, 5, 5),
                           'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
                         },
 
             # screw pump
-            'Ms':       { 'designate': 'exitmenu menu cmd moveto ! ! ! ! %'.split() },
+            r'Ms':      { 'designate': 'exitmenu menu cmd moveto ! ! ! ! %'.split() },
 
             # horizontal and vertical axles
-            'Mh':       { 'sizebounds': (1, 10, 1, 1) },
-            'Mv':       { 'sizebounds': (1, 1, 1, 10) },
+            r'Mh':      { 'sizebounds': (1, 10, 1, 1) },
+            r'Mv':      { 'sizebounds': (1, 1, 1, 10) }
 
-            # 3x3 workshops other than those already accounted for
-            'w[^sfv]':  { 'sizebounds': (3, 3, 3, 3),
-                          'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
-                        }
             }
     },
 
-    'p': { # place (stockpiles)
-        'init': [],
+    'place': { # place stockpiles
+        'init': None,
         'designate': 'moveto cmd ! setsize !'.split(),
-        'samecmd': [],
+        'samecmd': None,
         'diffcmd': ['cmd'],
-        'allowlarge': [],
         'submenukeys': '',
-        'minsize': 0,
-        'maxsize': 0,
-        'custom': {},
+        'sizebounds': None,
+        'custom': None,
         'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
     },
 
-    'q': { # query (set building/task prefs)
-        'init': [],
+    'query': { # set building/task prefs
+        'init': None,
         'designate': 'moveto cmd ! setsize !'.split(),
-        'allowlarge': [],
+        'samecmd': None,
+        'diffcmd': ['cmd'],
         'submenukeys': '',
-        'minsize': 0,
-        'maxsize': 0,
-        'custom': {},
+        'sizebounds': None,
+        'custom': None,
         'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
     }
 }
@@ -98,21 +95,21 @@ class BuildConfig:
 
     def __init__(self, build_type, options):
         self.build_type = build_type
+        # print build_type
         self.config = BUILD_TYPE_CFG[build_type]
-
-        # if build_type == 'b':
-        #     if options.singleunitconstruction:
-        #         self.config['maxsize'] = 1
-        #         self.config['allowlarge'] = []
+        # print self.config
 
     def get(self, label, forkey=None):
-        # return custom config value for matching key
-        if forkey and 'custom' in self.config:
-            custom = self.config['custom']
+        # return custom config value for matching key; if no match
+        # for forkey is found the buildtype default will be used instead
+        if forkey:
+            custom = self.config.get('custom') or {}
             for k in custom:
                 if re.match(k, forkey):
                     if label in custom[k]:
+                        # print 'label %s forkey %s response %s' % (label, forkey, custom[k][label])
                         return custom[k][label]
         # return standard config value of this build type
-        return self.config[label]
+        # print 'label %s forkey %s response %s' % (label, forkey, self.config.get(label))
+        return self.config.get(label)
 

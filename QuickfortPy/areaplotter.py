@@ -120,16 +120,17 @@ class AreaPlotter:
         return bestarea
 
     def find_largest_area_in_quadrant(self, pos, primary, secondary, bestarea):
-        # width and height are conceptually aligned to an
-        # east(primary) x south(secondary) quadrant below.
+        command = self.grid.get_cell(pos).command
 
         # Get the min/max size that this area may be, based on the command
-        command = self.grid.get_cell(pos).command
-        sizebounds = self.buildconfig.get('sizebounds', command)
+        sizebounds = self.buildconfig.get('sizebounds', command) \
+            or (1, 1000, 1, 1000) # default sizebounds
 
         # Get the max width of this area on the axis defined by
         # pos and primary direction, and max width from
-        # the secondary
+        # the secondary.
+        # width and height are conceptually aligned to an
+        # east(primary) x south(secondary) quadrant below.
         maxwidth = self.grid.count_repeating_cells(pos, primary)
         maxheight = self.grid.count_repeating_cells(pos, secondary)
 
@@ -157,7 +158,7 @@ class AreaPlotter:
             return Area(pos, pos)
 
 
-        # Get the coordinate of pos which the primary axis lies on
+        # Get the x|y coordinate of pos which the primary axis lies on
         start = pos.get_coord_of_axis(primary)
 
         # Determine which edge we're moving towards as we move along

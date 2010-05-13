@@ -70,7 +70,7 @@ class Router:
         return (plots, cursor)
 
     def get_cheapest_plottable_area_from(self, start, last_command):
-        cheapest_pos, cheapest_cost = None, sys.maxsize
+        cheapest_pos, cheapest_cost = None, 999999999
 
         # check the cell we started in: if it is plottable, it becomes our
         # starting cheapest_area

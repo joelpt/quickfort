@@ -3,30 +3,29 @@
 import sys
 import re
 from optparse import OptionParser
+import textwrap
 
 from geometry import *
-import csvreader
+import filereader
 from areaplotter import AreaPlotter
 from router import Router
 from keystroker import Keystroker
 from transformer import Transformer
 from buildconfig import BuildConfig
 
-def process_blueprint(csvpath, options):
-    if options.debugcsv: print ">>>> BEGIN CSV PARSING"
+def parse_blueprint(path, options):
+    if options.debugfile: print ">>>> BEGIN INPUT FILE PARSING"
 
     # parse the .csv blueprint file
-    (layers, build_type, start, start_comment, comment) = csvreader.parse_csv_file(csvpath)
+    (layers, build_type, start, start_comment, comment) = filereader.parse_file(path)
 
     if not start:
         start = Point(0, 0)
 
-    buildconfig = BuildConfig(build_type, options)
-
-    if options.debugcsv:
-        print '#### Parsed %s' % csvpath
+    if options.debugfile:
+        print '#### Parsed %s' % path
         for layer in layers:
-            print layer.grid.str_commands('') + '\n'
+            print layer.grid.str_commands('') + '\n' + ''.join(layer.onexit) + '\n'
 
     if options.transform:
         print "#### Transforming using transformation: %s" % options.transform
@@ -34,8 +33,13 @@ def process_blueprint(csvpath, options):
         for layer in layers:
             print layer.grid.str_commands('') + '\n'
 
-    if options.debugcsv: print ">>>> END CSV PARSING"
+    if options.debugfile: print ">>>> END INPUT FILE PARSING"
+    return (layers, build_type, start, start_comment, comment)
 
+def process_blueprint(path, options):
+    (layers, build_type, start, start_comment, comment) = parse_blueprint(path, options)
+
+    buildconfig = BuildConfig(build_type, options)
     keys = []
 
     for layer in layers:
@@ -50,7 +54,8 @@ def process_blueprint(csvpath, options):
             raise
 
         grid = plotter.grid
-
+        print 'before routing:'
+        print grid.str_commands('')
         # starting from start, discover the order we will
         # plot the areas in using a sort of cheapest-route algorithm
 
@@ -63,6 +68,8 @@ def process_blueprint(csvpath, options):
         keys += ks.plot(plots, start) + layer.onexit
         start = end
 
+    keys = ks.translate(keys)
+
     if options.debugsummary:
         print ">>>> BEGIN SUMMARY"
         for layer in layers:
@@ -74,15 +81,40 @@ def process_blueprint(csvpath, options):
 
     return ''.join(keys)
 
+def get_info(path, options):
+    (layers, build_type, start, start_comment, comment) = parse_blueprint(path, options)
+
+    s = textwrap.dedent("""
+        Build type: %s
+        Comment: %s
+        Start position: %s
+        Start comment: %s
+        First layer width: %d
+        First layer height: %d
+        Layer count: %d
+        """).strip() % (
+            build_type,
+            comment or '',
+            start,
+            start_comment or '',
+            layers[0].grid.width,
+            layers[0].grid.height,
+            len(layers)
+            )
+
+    return s
 
 def main():
-    usage = "usage: %prog [options] csv_file [output_file]"
+    usage = "usage: %prog [options] input_file [output_file]"
     parser = OptionParser(usage=usage, version="%prog 1.0")
+    parser.add_option("-i", "--info",
+                      action="store_true", dest="info", default=False,
+                      help="output information about input_file")
     parser.add_option("-t", "--transform",
                       action="store", dest="transform", default=False,
                       help="transformation rules, e.g. -t 2e;flipv;2s")
     parser.add_option("-c", "--show-csv",
-                      action="store_true", dest="debugcsv", default=False,
+                      action="store_true", dest="debugfile", default=False,
                       help="show parsed blueprint on stdout after reading")
     parser.add_option("-a", "--show-area",
                       action="store_true", dest="debugarea", default=False,
@@ -99,14 +131,17 @@ def main():
         parser.print_help()
         return
 
-    keystr = process_blueprint(args[0], options)
+    if options.info:
+        out = get_info(args[0], options)
+    else:
+        out = process_blueprint(args[0], options)
 
     if len(args) > 1:
         f = open(args[1], 'w')
-        f.write(keystr)
+        f.write(out)
         f.close()
     else:
-        print keystr
+        print out
 
     return
 
