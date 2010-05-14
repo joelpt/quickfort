@@ -1,7 +1,6 @@
 from geometry import *
 import util
 import re
-from itertools import takewhile
 
 """
 KEY_LIST = {

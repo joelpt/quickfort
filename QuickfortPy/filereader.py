@@ -2,6 +2,8 @@ import re
 import os.path
 from itertools import dropwhile
 import csv
+import zipfile
+from xml2obj import xml2obj
 
 import xlrd
 
@@ -20,8 +22,10 @@ def parse_file(filename):
     ext = os.path.splitext(filename)[1].lower()
     if ext == '.csv':
         lines = read_csv_file(filename)
-    elif ext in ('.xls', '.xlsx'):
+    elif ext == '.xls':
         lines = read_xls_file(filename)
+    elif ext == '.xlsx':
+        lines = read_xlsx_file(filename)
     else:
         raise NameError
 
@@ -65,7 +69,7 @@ def parse_file(filename):
     for cells in lines:
         # whitespace-strip and de-unicode the cells
         cells = [str(c.strip()) for c in cells]
-        # print cells
+
         # remove trailing empty cells
         cells = list(dropwhile(lambda x: x == '', cells[::-1]))[::-1]
 
@@ -126,12 +130,46 @@ def read_csv_file(filename):
 
 
 def read_xls_file(filename):
-    # read contents of first sheel in excel workbook file
+    """
+    Read contents of first sheet in Excel 95-2003 (.xls) workbook file.
+    """
     wb = xlrd.open_workbook(filename)
     sh = wb.sheet_by_index(0)
 
     lines = []
     for rownum in range(sh.nrows):
         lines.append(sh.row_values(rownum))
-    # print lines
+
+    return lines
+
+def read_xlsx_file(filename):
+    """
+    Read contents of first sheet in Excel 2007 (.xlsx) workbook file.
+    These .xlsx files are actually zip files containing xml files.
+    """
+
+    # get first sheet's rows
+    zf = zipfile.ZipFile(filename)
+    sheetdata = zf.read('xl/worksheets/sheet1.xml')
+    xml = xml2obj(sheetdata)
+    rows = xml.sheetData.row
+
+    # get shared strings xml
+    stringdata = zf.read('xl/sharedStrings.xml')
+    xml = xml2obj(stringdata)
+    strings = xml.si
+
+    # extract cell values into lines; cell values are given
+    # as ordinal index references into sharedStrings.xml:ssi.si
+    # elements, whose actual value is found in node.t
+    # @@@ TODO raise an error when c.v=='d' and not an int; that means
+    # it is a formula and we don't do those. give back a useful error
+    # by catching all errors in main() and output to stderr Error: ...
+
+    lines = []
+    for row in rows:
+        cells = row.c
+        values = [str(strings[int(c.v)].t) for c in cells]
+        lines.append(values)
+
     return lines

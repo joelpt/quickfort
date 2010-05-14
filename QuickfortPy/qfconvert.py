@@ -5,6 +5,7 @@ import re
 from optparse import OptionParser
 import textwrap
 
+import xml2obj
 from geometry import *
 import filereader
 from areaplotter import AreaPlotter
@@ -54,8 +55,8 @@ def process_blueprint(path, options):
             raise
 
         grid = plotter.grid
-        print 'before routing:'
-        print grid.str_commands('')
+        # print 'before routing:'
+        # print grid.str_commands('')
         # starting from start, discover the order we will
         # plot the areas in using a sort of cheapest-route algorithm
 
