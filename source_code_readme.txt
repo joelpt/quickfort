@@ -4,10 +4,9 @@
     "GUI", hotkeys, and key-sending functionality.
 
 \qfconvert
-    Python based implementation of Quickfort's core
-    building algorithm. In QuickfortPy, the building algorithm is
-    optimized to minimize the number of keystrokes used to build a
-    blueprint.
+    Python based implementation of Quickfort's core building
+    algorithm. Attempts to minimize the number of keystrokes
+    required to plot blueprints.
 
 \blueprints
     Various blueprints packaged with Quickfort releases.
