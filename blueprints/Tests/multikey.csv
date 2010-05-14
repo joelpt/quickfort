@@ -1,0 +1,3 @@
+#dig Test for having multiple keystrokes specified in a cell.,,
+j{Enter}i,,j{Enter}i
+j!i,,j!i
