@@ -1,12 +1,13 @@
-The QuickfortAHK folder contains the AutoHotKey portion of the
-Quickfort tool. Currently this is a standalone, fully functional
-Quickfort implementation.
+\quickfort
+    AutoHotKey-based frontend for Quickfort in Windows. Relies on
+    qfconvert to do all the heavy lifting, just providing the tooltip
+    "GUI", hotkeys, and key-sending functionality.
 
-The QuickfortPy folder contains a new Python based implementation of
-Quickfort's core building algorithm. In QuickfortPy, the building
-algorithm is optimized to minimize the number of keystrokes used to
-build a blueprint.
+\qfconvert
+    Python based implementation of Quickfort's core
+    building algorithm. In QuickfortPy, the building algorithm is
+    optimized to minimize the number of keystrokes used to build a
+    blueprint.
 
-In the near future Quickfort will rely on QuickfortPy for the 'heavy
-lifting' build algorithms and QuickfortAHK will continue to provide
-the frontend on Windows (and, with the arrival of IronAHK, Linux/Mac).
+\blueprints
+    Various blueprints packaged with Quickfort releases.
