@@ -31,7 +31,12 @@ class AreaPlotter:
                 plotted_something = True
                 label = new_label
 
-            if not self.grid.is_area_plottable(Area(Point(0,0), Point(self.grid.width-1, self.grid.height-1)), True):
+            testarea = Area(
+                Point(0,0),
+                Point(self.grid.width-1, self.grid.height-1)
+                )
+
+            if not self.grid.is_area_plottable(testarea, True):
                 if self.debug:
                     print self.grid.str_area_labels() + '\n'
                     print "#### Grid is completely plotted"
@@ -39,12 +44,15 @@ class AreaPlotter:
 
         if self.debug: print "<<<< END AREA DISCOVERY"
 
-        # should throw an error here, we should always stop before this because of plottability test above
+        # should throw an error here, we should always stop before
+        # this because of plottability test above
         return plotted_something
 
     def mark_largest_plottable_areas(self, initial_label):
-        # Find the largest plottable (available) areas in the grid and sort them by
-        # size descending
+        """
+        Find the largest plottable (available) areas in the grid
+        and sort them by size descending
+        """
         areas = self.find_largest_areas()
 
         areas.sort(cmp=lambda a, b: cmp(a.size(), b.size()), reverse=True)
@@ -62,7 +70,8 @@ class AreaPlotter:
                 self.grid.set_area_plottable(area, False)
                 self.grid.set_area_label(area, label)
 
-                label = chr( ((ord(label) - 48 + 1) % 78) + 48 ) # increment label character
+                # label character cycles through the printable ASCII chars
+                label = chr( ((ord(label) - 48 + 1) % 78) + 48 )
 
                 # store area in grid cell for each of the area's corners
                 for corner in area.corners:
@@ -99,9 +108,9 @@ class AreaPlotter:
 
         These represent the 4 quadrants created by partitioning the
         grid through the 2 axes which pos sits on, and
-        the inversions of each quadrant (e.g. the pair SE & ES).
-        Each quadrant includes the origin (0, 0); similarly, each
-        quadrant overlaps on two edges with adjacent quadrants.
+        the inversions of each quad; SE & ES is one such pair.
+        Each quad includes the origin (0, 0); similarly, each
+        quad overlaps on two edges with adjacent quads.
         """
         dir_pairs = []
         for d in ('e', 's', 'w', 'n'):
@@ -111,15 +120,15 @@ class AreaPlotter:
 
         bestarea = Area(pos, pos)
 
-        # find the biggest area(s) formable from each dir_pair quadrant
+        # find the biggest area(s) formable from each dir_pair quad
         for dirs in dir_pairs:
-            area = self.find_largest_area_in_quadrant(pos, dirs[0], dirs[1], bestarea)
+            area = self.find_largest_area_in_quad(pos, dirs[0], dirs[1], bestarea)
             if area is not None:
                 bestarea = area
 
         return bestarea
 
-    def find_largest_area_in_quadrant(self, pos, primary, secondary, bestarea):
+    def find_largest_area_in_quad(self, pos, primary, secondary, bestarea):
         command = self.grid.get_cell(pos).command
 
         # Get the min/max size that this area may be, based on the command
@@ -130,7 +139,7 @@ class AreaPlotter:
         # pos and primary direction, and max width from
         # the secondary.
         # width and height are conceptually aligned to an
-        # east(primary) x south(secondary) quadrant below.
+        # east(primary) x south(secondary) quad below.
         maxwidth = self.grid.count_repeating_cells(pos, primary)
         maxheight = self.grid.count_repeating_cells(pos, secondary)
 

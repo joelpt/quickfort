@@ -212,17 +212,14 @@ class Grid:
         if point.x + 1 > len(row):
             row.append(cell)
         else:
-            print """
-                error: add_cell trying to add to the left
-                of an existing cell (not supported)
-                """
-            return
+            raise Exception, \
+                "Grid.add_cell() can't add to the left of an existing cell"
 
         if point.x + 1 > self.width:
             self.width = point.x + 1
 
-    "Add missing cells to rows which ended prematurely"
     def fixup(self):
+        """Add missing cells to rows which ended prematurely"""
         for row in self.cells:
             if len(row) < self.width:
                 row.extend(
@@ -364,16 +361,17 @@ class Grid:
         else:
             axis = axis[start::-1]
 
-        # Count the number of cells whose command matches our starting cell's command,
-        # until we encounter one that doesn't. Operates on just those cells in axis
-        # which start at pos and continue to the grid edge in the given direction.
+        # Count the number of cells whose command matches our
+        # starting cell's command, until we encounter one that
+        # doesn't. Operates on just those cells in axis which start
+        # at pos and continue to the grid edge in the given
+        # direction.
         count = len(list(takewhile(lambda cell: cell.plottable and cell.command == command, axis)))
 
         return count
 
     def str_commands(self, colsep = ''):
-        rowstrings = [colsep.join(['.' if c.command == '' else c.command[0] for c in row]) + '|' for row in self.cells]
-        return '\n'.join(rowstrings)
+        return Grid.print_cells(self.cells, colsep)
 
     def str_plottable(self):
         rowstrings = [''.join(['.' if c.plottable == True else 'x' for c in row]) + '|' for row in self.cells]

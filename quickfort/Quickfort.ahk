@@ -217,49 +217,49 @@ $!X::
   Send {x 30}
   return
 
-;;; ---------------------------------------------------------------------------
-;; redo last construction effort (Alt+E)
-;; Only does anything after a build finishes (successfully or cancelled)
-;$!E::
-;  if (!ReadyToBuild)
-;  {
-;    if (LastSelectedFile = "")
-;    {
-;      MsgBox, No file selected yet. Use Alt+F to select a file, or Alt+T to enter a command directly.`n`nShift+Alt+Z suspends/resumes Quickfort hotkeys.
-;      ActivateGameWin()
-;      return
-;    }
+;; ---------------------------------------------------------------------------
+; redo last construction effort (Alt+E)
+; Only does anything after a build finishes (successfully or cancelled)
+!E::
+  if (!ReadyToBuild)
+  {
+    if (LastSelectedFile = "")
+    {
+      Goto ShowFilePicker
+      return ; gratuitous
+    }
 
-;    SelectedFile := LastSelectedFile
-;    ShowCSVIntro := 0
-;    ForceMouseTipUpdate()
-;    BuildRoutine()
-;  }
-;  else
-;  {
-;    ; Re-enable use of the start() specification from the blueprint
-;    SetStartPos(0, "Top left")
-;    StartPosAbsX := LastStartPosAbsX
-;    StartPosAbsY := LastStartPosAbsY
-;    ForceMouseTipUpdate()
-;  }
-;  return
+    SelectedFile := LastSelectedFile
+    ReadyToBuild := True
+    UpdateTip()
+  }
+  ;else
+  ;{
+  ;  ; Re-enable use of the start() specification from the blueprint
+  ;  SetStartPos(0, "Top left")
+  ;  StartPosAbsX := LastStartPosAbsX
+  ;  StartPosAbsY := LastStartPosAbsY
+  ;  ForceMouseTipUpdate()
+  ;}
+  return
 
 ;; Autorepeat build (Alt+R)
-$!R::
+!R::
   if (!Building && ReadyToBuild)
   {
     msg =
     (
-Enter transformation pattern below, or ? for more help.
+Enter transformation pattern below.
 
   Syntax: #D #D #D ...
     where D is one of: n s e w u d flipv fliph rotcw rotccw !
+  Examples:
+    4e 4s;  2n 2w 2d;  fliph 2e flipv 2s
 
-  Examples: 4e 4s;  2n 2w 2d;  fliph 2e flipv 2s
+Enter ? for more help.
     )
 
-    InputBox, pattern, Transform blueprint, %msg%, , 440, 220, , , , , %LastRepeatPattern%
+    InputBox, pattern, Transform blueprint, %msg%, , 440, 260, , , , , %LastRepeatPattern%
     ActivateGameWin()
     if (RegExMatch(pattern, "^(help|\?)"))
     {
@@ -271,6 +271,7 @@ Syntax: [#]D [[#]D [#]D...]
   # = times to repeat action, defaults to 1 if omitted
   D = one of: n s e w u d flipv fliph rotcw rotccw !
   Any number of transformations can be chained together.
+  #d/#u transforms (multi z-level) are always performed last.
 
 Examples:
   4e -- make a row of the blueprint repeated 4 times going east
@@ -292,7 +293,7 @@ Examples:
     }
     else
     {
-      RepeatPattern := pattern
+      RepeatPattern := LastRepeatPattern := pattern
       UpdateTip()
     }
   }
@@ -370,6 +371,7 @@ Examples:
 ;; ---------------------------------------------------------------------------
 ; File picker (Alt+F)
 !F::
+ShowFilePicker:
   if (!Building && !ReadyToBuild)
   {
     SelectedFile := SelectFile()
@@ -391,6 +393,9 @@ Examples:
     Building := False
     ReadyToBuild := False
     LastSelectedFile := SelectedFile
+    ; get the filename on its own
+    SplitPath, LastSelectedFile, LastSelectedFilename
+
     SelectedFile =
     If (RepeatPattern)
       LastRepeatPattern := RepeatPattern
@@ -452,6 +457,17 @@ ConvertFile(filename, transformation)
   ; Read converter results
   FileRead, output, %tempfile%
 
+  ; Check for exceptions
+  if (RegExMatch(output, "Exception:"))
+  {
+    ; Inform the user.
+    StringReplace, output, output, Exception:, Error:
+    StringReplace, output, output, \n, `n
+    MsgBox % output
+    ClearTip()
+    return ""
+  }
+
   ClearTip()
   return output
 }
@@ -497,7 +513,7 @@ UpdateTip()
   ; Determine contents of mouse tooltip based on mode.
   if (mode == "pickfile")
   {
-    header := "Quickfort 2.0.`nPick a blueprint file with Alt+F."
+    header := "Quickfort 2.0.`n`nPick a blueprint file with Alt+F." . (LastSelectedFile ? "`nPress Alt+E to use " LastSelectedFilename " again." : "")
   }
   else {
     header := "details about the blueprint and selected modes`nrepeat: " . RepeatPattern

@@ -55,10 +55,10 @@ class Router:
                     print self.grid.str_plottable() + '\n'
 
                 # move cursor to the ending corner of the plotted area
-                print cursor
+                # print cursor
                 cursor = self.grid.get_cell(cheapest_pos).area.opposite_corner(cheapest_pos)
-                print cursor
-                print cheapest_pos
+                # print cursor
+                # print cheapest_pos
                 total_key_cost += len(ks.move(cheapest_pos, cursor)) + 2
 
         if self.debug:

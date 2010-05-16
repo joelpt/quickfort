@@ -1,6 +1,6 @@
 import re
 import os.path
-from itertools import dropwhile
+from itertools import dropwhile, repeat
 import csv
 import zipfile
 from xml2obj import xml2obj
@@ -8,6 +8,7 @@ from xml2obj import xml2obj
 import xlrd
 
 from geometry import *
+import blueprint
 
 
 class FileLayer:
@@ -15,6 +16,23 @@ class FileLayer:
     def __init__(self, onexit, rows=None):
         self.onexit = onexit
         self.rows = rows or []
+
+    def fixup(self):
+        """Add missing cells to rows which ended prematurely"""
+        # remove trailing empty and # cells
+        for cells in self.rows:
+            while cells and cells[-1] in ('', '#'):
+                # print cells
+                cells = cells[:-1]
+
+        maxlen = max([len(row) for row in self.rows])
+        for row in self.rows:
+            # print row
+            if len(row) < maxlen:
+                row.extend(
+                    [''] * (maxlen - len(row))
+                    )
+        return
 
 
 def parse_file(filename):
@@ -31,6 +49,10 @@ def parse_file(filename):
     else:
         raise NameError
 
+    # remove last line if it starts with a #
+    if lines[-1][0] == '#':
+        lines = lines[:-1]
+
     # break into the lines we want
     (top_line, lines) = (','.join(lines[0]), lines[1:])
 
@@ -38,8 +60,9 @@ def parse_file(filename):
     top_line = re.sub(r',+$', '', top_line)
 
     # extract build type, start() command if any, and comment if any
+    m = re.match(r'^#(build|dig|query|place)\w*( +start\(.+?\))?( .+)?$',
+        top_line)
 
-    m = re.match(r'^#(build|dig|query|place)\w*( +start\(.+?\))?( .+)?$', top_line)
     (build_type, start_command, comment) = m.group(1, 2, 3)
     build_type = build_type.lower()
 
@@ -49,10 +72,12 @@ def parse_file(filename):
         m = re.match(r" +start\( *(\d+) *; *(\d+) *;? *(.+)? *\)",
             start_command)
 
-        (start_pos, start_comment) = (Point(int(m.group(1)), int(m.group(2))),
-            m.group(3))
+        (start, start_comment) = (
+            Point(int(m.group(1)) - 1, int(m.group(2)) - 1),
+            m.group(3)
+            )
     else:
-        start_pos = None
+        start = None
         start_comment = None
 
     # clean up comment
@@ -63,22 +88,21 @@ def parse_file(filename):
     else:
         comment = ''
 
-    # break up csv into layers of cells, with each
-    # layer separated by #> or #<
-
+    # break up csv into layers of cells, each separated by #> or #<
     csvlayers = []
     csv = []
     for cells in lines:
         # whitespace-strip and de-unicode the cells
         cells = [str(c.strip()) for c in cells]
-        print cells
-        # remove trailing empty cells
-        while cells[-1] == '':
-            print cells
+        # print cells
+
+        # remove trailing empty and # cells
+        while cells and cells[-1] in ('', '#'):
+            # print cells
             cells = cells[:-1]
 
         # test for multilayer separator #> or #<
-        c = cells[0]
+        c = cells[0] if cells else ''
         m = re.match(r'\#(\>+|\<+)', c)
         if m:
             newlayer = FileLayer([m.group(1)], csv)
@@ -92,6 +116,7 @@ def parse_file(filename):
 
     layers = []
     for csvlayer in csvlayers:
+        csvlayer.fixup()
         # fill a new Grid
         grid = Grid()
         (x, y) = (0, 0)
@@ -101,7 +126,7 @@ def parse_file(filename):
             for cell in row:
                 cell = cell.strip()
                 if (cell == '#'):
-                    # end of a line
+                    # forced end of row
                     break
                 else:
                     # Blank out marking (non-sent) chars
@@ -114,7 +139,14 @@ def parse_file(filename):
         grid.fixup()
         layers.append(GridLayer(csvlayer.onexit, grid))
 
-    return (layers, build_type, start_pos, start_comment, comment)
+    bp = blueprint.Blueprint()
+    bp.layers = layers
+    bp.build_type = build_type
+    bp.start = start
+    bp.start_comment = start_comment
+    bp.comment = comment
+
+    return bp
 
 
 def read_csv_file(filename):
@@ -171,34 +203,38 @@ def read_xlsx_file(filename):
     # it is a formula and we don't do those. give back a useful error
     # by catching all errors in main() and output to stderr Error: ...
 
-    # TODO account for blank lines which are missing from xml too...
-    # time to split colcode up and use both parts
-
     lines = []
+    lastrownum = 0
     for row in rows:
+        rownum = int(row.r)
+        # print "%d %d" % (rownum, lastrownum)
+        if rownum > lastrownum + 1: # interpolate missing rows
+            lines.extend([[]] * (rownum - lastrownum - 1))
+        lastrownum = rownum
         cells = row.c
+
         line = []
-        lastcol = 0
+        lastcolnum = 0
         for c in cells:
             # get column number
             colcode = re.match('^([A-Z]+)', str(c.r)).group(1)
-            col = colcode_to_colnum(colcode)
+            colnum = colcode_to_colnum(colcode)
 
-            if col > lastcol + 1:
-                # add interleaving blank cells (these are omitted
-                # as xml elements so must be interpolated)
-                line.extend([''] * (col - lastcol - 1))
+            if colnum > lastcolnum + 1: # interpolate missing columns
+                line.extend([''] * (colnum - lastcolnum - 1))
 
-            lastcol = col
+            lastcolnum = colnum
             # add cell value looked-up from shared strings
             line.append(str(strings[int(c.v)].t))
         lines.append(line)
-
+    # print lines
     return lines
 
 
 def colcode_to_colnum(colcode):
-    """Convert Excel style column ids, e.g. A, XFD, etc. to a column number."""
+    """
+    Convert Excel style column ids, e.g. A, XFD, etc. to a column number.
+    """
     if len(colcode) == 0:
         return 0
     return (ord(colcode[-1]) - ord('A') + 1) + \
