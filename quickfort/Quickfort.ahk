@@ -246,35 +246,57 @@ $!X::
 ;  return
 
 ;; Autorepeat build (Alt+R)
-;$!R::
-;  if (!Building && ReadyToBuild)
-;  {
-;    msg =
-;    (
-;Enter repeat pattern below.
+$!R::
+  if (!Building && ReadyToBuild)
+  {
+    msg =
+    (
+Enter transformation pattern below, or ? for more help.
 
-;Syntax: #D
-;  # is the number of times to repeat in a direction
-;  D is north|south|east|west|up|down or one of nsewud
-;  Up to 3 directions (dimensions) can be specified.
+  Syntax: #D #D #D ...
+    where D is one of: n s e w u d flipv fliph rotcw rotccw !
 
-;Examples:
-;    4 north       - repeat blueprint 4 times to the north
-;    3e 3s          - make a 3x3 pattern of our repeated blueprint
-;    10e 10s 4d  - repeat a 10x10 pattern 4 z-levels down (10x10x4)
-;    )
-;    InputBox, pattern, Auto-repeat blueprint, %msg%, , 440, 300
-;    ;InputBox, pattern, Auto-repeat blueprint, %msg%
-;    if (!RegExMatch(pattern, "S)^(\d+\s*[dunsew]\w*\s*)+$", pattern)) {
-;      MsgBox, Repeat pattern not in correct format.
-;    }
-;    else {
-;      RepeatPattern := pattern
-;      ForceMouseTipUpdate()
-;    }
-;  }
-;  ActivateGameWin()
-;  return
+  Examples: 4e 4s;  2n 2w 2d;  fliph 2e flipv 2s
+    )
+
+    InputBox, pattern, Transform blueprint, %msg%, , 440, 220, , , , , %LastRepeatPattern%
+    ActivateGameWin()
+    if (RegExMatch(pattern, "^(help|\?)"))
+    {
+      msg =
+      (
+Enter transformation pattern below.
+
+Syntax: [#]D [[#]D [#]D...]
+  # = times to repeat action, defaults to 1 if omitted
+  D = one of: n s e w u d flipv fliph rotcw rotccw !
+  Any number of transformations can be chained together.
+
+Examples:
+  4e -- make a row of the blueprint repeated 4 times going east
+  3e 3s -- 3x3 repeating pattern of blueprint
+  5e 5s 5d -- 5x5x5 cube of blueprint (multi z level)
+  fliph -- flip the blueprint horizontally
+  rotcw -- rotate the blueprint clockwise 90 degrees
+  fliph 2e flipv 2s -- 2x2 symmetrical pattern of blueprint
+  rotcw 2e flipv fliph 2s -- 2x2 rotated around a center point
+  rotcw ! 2e -- rotate original blueprint then repeat that 2x east
+      )
+      InputBox, pattern, Transform blueprint, %msg%, , 440, 400, , , , , %LastRepeatPattern%
+      ActivateGameWin()
+    }
+
+    if (!RegExMatch(pattern, "^(\d*([dunsew]|flip[vh]|rotc?cw|\!)\s*)+$"))
+    {
+      MsgBox, Invalid transformation syntax:`n%pattern%
+    }
+    else
+    {
+      RepeatPattern := pattern
+      UpdateTip()
+    }
+  }
+  return
 
 
 ;; One-off command line (Alt+T)
@@ -363,13 +385,16 @@ $!X::
   if (!Building && ReadyToBuild)
   {
     Building := True
-    data := ConvertFile(SelectedFile)
+    data := ConvertFile(SelectedFile, RepeatPattern)
     if (data)
       SendKeys(data)
     Building := False
     ReadyToBuild := False
     LastSelectedFile := SelectedFile
     SelectedFile =
+    If (RepeatPattern)
+      LastRepeatPattern := RepeatPattern
+    RepeatPattern =
     UpdateTip()
   }
   return
@@ -390,15 +415,23 @@ SelectFile()
 
 ;; ---------------------------------------------------------------------------
 ;; do blueprint conversion via qfconvert
-ConvertFile(filename)
+ConvertFile(filename, transformation)
 {
   tempfile := A_ScriptDir "\qfconvert.out.txt"
 
   Tip("Thinking...")
 
   FileDelete, %tempfile%
-  MsgBox, %comspec% /c ""c:\lang\Python26\python" "d:\code\Quickfort\trunk\QuickfortPy\qfconvert.py" "%filename%" "%tempfile%""
-  RunWait %comspec% /c ""c:\lang\Python26\python" "d:\code\Quickfort\trunk\QuickfortPy\qfconvert.py" "%filename%" "%tempfile%"", , Hide
+
+  transcmd =
+  if (transformation) {
+    transcmd = --transform "%transformation%"
+  }
+
+  cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%filename%" "%tempfile%" %transcmd%
+
+  ;MsgBox %cmd%
+  RunWait %cmd%, , Hide
 
   ready := False
   Loop 10
@@ -455,25 +488,19 @@ UpdateTip()
 
   ; Determine tip mode.
   if (!SelectedFile)
-  {
     mode := "pickfile"
-  }
   else if (Building)
-  {
     mode := "build"
-  }
   else
-  {
     mode := "prebuild"
-  }
 
   ; Determine contents of mouse tooltip based on mode.
   if (mode == "pickfile")
   {
-    header := "QF 2.0. Pick a file with Alt+F."
+    header := "Quickfort 2.0.`nPick a blueprint file with Alt+F."
   }
   else {
-    header := "details about the blueprint and selected modes"
+    header := "details about the blueprint and selected modes`nrepeat: " . RepeatPattern
   }
 
   if (Tooltip)
@@ -488,7 +515,7 @@ UpdateTip()
     }
     else if (mode == "prebuild")
     {
-      body := "Instructions to begin: hit Alt+D"
+      body := "Alt+V shows area size. Alt+D starts building."
     }
     else
     {
@@ -504,7 +531,6 @@ UpdateTip()
 SendKeys(keys)
 {
   global
-  MsgBox, % keys
   ActivateGameWin()
   Sleep, 250
   Sleep, 0
