@@ -9,11 +9,13 @@ import xlrd
 
 from geometry import *
 
+
 class FileLayer:
 
     def __init__(self, onexit, rows=None):
         self.onexit = onexit
         self.rows = rows or []
+
 
 def parse_file(filename):
     layers = []
@@ -69,14 +71,17 @@ def parse_file(filename):
     for cells in lines:
         # whitespace-strip and de-unicode the cells
         cells = [str(c.strip()) for c in cells]
-
+        print cells
         # remove trailing empty cells
-        cells = list(dropwhile(lambda x: x == '', cells[::-1]))[::-1]
+        while cells[-1] == '':
+            print cells
+            cells = cells[:-1]
 
         # test for multilayer separator #> or #<
         c = cells[0]
-        if c in ('#>', '#<'):
-            newlayer = FileLayer(['^5' if c == "#>" else '+5'], csv)
+        m = re.match(r'\#(\>+|\<+)', c)
+        if m:
+            newlayer = FileLayer([m.group(1)], csv)
             csvlayers.append(newlayer)
             csv = []
         else:
@@ -166,10 +171,35 @@ def read_xlsx_file(filename):
     # it is a formula and we don't do those. give back a useful error
     # by catching all errors in main() and output to stderr Error: ...
 
+    # TODO account for blank lines which are missing from xml too...
+    # time to split colcode up and use both parts
+
     lines = []
     for row in rows:
         cells = row.c
-        values = [str(strings[int(c.v)].t) for c in cells]
-        lines.append(values)
+        line = []
+        lastcol = 0
+        for c in cells:
+            # get column number
+            colcode = re.match('^([A-Z]+)', str(c.r)).group(1)
+            col = colcode_to_colnum(colcode)
+
+            if col > lastcol + 1:
+                # add interleaving blank cells (these are omitted
+                # as xml elements so must be interpolated)
+                line.extend([''] * (col - lastcol - 1))
+
+            lastcol = col
+            # add cell value looked-up from shared strings
+            line.append(str(strings[int(c.v)].t))
+        lines.append(line)
 
     return lines
+
+
+def colcode_to_colnum(colcode):
+    """Convert Excel style column ids, e.g. A, XFD, etc. to a column number."""
+    if len(colcode) == 0:
+        return 0
+    return (ord(colcode[-1]) - ord('A') + 1) + \
+        (26 * colcode_to_colnum(colcode[:-1]))

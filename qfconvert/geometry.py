@@ -189,8 +189,7 @@ class Grid:
         self.height = 0
 
     def __str__(self):
-        rowstrings = [','.join([c.command for c in row]) for row in self.cells]
-        return '\n'.join(rowstrings)
+        return self.str_commands()
 
     def add_cell(self, point, contents):
         """
@@ -372,8 +371,8 @@ class Grid:
 
         return count
 
-    def str_commands(self, column_separator):
-        rowstrings = [column_separator.join(['.' if c.command == '' else c.command[0] for c in row]) + '|' for row in self.cells]
+    def str_commands(self, colsep = ''):
+        rowstrings = [colsep.join(['.' if c.command == '' else c.command[0] for c in row]) + '|' for row in self.cells]
         return '\n'.join(rowstrings)
 
     def str_plottable(self):
@@ -386,5 +385,10 @@ class Grid:
 
     def str_area_labels(self):
         rowstrings = [''.join(['.' if c.label == '' else c.label for c in row]) + '|' for row in self.cells]
+        return '\n'.join(rowstrings)
+
+    @staticmethod
+    def print_cells(cells, colsep = ''):
+        rowstrings = [colsep.join(['.' if c.command == '' else c.command[0] for c in row]) + '|' for row in cells]
         return '\n'.join(rowstrings)
 
