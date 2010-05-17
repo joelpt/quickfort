@@ -29,6 +29,9 @@ def parse_options():
     parser.add_option("-s", "--show-summary",
                       action="store_true", dest="debugsummary", default=False,
                       help="show summary output")
+    parser.add_option("-p", "--profile",
+                      action="store_true", dest="profile", default=False,
+                      help="profile qfconvert performance")
     options, args = parser.parse_args()
     return options, args
 
@@ -104,5 +107,8 @@ if __name__ == "__main__":
     if len(args) < 1:
         parser.print_help()
 
-    main(options, args)
+    if options.profile:
+        cProfile.run('main(options, args)')
+    else:
+        main(options, args)
 

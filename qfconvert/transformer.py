@@ -7,8 +7,8 @@ def transform(transforms, layers):
     # print transforms
 
     for i, layer in enumerate(layers):
-        a = deepcopy(layer.grid.cells)
-        b = deepcopy(layer.grid.cells)
+        a = layer.grid.cells
+        b = layer.grid.cells
         left = transforms
         for t in transforms:
             count, cmd = t
@@ -25,14 +25,14 @@ def transform(transforms, layers):
                 # print 'B:'
                 # print Grid.print_cells(b)
                 new = apply_transform(t, a, b)
-                a, b = deepcopy(new), deepcopy(new)
+                a, b = new, deepcopy(new)
             else:
                 # print 'calling transform %s,%s with this:' % t
                 # 'B:'
                 # print Grid.print_cells(b)
                 # print
                 new = apply_transform(t, b)
-                b = deepcopy(new)
+                b = new
             layers[i].grid.cells = b
             layers[i].grid.height = len(layers[i].grid.cells)
             layers[i].grid.width = len(layers[i].grid.cells[0])
@@ -94,7 +94,7 @@ def apply_transform(transform, a, b=None):
             "To use e.g. 'rotcw 2e rotcw 2s', instead use "
             "'rotcw 2e fliph flipv 2s'."
             )
-    a, b = deepcopy(a), deepcopy(b)
+    # a, b = deepcopy(a), deepcopy(b)
     # print 'applying %s %d' % (action, count)
     # print 'A:'
     # print Grid.print_cells(a)
@@ -151,7 +151,7 @@ def apply_transform(transform, a, b=None):
                 newrow = []
                 for s in r:
                     newrow.extend(deepcopy(s))
-                out.append(deepcopy(newrow))
+                out.append(newrow)
         return out
 
     else:
