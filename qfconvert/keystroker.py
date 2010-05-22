@@ -19,17 +19,60 @@ KEY_LIST = {
     }
 """
 
-KEY_LIST = {
-    '[n]': '8', '[ne]': '9', '[e]': '6', '[se]': '3', '[s]': '2', '[sw]': '1', '[w]': '4', '[nw]': '7',
-    '[widen]': 'k',
-    '[heighten]': 'u',
-    '[menudown]': '{NumpadAdd}',
-    '!': '{Enter}',
-    '#': '+{Enter}',
-    '%': '%wait%',
-    '^': '{Esc}'
-}
+# KEY_LIST = {
+# }
 
+KEY_LIST = {
+    'key': {
+        '[n]': '8',
+        '[ne]': '9',
+        '[e]': '6',
+        '[se]': '3',
+        '[s]': '2',
+        '[sw]': '1',
+        '[w]': '4',
+        '[nw]': '7',
+        '[+n]': '+8',
+        '[+ne]': '+9',
+        '[+e]': '+6',
+        '[+se]': '+3',
+        '[+s]': '+2',
+        '[+sw]': '+1',
+        '[+w]': '+4',
+        '[+nw]': '+7',
+        '[widen]': 'k',
+        '[heighten]': 'u',
+        '[menudown]': '{NumpadAdd}',
+        '!': '{Enter}',
+        '#': '+{Enter}',
+        '%': '%wait%',
+        '^': '{Esc}'
+        },
+    'macro': {
+        '[n]': '0:8',
+        '[ne]': '0:9',
+        '[e]': '0:6',
+        '[se]': '0:3',
+        '[s]': '0:2',
+        '[sw]': '0:1',
+        '[w]': '0:4',
+        '[nw]': '0:7',
+        '[+n]': '1:8',
+        '[+ne]': '1:9',
+        '[+e]': '1:6',
+        '[+se]': '1:3',
+        '[+s]': '1:2',
+        '[+sw]': '1:1',
+        '[+w]': '1:4',
+        '[+nw]': '1:7',
+        '[widen]': 'k',
+        '[heighten]': 'u',
+        '[menudown]': '+',
+        '!': '0:Enter',
+        '#': '1:Enter',
+        '%': ''
+    }
+}
 
 
 class Keystroker:
@@ -168,12 +211,6 @@ class Keystroker:
         # print self.translate(keys)
         return keys
 
-    def translate(self, keys):
-        return util.flatten([self.translate_key(k) for k in keys])
-
-    def translate_key(self, key):
-        return KEY_LIST.get(key) or key
-
     def move(self, start, end):
         keys = []
         allow_backtrack = True
@@ -196,6 +233,7 @@ class Keystroker:
                 steps = min([dx, dy])
 
             keycode = ['[' + direction.compass + ']']
+            jumpkeycode = ['[+' + direction.compass + ']']
             move = direction.delta()
             if steps < 8 or not allow_backtrack:
                 # render keystrokes
@@ -232,25 +270,8 @@ class Keystroker:
                     start = start + (move * steps)
                     allow_backtrack = True
 
-                # shift optimization
-                # this needs to be configured somewhere based
-                # on the output-mode (macros vs ahkeys)
-                # for ahkeys output should probably look like
-                # +6 +6 +6
-                # rather than
-                # +{6 3}
-                # only because the former is easier to
-                # express in a template form easily modifiable
-                # by an end user
-                # might be best to use this template style:
-                    # jump_begin: '{Shift down}'
-                    # jump_step: '[key]'
-                    # jump_end: '{Shift up}'
                 if jumps > 0:
-                    keys.append("{Shift down}")
-                    keys.extend(keycode * jumps)
-                    keys.append("{Shift up}")
-                #keys.append("+{%s %d}" % (keycode[0], jumps))
+                    keys.extend(jumpkeycode * jumps)
 
         return keys
 
@@ -312,3 +333,76 @@ class Keystroker:
         keys.append('#')
         # print 'setmats ' + `keys`
         return keys
+
+
+
+def convert_keys(keys, mode):
+    keys = translate_keystrokes(keys, mode)
+    if mode == 'macro':
+        return '\n'.join(convert_to_macro(keys)) + '\n'
+    elif mode == 'key':
+        return ''.join(keys)
+    else:
+        raise Exception, 'Unknown Keystroker.render() mode "%s"' % mode
+
+
+def translate_keystrokes(keys, mode):
+    return util.flatten( [ translate_keystroke(k, mode) for k in keys ] )
+
+
+def translate_keystroke(key, mode):
+    return KEY_LIST[mode].get(key) or key
+
+
+def convert_to_macro(keys):
+    keybinds = parse_interface_txt('interface.txt')
+
+    # for k in keybinds.iterkeys():
+    #     print 'Key %s' % k
+    #     print 'Binds %s' % '\n'.join(keybinds[k])
+
+    output = ['qfmacro'] # first line of macro, has no actual effect
+
+    for key in keys:
+        if keybinds.get(key) is None:
+            raise Exception, \
+                "Key '%s' not bound in interface.txt" % key
+        if key == '^':
+            output.append('LEAVESCREEN') # escape menu key
+        else:
+            output.extend(keybinds[key])
+        output.append('\tEnd of group')
+    output.append('End of macro')
+
+    return output
+
+
+def parse_interface_txt(path):
+    with open(path) as f:
+        data = f.read()
+
+    groups = [re.split('\n', kb) for kb in re.split(r'\[BIND:', data)]
+
+    # keybinds = {'^': ['\t\tLEAVESCREEN']}
+    keybinds = KEY_LIST
+    # print keybinds['^']
+    # print groups[0:100]
+    for kb in groups:
+        if kb == ['']:
+            continue
+
+        bind = re.sub(r'(\w+):.+', r'\1', kb[0])
+        keys = [re.sub(r'\[(KEY:|SYM:)(.+?)\]', r'\2', k)
+            for k in kb[1:] ]
+
+        for k in keys:
+            if k == '':
+                continue
+            if keybinds.get(k) is None:
+                keybinds[k] = []
+            # print k
+            # print bind
+            # print keybinds[k]
+            keybinds[k].append('\t\t' + bind)
+    # print sorted(keybinds.keys())
+    return keybinds

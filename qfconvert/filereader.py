@@ -34,6 +34,47 @@ class FileLayer:
                     )
         return
 
+    @staticmethod
+    def str_rows(layer, colsep = ''):
+        rowstrings = [colsep.join(['.' if c == '' else c[0] for c in row]) + \
+            '|' for row in layer.rows]
+        return '\n'.join(rowstrings)
+
+    @staticmethod
+    def str_layers(file_layers):
+        s = ''
+        for layer in file_layers:
+            s += (FileLayer.str_rows(layer) + '\n') + \
+                (''.join(['On Exit: '] + layer.onexit) + '\n')
+        return s
+
+
+def FileLayers_to_GridLayers(file_layers):
+    """Convert a list of FileLayers to a list of GridLayers."""
+    layers = []
+    for fl in file_layers:
+        # fill a new Grid
+        grid = Grid()
+        (x, y) = (0, 0)
+        for row in fl.rows:
+            # print row
+            x = 0
+            for cell in row:
+                cell = cell.strip()
+                if (cell == '#'):
+                    # forced end of row
+                    break
+                else:
+                    # Blank out marking (non-sent) chars
+                    if cell in ('~', '`'): cell = ''
+
+                    # add this csv cell to the grid
+                    grid.add_cell(Point(x, y), cell)
+                    x += 1 # for next column
+            y += 1 # for next line
+        layers.append(GridLayer(fl.onexit, grid))
+    return layers
+
 
 def parse_file(filename):
     layers = []
@@ -77,8 +118,8 @@ def parse_file(filename):
             m.group(3)
             )
     else:
-        start = None
-        start_comment = None
+        start = Point(0, 0)
+        start_comment = ''
 
     # clean up comment
     if comment:
@@ -89,7 +130,7 @@ def parse_file(filename):
         comment = ''
 
     # break up csv into layers of cells, each separated by #> or #<
-    csvlayers = []
+    filelayers = []
     csv = []
     for cells in lines:
         # whitespace-strip and de-unicode the cells
@@ -106,47 +147,20 @@ def parse_file(filename):
         m = re.match(r'\#(\>+|\<+)', c)
         if m:
             newlayer = FileLayer([m.group(1)], csv)
-            csvlayers.append(newlayer)
+            filelayers.append(newlayer)
             csv = []
         else:
             csv.append(cells)
 
     if len(csv) > 0:
-        csvlayers.append( FileLayer( [], csv ) )
+        filelayers.append( FileLayer( [], csv ) )
 
-    layers = []
-    for csvlayer in csvlayers:
-        csvlayer.fixup()
-        # fill a new Grid
-        grid = Grid()
-        (x, y) = (0, 0)
-        for row in csvlayer.rows:
-            # print row
-            x = 0
-            for cell in row:
-                cell = cell.strip()
-                if (cell == '#'):
-                    # forced end of row
-                    break
-                else:
-                    # Blank out marking (non-sent) chars
-                    if cell in ('~', '`'): cell = ''
+    for fl in filelayers:
+        fl.fixup()
 
-                    # add this csv cell to the grid
-                    grid.add_cell(Point(x, y), cell)
-                    x += 1 # for next column
-            y += 1 # for next line
-        grid.fixup()
-        layers.append(GridLayer(csvlayer.onexit, grid))
+    # print FileLayer.print_layers(filelayers)
 
-    bp = blueprint.Blueprint()
-    bp.layers = layers
-    bp.build_type = build_type
-    bp.start = start
-    bp.start_comment = start_comment
-    bp.comment = comment
-
-    return bp
+    return filelayers, build_type, start, start_comment, comment
 
 
 def read_csv_file(filename):

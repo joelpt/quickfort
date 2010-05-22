@@ -3,10 +3,27 @@ import util
 
 class AreaPlotter:
 
-    def __init__(self, grid, buildconfig, debug):
+    def __init__(self, grid, buildconfig, debug): # options):
         self.grid = grid
         self.debug = debug
+        # self.debug = options.debugarea
+        # self.naive = True if options.optlevel < 2 else False
         self.buildconfig = buildconfig
+
+    """
+    areaplotter types:
+        standard: mark all plottable areas recursively using largest area
+            every time
+        naive: mark each non empty cell as a 1x1 area to be plotted
+
+        O1 - naive area plan and routing (default for macro output)
+        O2 - smart area plan, naive routing
+        O3 - smart area plan and routing (default for keystroke output)
+
+    """
+
+    def discover_areas(self):
+        """Discover contiguous areas in the grid. Returns the plotted grid."""
 
     def mark_all_plottable_areas(self):
         """

@@ -7,8 +7,8 @@ def transform(transforms, layers):
     # print transforms
 
     for i, layer in enumerate(layers):
-        a = layer.grid.cells
-        b = layer.grid.cells
+        a = layer.rows
+        b = layer.rows
         left = transforms
         for t in transforms:
             count, cmd = t
@@ -33,9 +33,9 @@ def transform(transforms, layers):
                 # print
                 new = apply_transform(t, b)
                 b = new
-            layers[i].grid.cells = b
-            layers[i].grid.height = len(layers[i].grid.cells)
-            layers[i].grid.width = len(layers[i].grid.cells[0])
+            layers[i].rows = b
+            # layers[i].grid.height = len(layers[i].grid.cells)
+            # layers[i].grid.width = len(layers[i].grid.cells[0])
             # print
             # print layers[i].grid
             # print '--- ^b ---'
@@ -141,7 +141,7 @@ def apply_transform(transform, a, b=None):
         if action in ('n', 's'):
             out = []
             for s in series:
-                out.extend(deepcopy(s))
+                out.extend(s)
         else: # 'e', 'w'
             # combine each row of each series item
             # into a new row
@@ -150,7 +150,7 @@ def apply_transform(transform, a, b=None):
             for r in rows:
                 newrow = []
                 for s in r:
-                    newrow.extend(deepcopy(s))
+                    newrow.extend(s)
                 out.append(newrow)
         return out
 

@@ -5,8 +5,10 @@ import sys
 import traceback
 import cProfile
 
-import blueprint
+from geometry import Grid
+from blueprint import *
 import transformer
+
 
 def parse_options():
     usage = "usage: %prog [options] input_file [output_file]"
@@ -35,59 +37,13 @@ def parse_options():
     options, args = parser.parse_args()
     return options, args
 
+
 def main(options, args):
     infile = args[0]
     outfile = args[1] if len(args) > 1 else None
 
     try:
-        if options.debugfile: print ">>>> BEGIN INPUT FILE PARSING"
-
-        bp = blueprint.read_blueprint(infile, options)
-
-        if options.debugfile:
-            print '#### Parsed %s' % infile
-            for layer in bp.layers:
-                print (layer.grid.str_commands('') + '\n'
-                    + ''.join(layer.onexit) + '\n'
-                    )
-
-        if options.transform:
-            if options.debugfile:
-                print "#### Transforming using transformation: %s" % \
-                    options.transform
-
-            transforms = transformer.parse_transform_str(options.transform)
-            bp.layers = transformer.transform(transforms, bp.layers)
-
-            if options.debugfile:
-                for layer in bp.layers:
-                    print layer.grid.str_commands('') + '\n'
-
-        if options.debugfile: print ">>>> END INPUT FILE PARSING"
-
-        if options.info:
-            output = bp.get_info(options)
-        else:
-            keys = bp.plot(options)
-            output = ''.join(keys)
-
-            if options.debugsummary:
-                print ">>>> BEGIN SUMMARY"
-                print "---- Layers:"
-                for layer in bp.layers:
-                    print "#### Commands:"
-                    print layer.grid.str_commands() + '\n'
-                    print "#### Area labels:"
-                    print layer.grid.str_area_labels() + '\n'
-                    print "Initial cursor position: %s" % layer.start
-                    print "Route order: %s" % ''.join(
-                        [layer.grid.get_cell(plot).label
-                        for plot in layer.plots]
-                        )
-                    print "Layer onexit keys: %s" % layer.onexit
-                print "---- Overall:"
-                print "Total key cost: %d" % len(keys)
-                print "<<<< END SUMMARY"
+        output = process_blueprint_file(infile, options)
 
         if outfile:
             with open(outfile, 'w') as f:

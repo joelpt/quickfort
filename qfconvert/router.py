@@ -6,9 +6,11 @@ from keystroker import Keystroker
 
 class Router:
 
-    def __init__(self, grid, debug):
+    def __init__(self, grid, debug): # options):
         self.grid = grid
         self.debug = debug
+        # self.debug = options.debugroute
+        # self.naive = True if options.optlevel < 3 else False
 
     def plan_route(self, cursor):
         """

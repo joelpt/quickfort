@@ -169,7 +169,7 @@ class CommandCell:
         self.area = None
         self.plottable = True if command not in (None, '') else False
         self.label = ''
-        self.parentgrid = parentgrid
+        # self.parentgrid = parentgrid
 
 
 class GridLayer:
@@ -390,3 +390,8 @@ class Grid:
         rowstrings = [colsep.join(['.' if c.command == '' else c.command[0] for c in row]) + '|' for row in cells]
         return '\n'.join(rowstrings)
 
+    @staticmethod
+    def print_layers(grid_layers):
+        for layer in grid_layers:
+            print (Grid.print_cells(layer) + '\n') + (
+                ''.join(layer.onexit) + '\n')
