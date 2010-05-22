@@ -6,13 +6,24 @@ from keystroker import Keystroker
 
 class Router:
 
-    def __init__(self, grid, debug): # options):
+    def __init__(self, grid, debug, naive):
         self.grid = grid
         self.debug = debug
-        # self.debug = options.debugroute
-        # self.naive = True if options.optlevel < 3 else False
+        self.naive = naive
 
     def plan_route(self, cursor):
+        if self.naive:
+            return self.plan_route_naive(cursor)
+        else:
+            return self.plan_route_smart(cursor)
+
+    def plan_route_naive(cursor):
+        # make a list of areas to be plotted
+        areas = [cell.area for cell in flatten(self.grid.cells) if cell.area]
+
+
+
+    def plan_route_smart(cursor):
         """
         We assume the areas to be plotted are already loaded into grid.
         Starting from cursor, we locate the nearest/smallest area

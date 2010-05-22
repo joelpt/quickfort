@@ -1,6 +1,8 @@
+import re
+import random
+
 from geometry import *
 import util
-import re
 
 """
 KEY_LIST = {
@@ -336,10 +338,10 @@ class Keystroker:
 
 
 
-def convert_keys(keys, mode):
+def convert_keys(keys, mode, title=None):
     keys = translate_keystrokes(keys, mode)
     if mode == 'macro':
-        return '\n'.join(convert_to_macro(keys)) + '\n'
+        return '\n'.join(convert_to_macro(keys, title)) + '\n'
     elif mode == 'key':
         return ''.join(keys)
     else:
@@ -354,14 +356,16 @@ def translate_keystroke(key, mode):
     return KEY_LIST[mode].get(key) or key
 
 
-def convert_to_macro(keys):
+def convert_to_macro(keys, title):
     keybinds = parse_interface_txt('interface.txt')
 
+    if not title:
+        title = '@@@qf' + str(random.randrange(0, 999999999))
     # for k in keybinds.iterkeys():
     #     print 'Key %s' % k
     #     print 'Binds %s' % '\n'.join(keybinds[k])
 
-    output = ['qfmacro'] # first line of macro, has no actual effect
+    output = [title] # first line of macro is macro title
 
     for key in keys:
         if keybinds.get(key) is None:

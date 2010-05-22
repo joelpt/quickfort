@@ -1,3 +1,5 @@
+import textwrap
+
 from util import Struct
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
@@ -35,10 +37,10 @@ def process_blueprint_file(path, options):
     if options.debugfile: print ">>>> END INPUT FILE PARSING"
 
     if options.info:
-        output = bp.get_info(options)
+        output = bp.get_info()
     else:
         keys = bp.plot(options)
-        output = convert_keys(keys, 'macro')
+        output = convert_keys(keys, options.mode, options.title)
 
         if options.debugsummary:
             print ">>>> BEGIN SUMMARY"
@@ -57,18 +59,7 @@ def process_blueprint_file(path, options):
             print "---- Overall:"
             print "Total key cost: %d" % len(keys)
             print "<<<< END SUMMARY"
-
     return output
-
-# def read_blueprint(path, options):
-#     """read the specified blueprint file into a new Blueprint"""
-
-#     filereader.parse_file(path)
-#     convert_to_GridLayers
-#     # print len(bp.layers)
-#     if not bp.start:
-#         bp.start = Point(0, 0)
-#     return bp
 
 
 class Blueprint:
@@ -91,17 +82,13 @@ class Blueprint:
             ## TODO plot_predefined_areas()
 
             # plot areas to be built on the grid
-            plotter = AreaPlotter(grid, buildconfig, options.debugarea)
-            if not plotter.mark_all_plottable_areas():
+            plotter = AreaPlotter(grid, buildconfig, options.debugarea,
+                not options.optarea)
+            if not plotter.discover_areas():
                 raise
 
             grid = plotter.grid
-            # print 'before routing:'
-            # print grid.str_commands('')
-            # starting from start, discover the order we will
-            # plot the areas in using a sort of cheapest-route algorithm
-
-            router = Router(grid, options.debugrouter)
+            router = Router(grid, options.debugrouter, not options.optrouter)
             plots, end = router.plan_route(start)
             layer.plots = plots
 
@@ -109,7 +96,6 @@ class Blueprint:
             ks = Keystroker(grid, buildconfig)
             keys += ks.plot(plots, start) + layer.onexit
             start = end
-
         return keys
 
 

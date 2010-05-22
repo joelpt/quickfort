@@ -3,33 +3,41 @@ import util
 
 class AreaPlotter:
 
-    def __init__(self, grid, buildconfig, debug): # options):
+    def __init__(self, grid, buildconfig, debug, naive):
         self.grid = grid
         self.debug = debug
-        # self.debug = options.debugarea
-        # self.naive = True if options.optlevel < 2 else False
+        self.naive = naive
         self.buildconfig = buildconfig
-
-    """
-    areaplotter types:
-        standard: mark all plottable areas recursively using largest area
-            every time
-        naive: mark each non empty cell as a 1x1 area to be plotted
-
-        O1 - naive area plan and routing (default for macro output)
-        O2 - smart area plan, naive routing
-        O3 - smart area plan and routing (default for keystroke output)
-
-    """
 
     def discover_areas(self):
         """Discover contiguous areas in the grid. Returns the plotted grid."""
+        if self.naive:
+            return self.mark_areas_naive()
+        else:
+            return self.mark_all_plottable_areas()
+
+    def mark_areas_naive(self):
+        """
+        Plot each cell on the map as a 1x1 area. Inefficient keystrokewise
+        but very fast. Returns True when we plotted at least one area.
+        """
+        label = '0'
+        plotted_something = False
+        for y, row in enumerate(self.grid.cells):
+            for x, cell in enumerate(row):
+                if cell.command:
+                    cell.label = label
+                    pos = Point(x, y)
+                    cell.area = Area(pos, pos)
+                    label = next_label(label)
+                    plotted_something = True
+        return plotted_something
 
     def mark_all_plottable_areas(self):
         """
         Repeatedly plot the largest areas possible until
         there are no more areas left to plot. Returns
-        the plotted grid.
+        True when we plotted at least one area.
         """
         label = '0'
         plotted_something = False
@@ -39,7 +47,8 @@ class AreaPlotter:
         while True:
             if self.debug:
                 print self.grid.str_area_labels() + '\n'
-                print '#### Marking largest plottable areas starting with label %s' % label
+                print '#### Marking largest plottable areas starting ' + \
+                    'with label %s' % label
 
             new_label = self.mark_largest_plottable_areas(label)
 
@@ -87,8 +96,7 @@ class AreaPlotter:
                 self.grid.set_area_plottable(area, False)
                 self.grid.set_area_label(area, label)
 
-                # label character cycles through the printable ASCII chars
-                label = chr( ((ord(label) - 48 + 1) % 78) + 48 )
+                label = next_label(label)
 
                 # store area in grid cell for each of the area's corners
                 for corner in area.corners:
@@ -96,7 +104,6 @@ class AreaPlotter:
 
         # return our label when we plotted at least 1 new area
         return label
-
 
     def find_largest_areas(self):
         """
@@ -217,3 +224,8 @@ class AreaPlotter:
                 continue
 
         return bestarea
+
+
+def next_label(label):
+    """label character cycles through the printable ASCII chars"""
+    return chr( ((ord(label) - 48 + 1) % 78) + 48 )
