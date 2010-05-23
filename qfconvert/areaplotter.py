@@ -1,7 +1,10 @@
-from geometry import *
+"""Handles discovery of areas to be plotted by someone else."""
+
+from geometry import Point, Direction, Area
 import util
 
 class AreaPlotter:
+    """Handles discovery of areas to be plotted by someone else."""
 
     def __init__(self, grid, buildconfig, debug):
         self.grid = grid
@@ -17,7 +20,8 @@ class AreaPlotter:
         label = '0'
         plotted_something = False
 
-        if self.debug: print ">>>> BEGIN AREA DISCOVERY"
+        if self.debug:
+            print ">>>> BEGIN AREA DISCOVERY"
 
         while True:
             if self.debug:
@@ -43,7 +47,8 @@ class AreaPlotter:
                     print "#### Grid is completely plotted"
                 return plotted_something
 
-        if self.debug: print "<<<< END AREA DISCOVERY"
+        if self.debug:
+            print "<<<< END AREA DISCOVERY"
 
         # should throw an error here, we should always stop before
         # this because of plottability test above
@@ -65,7 +70,6 @@ class AreaPlotter:
         for area in areas:
             # not overlapping any already-plotted area?
             if self.grid.is_area_plottable(area):
-                plotted_something = True
 
                 # mark this area as unavailable for subsequent plotting
                 self.grid.set_area_plottable(area, False)
@@ -87,15 +91,18 @@ class AreaPlotter:
         """
         areas = []
 
-        for y in range(0, self.grid.height):
-            for x in range(0, self.grid.width):
-                pos = Point(x, y)
+        for ypos in range(0, self.grid.height):
+            for xpos in range(0, self.grid.width):
+                pos = Point(xpos, ypos)
                 if self.grid.get_cell(pos).plottable \
                     and len(self.grid.get_command(pos)) > 0 \
                     and self.grid.is_corner(pos):
                     areas.append(self.find_largest_area_from(pos))
 
-        areas = util.uniquify(areas, lambda area: ''.join([str(c) for c in area.corners]))
+        areas = util.uniquify(
+            areas,
+            lambda area: ''.join([str(c) for c in area.corners])
+            )
         return areas
 
     def find_largest_area_from(self, pos):
@@ -112,8 +119,8 @@ class AreaPlotter:
         quad overlaps on two edges with adjacent quads.
         """
         dir_pairs = []
-        for d in ('e', 's', 'w', 'n'):
-            direction = Direction(d)
+        for dir_ in ('e', 's', 'w', 'n'):
+            direction = Direction(dir_)
             dir_pairs.append([direction, direction.right_turn()])
             dir_pairs.append([direction, direction.left_turn()])
 
@@ -121,13 +128,20 @@ class AreaPlotter:
 
         # find the biggest area(s) formable from each dir_pair quad
         for dirs in dir_pairs:
-            area = self.find_largest_area_in_quad(pos, dirs[0], dirs[1], bestarea)
+            area = self.find_largest_area_in_quad(
+                pos, dirs[0], dirs[1], bestarea)
             if area is not None:
                 bestarea = area
 
         return bestarea
 
     def find_largest_area_in_quad(self, pos, primary, secondary, bestarea):
+        """
+        Given the quad starting at corner pos and extending first
+        in primary direction, then in secondary direction: return
+        the largest area we can find in the quad.
+        """
+
         command = self.grid.get_cell(pos).command
 
         # Get the min/max size that this area may be, based on the command
@@ -165,25 +179,14 @@ class AreaPlotter:
             # 1x1 area, just return it
             return Area(pos, pos)
 
-
-        # Get the x|y coordinate of pos which the primary axis lies on
-        start = pos.get_coord_of_axis(primary)
-
-        # Determine which edge we're moving towards as we move along
-        # the secondary axis
-        step = secondary.delta().get_coord_crossing_axis(secondary)
-        end = start + (step * (maxheight - 1))
-
         # (width x 1) sized area
         bestarea = Area(
-            pos,
-            pos + primary.delta().magnify(maxwidth - 1)
-            )
+            pos, pos + primary.delta().magnify(maxwidth - 1) )
 
-        for dy in range(1, maxheight):
-            check_point = pos + secondary.delta().magnify(dy)
+        for ydelta in range(1, maxheight):
+            check_point = pos + secondary.delta().magnify(ydelta)
 
-            height = dy + 1
+            height = ydelta + 1
             width = self.grid.count_repeating_cells(check_point, primary)
 
             if width > maxwidth:
@@ -194,7 +197,8 @@ class AreaPlotter:
                 maxwidth = width
 
             if width * height > bestarea.size():
-                bestarea = Area(pos, check_point + primary.delta().magnify(width - 1))
+                bestarea = Area(
+                    pos, check_point + primary.delta().magnify(width - 1))
             else:
                 continue
 

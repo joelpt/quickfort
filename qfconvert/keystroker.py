@@ -5,27 +5,6 @@ import random
 from geometry import *
 import exetest
 import util
-
-"""
-KEY_LIST = {
-        '[n]':config['KeyUp'],
-        '[ne]':config['KeyUpRight'],
-        '[e]':config['KeyRight'],
-        '[se]':config['KeyDownRight'],
-        '[s]':config['KeyDown'],
-        '[sw]':config['KeyDownLeft'],
-        '[w]':config['KeyLeft'],
-        '[nw]':config['KeyUpLeft'],
-        '[u]':config['KeyUpZ'],
-        '[d]':config['KeyDownZ'],
-        '!':config['KeyCommit'],
-        '^':config['KeyExitMenu']
-    }
-"""
-
-# KEY_LIST = {
-# }
-
 KEY_LIST = {
     'key': {
         '[n]': '8',

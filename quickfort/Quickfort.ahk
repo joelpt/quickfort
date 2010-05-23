@@ -152,10 +152,7 @@ $+!Z::
 ; Intercept Ctrl-P command to DF and resend it. If sent manually, for large
 ; macros it causes DF to repeat the macro twice with a single Ctrl-P press.
 ; QF can send a single Ctrl-P that will not cause DF to repeat the macro.
-$^p::
-  Tip("interception complete")
-  Send ^p
-  return
+$^p:: Send ^p
 
 
 ;; ---------------------------------------------------------------------------

@@ -141,7 +141,8 @@ class Area:
         return cmp(self.size(), other.size())
 
     def __str__(self):
-        return '[' + ','.join([str(c) for c in self.corners]) + '] size:' + str(self.size())
+        return '[' + ','.join([str(c) for c in self.corners]) + \
+            '] size:' + str(self.size())
 
     def width(self):
         return self.corners[1].x - self.corners[0].x + 1
@@ -202,11 +203,9 @@ class Grid:
         if len(contents) == 0:
             cell.label = '.' # visual identification of empty cells
 
-        # print 'addcell %s point %s height %d' % (contents, point, self.height)
         if point.y + 1 > self.height:
             self.cells.append([]) # new row
             self.height = point.y + 1
-        # print 'addcell %s point %s height %d' % (contents, point, self.height)
         row = self.cells[point.y]
 
         if point.x + 1 > len(row):
@@ -266,15 +265,15 @@ class Grid:
         return self.height if direction.axis() == 'y' else self.width
 
     def set_area_plottable(self, area, plottable):
-        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW to NE corner
-            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW to SW corner
+        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
+            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
                 cell = self.get_cell(Point(x, y))
                 cell.plottable = plottable
         return
 
     def set_area_label(self, area, label):
-        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW to NE corner
-            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW to SW corner
+        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
+            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
                 cell = self.get_cell(Point(x, y))
                 cell.label = label
         return
@@ -287,12 +286,13 @@ class Grid:
 
     def is_area_plottable(self, area, any_plottable=False):
         """
-        Test the given area against the grid cells to see if it is plottable.
-        If any_plottable is False, we return False if any cell is unplottable, True otherwise.
-        If any_plottable is True, we return True if any cell is plottable, False otherwise.
+        Test the given area against the grid cells to see if it is
+        plottable. If any_plottable is False, we return False if any
+        cell is unplottable, True otherwise. If any_plottable is True,
+        we return True if any cell is plottable, False otherwise.
         """
-        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW to NE corner
-            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW to SW corner
+        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
+            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
                 pos = Point(x, y)
                 if any_plottable:
                     if self.get_cell(pos).plottable:
@@ -323,8 +323,12 @@ class Grid:
 
         dirs = (Direction(d) for d in ['n', 's', 'e', 'w'])
 
-        # if cell can not extend in any of NSEW directions, consider it a corner cell
-        matches4 = sum(self.is_plottable(pos + d.delta()) and command == self.get_command(pos + d.delta()) for d in dirs)
+        # if cell can not extend in any of NSEW directions, it's a corner cell
+        matches4 = sum(
+            self.is_plottable(pos + d.delta())
+            and command == self.get_command(pos + d.delta())
+            for d in dirs
+            )
         if matches4 == 0:
             # solo corner
             return True
@@ -355,7 +359,7 @@ class Grid:
         # Get the row|col (determined by direction) which pos is on
         axis = self.get_axis(pos.get_coord_of_axis(direction), direction)
 
-        # get just the segment of the axis we want, ordered in the direction we want
+        # get just the segment of the axis we want, ordered in the dir we want
         if step == 1:
             axis = axis[start:self.get_length_of_axis(direction)]
         else:
@@ -366,7 +370,14 @@ class Grid:
         # doesn't. Operates on just those cells in axis which start
         # at pos and continue to the grid edge in the given
         # direction.
-        count = len(list(takewhile(lambda cell: cell.plottable and cell.command == command, axis)))
+        count = len(
+            list(
+                takewhile(
+                    lambda cell: cell.plottable and cell.command == command,
+                    axis
+                    )
+                )
+            )
 
         return count
 
@@ -374,20 +385,33 @@ class Grid:
         return Grid.print_cells(self.cells, colsep)
 
     def str_plottable(self):
-        rowstrings = [''.join(['.' if c.plottable == True else 'x' for c in row]) + '|' for row in self.cells]
+        rowstrings = [
+            ''.join(['.' if c.plottable == True else 'x' for c in row])
+            + '|' for row in self.cells
+            ]
         return '\n'.join(rowstrings)
 
     def str_area_corners(self):
-        rowstrings = [''.join(['x' if c.area else '.' for c in row]) + '|' for row in self.cells]
+        rowstrings = [
+            ''.join(['x' if c.area else '.' for c in row])
+            + '|' for row in self.cells
+            ]
         return '\n'.join(rowstrings)
 
     def str_area_labels(self):
-        rowstrings = [''.join(['.' if c.label == '' else c.label for c in row]) + '|' for row in self.cells]
+        rowstrings = [
+            ''.join(['.' if c.label == '' else c.label for c in row])
+            + '|' for row in self.cells]
         return '\n'.join(rowstrings)
 
     @staticmethod
     def print_cells(cells, colsep = ''):
-        rowstrings = [colsep.join(['.' if c.command == '' else c.command[0] for c in row]) + '|' for row in cells]
+        rowstrings = [
+            colsep.join(
+                ['.' if c.command == '' else c.command[0] for c in row]
+                )
+            + '|' for row in cells
+            ]
         return '\n'.join(rowstrings)
 
     @staticmethod
