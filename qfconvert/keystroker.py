@@ -5,6 +5,8 @@ import random
 from geometry import *
 import exetest
 import util
+
+
 KEY_LIST = {
     'key': {
         '[n]': '8',
@@ -146,10 +148,10 @@ class Keystroker:
             # break command into keys
             cmdedit = re.sub(r'\{', '|{', justcommand)
             cmdedit = re.sub(r'\}', '}|', cmdedit)
-            cmdedit = re.sub(r'\!', '|!|', cmdedit)
             cmdedit = re.sub(r'\+\!', '|+!|', cmdedit)
+            cmdedit = re.sub(r'\!', '|!|', cmdedit)
             cmdedit = re.sub(r'\^', '|^|', cmdedit)
-            cmdsplit = re.split(r'\|', cmdedit)
+            cmdsplit = re.split(r'\|+', cmdedit)
 
             cmdkeys = []
             for k in cmdsplit:
@@ -242,6 +244,7 @@ class Keystroker:
                     # move the last few cells needed when using
                     # jumpmoves to land on the right spot
                     keys.extend(keycode * leftover)
+                    # keys.append('%')
                     start = start + (move * steps)
                     allow_backtrack = True
 
@@ -342,6 +345,8 @@ def convert_to_macro(keys, title):
                 "Key '%s' not bound in interface.txt" % key
         if key == '^':
             output.append('\t\tLEAVESCREEN') # escape menu key
+        elif key == '%':
+            output.append('\t\tJUST_DELAY') # wait
         else:
             output.extend(keybinds[key])
         output.append('\tEnd of group')

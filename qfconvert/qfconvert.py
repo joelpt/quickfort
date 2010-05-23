@@ -75,8 +75,8 @@ def main():
     if args is not None:
         if options.profile:
             cProfile.run('run(options, args)')
-    else:
-        run(options, args)
+        else:
+            run(options, args)
 
 if __name__ == "__main__":
     main()

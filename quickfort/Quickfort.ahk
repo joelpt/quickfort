@@ -381,6 +381,7 @@ Examples:
 ; File picker (Alt+F)
 !F::
 ShowFilePicker:
+{
   if (!Building && !ReadyToBuild)
   {
     SelectedFile := SelectFile()
@@ -389,22 +390,52 @@ ShowFilePicker:
     ShowTip()
   }
   return
+}
+
 
 ;; ---------------------------------------------------------------------------
 ; Build starter (Alt+D)
 !D::
+{
   if (!Building && ReadyToBuild)
   {
     Building := True
-    ConvertFile(SelectedFile, RepeatPattern)
-    ExecuteMacro()
+
+    ; We use macro names that should always go in decreasing sort order in DF's UI
+    ; (between reboots); and we always delete our macros after use. However DF doesn't
+    ; update its macro list when macros are deleted; thus the desire to have our new
+    ; macro always be sorted to the top item in DF's macro list. It allows QF to just
+    ; use Ctrl+L, Enter to select our just-created macro.
+    inverseticks := 4294967296 - A_TickCount
+    title = @@@qf%inverseticks%
+    outfile := A_ScriptDir "\" title ".mak"
+    destfile := "A:\games\dwarffortress3104\data\init\macros\" title ".mak"
+    ; TODO make destfile figure out the path from the currently active DF window's exe path
+
+    if (ConvertFile(SelectedFile, outfile, title, RepeatPattern))
+    {
+      ; Copy to DF dir
+      FileCopy, %outfile%, %destfile%, 1
+      if (ErrorLevel > 0)
+      {
+        MsgBox, Error: Could not copy macro file`nFrom: %outfile%`nTo: %destfile%
+      }
+      else
+      {
+        ExecuteMacro()
+        FileDelete, %destfile%
+      }
+    }
+
     ; TODO copy file here? rename ConvertFile to GenerateMacro and extract qfconvert executor to new method
     ;data := ConvertFile(SelectedFile, RepeatPattern)
     ;if (data)
     ;  SendKeys(data)
+
     Building := False
     ReadyToBuild := False
     LastSelectedFile := SelectedFile
+
     ; get the filename on its own
     SplitPath, LastSelectedFile, LastSelectedFilename
 
@@ -415,6 +446,8 @@ ShowFilePicker:
     UpdateTip()
   }
   return
+}
+
 
 ;; ---------------------------------------------------------------------------
 ;; file picker
@@ -430,6 +463,7 @@ SelectFile()
   return filename
 }
 
+
 ;; ---------------------------------------------------------------------------
 ;; execute macro by sending keys to DF window
 ExecuteMacro()
@@ -437,34 +471,28 @@ ExecuteMacro()
   ActivateGameWin()
   ReleaseModifierKeys()
   Send ^l
-  Sleep 500
+  Sleep 2000
   Send {Enter}
-  Sleep 1000
+  Sleep 2000
   Send ^p
   return
 }
 
 ;; ---------------------------------------------------------------------------
 ;; do blueprint conversion via qfconvert
-ConvertFile(filename, transformation)
+ConvertFile(filename, outfile, title, transformation)
 {
   Tip("Thinking...")
+
+  titlecmd =
+  if (title) {
+    titlecmd = --title="%title%"
+  }
 
   transcmd =
   if (transformation) {
     transcmd = --transform="%transformation%"
   }
-
-  ; We use macro names that should always go in decreasing sort order in DF's UI
-  ; (between reboots); and we always delete our macros after use. However DF doesn't
-  ; update its macro list when macros are deleted; thus the desire to have our new
-  ; macro always be sorted to the top item in DF's macro list. It allows QF to just
-  ; use Ctrl+L, Enter to select our just-created macro.
-  inverseticks := 4294967296 - A_TickCount
-  title = @@@qf%inverseticks%
-  titlecmd = --title="%title%"
-  outfile := A_ScriptDir "\" title ".mak"
-  ;FileDelete, %outfile%
 
   cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%filename%" "%outfile%" %transcmd% %titlecmd%
 
@@ -484,7 +512,7 @@ ConvertFile(filename, transformation)
   if (!ready)
   {
     MsgBox, Error: qfconvert did not return any results.
-    return
+    return False
   }
 
   ; Read converter results
@@ -500,19 +528,13 @@ ConvertFile(filename, transformation)
       StringReplace, output, output, \n, `n
       MsgBox % output
       ClearTip()
-      return ""
-    }
-    else
-    {
-      ; Copy to DF dir
-      FileCopy, %outfile%, A:\games\dwarffortress3104\data\init\macros\
-      ; TODO check for err
+      return False
     }
     break
   }
 
   ClearTip()
-  ;return output
+  return True
 }
 
 HideTip()
