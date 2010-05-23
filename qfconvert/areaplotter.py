@@ -3,37 +3,12 @@ import util
 
 class AreaPlotter:
 
-    def __init__(self, grid, buildconfig, debug, naive):
+    def __init__(self, grid, buildconfig, debug):
         self.grid = grid
         self.debug = debug
-        self.naive = naive
         self.buildconfig = buildconfig
 
     def discover_areas(self):
-        """Discover contiguous areas in the grid. Returns the plotted grid."""
-        if self.naive:
-            return self.mark_areas_naive()
-        else:
-            return self.mark_all_plottable_areas()
-
-    def mark_areas_naive(self):
-        """
-        Plot each cell on the map as a 1x1 area. Inefficient keystrokewise
-        but very fast. Returns True when we plotted at least one area.
-        """
-        label = '0'
-        plotted_something = False
-        for y, row in enumerate(self.grid.cells):
-            for x, cell in enumerate(row):
-                if cell.command:
-                    cell.label = label
-                    pos = Point(x, y)
-                    cell.area = Area(pos, pos)
-                    label = next_label(label)
-                    plotted_something = True
-        return plotted_something
-
-    def mark_all_plottable_areas(self):
         """
         Repeatedly plot the largest areas possible until
         there are no more areas left to plot. Returns

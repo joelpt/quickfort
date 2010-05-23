@@ -23,12 +23,6 @@ def parse_options():
     parser.add_option("-i", "--info",
                       action="store_true", dest="info", default=False,
                       help="output information about input_file")
-    parser.add_option("-A", "--opt-areas",
-                      action="store_true", dest="optarea", default=False,
-                      help="optimize area discovery")
-    parser.add_option("-R", "--opt-routing",
-                      action="store_true", dest="optrouter", default=False,
-                      help="optimize route planning")
     parser.add_option("-c", "--show-csv",
                       action="store_true", dest="debugfile", default=False,
                       help="show blueprint parsing steps on stdout")

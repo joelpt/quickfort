@@ -10,7 +10,6 @@ from transformer import *
 from filereader import FileLayer
 import filereader
 import transformer
-import macro
 
 
 def process_blueprint_file(path, options):
@@ -75,6 +74,7 @@ class Blueprint:
         buildconfig = BuildConfig(self.build_type, options)
         keys = []
         start = self.start
+        ks = None
         for layer in self.layers:
             grid = layer.grid
             layer.start = start
@@ -82,13 +82,12 @@ class Blueprint:
             ## TODO plot_predefined_areas()
 
             # plot areas to be built on the grid
-            plotter = AreaPlotter(grid, buildconfig, options.debugarea,
-                not options.optarea)
+            plotter = AreaPlotter(grid, buildconfig, options.debugarea)
             if not plotter.discover_areas():
                 raise
 
             grid = plotter.grid
-            router = Router(grid, options.debugrouter, not options.optrouter)
+            router = Router(grid, options.debugrouter)
             plots, end = router.plan_route(start)
             layer.plots = plots
 
@@ -96,6 +95,10 @@ class Blueprint:
             ks = Keystroker(grid, buildconfig)
             keys += ks.plot(plots, start) + layer.onexit
             start = end
+
+        # move cursor back to start pos
+        keys += ks.move(end, self.start)
+
         return keys
 
 

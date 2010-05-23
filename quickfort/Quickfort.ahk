@@ -146,6 +146,18 @@ $+!Z::
 
 #IfWinActive Dwarf Fortress
 
+
+
+;; ---------------------------------------------------------------------------
+; Intercept Ctrl-P command to DF and resend it. If sent manually, for large
+; macros it causes DF to repeat the macro twice with a single Ctrl-P press.
+; QF can send a single Ctrl-P that will not cause DF to repeat the macro.
+$^p::
+  Tip("interception complete")
+  Send ^p
+  return
+
+
 ;; ---------------------------------------------------------------------------
 ; Exit the script (Shift-Alt-X)
 $+!X::
@@ -387,9 +399,12 @@ ShowFilePicker:
   if (!Building && ReadyToBuild)
   {
     Building := True
-    data := ConvertFile(SelectedFile, RepeatPattern)
-    if (data)
-      SendKeys(data)
+    ConvertFile(SelectedFile, RepeatPattern)
+    ExecuteMacro()
+    ; TODO copy file here? rename ConvertFile to GenerateMacro and extract qfconvert executor to new method
+    ;data := ConvertFile(SelectedFile, RepeatPattern)
+    ;if (data)
+    ;  SendKeys(data)
     Building := False
     ReadyToBuild := False
     LastSelectedFile := SelectedFile
@@ -419,21 +434,42 @@ SelectFile()
 }
 
 ;; ---------------------------------------------------------------------------
+;; execute macro by sending keys to DF window
+ExecuteMacro()
+{
+  ActivateGameWin()
+  ReleaseModifierKeys()
+  Send ^l
+  Sleep 500
+  Send {Enter}
+  Sleep 1000
+  Send ^p
+  return
+}
+
+;; ---------------------------------------------------------------------------
 ;; do blueprint conversion via qfconvert
 ConvertFile(filename, transformation)
 {
-  tempfile := A_ScriptDir "\qfconvert.out.txt"
-
   Tip("Thinking...")
-
-  FileDelete, %tempfile%
 
   transcmd =
   if (transformation) {
-    transcmd = --transform "%transformation%"
+    transcmd = --transform="%transformation%"
   }
 
-  cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%filename%" "%tempfile%" %transcmd%
+  ; We use macro names that should always go in decreasing sort order in DF's UI
+  ; (between reboots); and we always delete our macros after use. However DF doesn't
+  ; update its macro list when macros are deleted; thus the desire to have our new
+  ; macro always be sorted to the top item in DF's macro list. It allows QF to just
+  ; use Ctrl+L, Enter to select our just-created macro.
+  inverseticks := 4294967296 - A_TickCount
+  title = @@@qf%inverseticks%
+  titlecmd = --title="%title%"
+  outfile := A_ScriptDir "\" title ".mak"
+  ;FileDelete, %outfile%
+
+  cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%filename%" "%outfile%" %transcmd% %titlecmd%
 
   ;MsgBox %cmd%
   RunWait %cmd%, , Hide
@@ -441,7 +477,7 @@ ConvertFile(filename, transformation)
   ready := False
   Loop 10
   {
-    If FileExist(tempfile) {
+    If FileExist(outfile) {
       ready = True
       break
     }
@@ -455,21 +491,31 @@ ConvertFile(filename, transformation)
   }
 
   ; Read converter results
-  FileRead, output, %tempfile%
+  FileRead, output, %outfile%
 
   ; Check for exceptions
-  if (RegExMatch(output, "Exception:"))
+  Loop, Read, %outfile%
   {
-    ; Inform the user.
-    StringReplace, output, output, Exception:, Error:
-    StringReplace, output, output, \n, `n
-    MsgBox % output
-    ClearTip()
-    return ""
+    if (RegExMatch(A_LoopReadLine, "Exception:"))
+    {
+      ; Inform the user.
+      StringReplace, output, output, Exception:, Error:
+      StringReplace, output, output, \n, `n
+      MsgBox % output
+      ClearTip()
+      return ""
+    }
+    else
+    {
+      ; Copy to DF dir
+      FileCopy, %outfile%, A:\games\dwarffortress3104\data\init\macros\
+      ; TODO check for err
+    }
+    break
   }
 
   ClearTip()
-  return output
+  ;return output
 }
 
 HideTip()
@@ -635,23 +681,7 @@ SendKeys(keys)
       else if (SendMode = "SendEvent")
         SendEvent %keys%
       else { ; SendMode = "ControlSend"
-        Loop {
-          if (GetKeyState("Alt") || GetKeyState("Ctrl") || GetKeyState("Shift") || GetKeyState("LWin") || GetKeyState("RWin"))
-          {
-            ; Try to avoid the modifier keys screwing up our playback if the user presses them.
-            KeyWait, Alt
-            KeyWait, Ctrl
-            KeyWait, Shift
-            KeyWait, LWin
-            KeyWait, RWin
-            BlockInput, On
-            Sleep 250
-            ControlSend,, {Alt up}{Ctrl up}{Shift up}{LWin up}{RWin up},Dwarf Fortress
-            Sleep 250
-          }
-          else
-            break
-        }
+        ReleaseModifierKeys()
         ControlSend,, %keys% ,Dwarf Fortress
         BlockInput, Off
       }
@@ -659,6 +689,29 @@ SendKeys(keys)
   }
 }
 
+
+ReleaseModifierKeys()
+{
+  Loop
+  {
+    if (GetKeyState("Alt") || GetKeyState("Ctrl") || GetKeyState("Shift") || GetKeyState("LWin") || GetKeyState("RWin"))
+    {
+      ; Try to avoid the modifier keys screwing up our playback if the user presses them.
+      KeyWait, Alt
+      KeyWait, Ctrl
+      KeyWait, Shift
+      KeyWait, LWin
+      KeyWait, RWin
+      BlockInput, On
+      Sleep 250
+      ControlSend,, {Alt up}{Ctrl up}{Shift up}{LWin up}{RWin up},Dwarf Fortress
+      Sleep 250
+    }
+    else
+      break
+  }
+  return
+}
 
 ;BuildRoutine()
 ;{

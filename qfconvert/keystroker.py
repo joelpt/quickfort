@@ -1,7 +1,9 @@
+import os
 import re
 import random
 
 from geometry import *
+import exetest
 import util
 
 """
@@ -89,9 +91,6 @@ class Keystroker:
         last_command = ''
         last_submenu = ''
         keys = self.buildconfig.get('init') or []
-        # print 'starting plot in keystroker'
-        # print [str(p) for p in plots]
-        # print keys
         # construct the list of keystrokes required to move to each
         # successive area and build it
         for pos in plots:
@@ -120,10 +119,6 @@ class Keystroker:
                 last_command = command
 
             # moveto = keys to move cursor to starting area-corner
-            # TODO self.move should return special movement symbols
-            # to be looked up in KEY_LIST; use a format in KEY_LIST
-            # of [n], [s], [menudown], etc. to distinguish key-aliases
-            # from {AHKKeys} and bare keystrokes
             subs['moveto'] = self.move(cursor, pos)
 
             # setsize = keys to set area to desired dimensions
@@ -141,23 +136,19 @@ class Keystroker:
             for k in submenukeys:
                 if re.match(k, command):
                     submenu = command[0]
-                    # print '(*****' + submenu + ' - ' + last_submenu
 
                     # entering a submenu from not being in one?
                     if not last_submenu:
-                        # print 'ENTER NEW MENU FROM NOT BEING IN ONE ' + submenu
                         subs['menu'] = submenu
                         subs['exitmenu'] = []
                         last_submenu = submenu
                     elif last_submenu != submenu:
-                        # print 'DIFFERS, using ' + submenu
                         # exit previous submenu
-                        subs['exitmenu'] = KEY_LIST['^']
+                        subs['exitmenu'] = ['^']
                         # enter new menu
                         subs['menu'] = submenu
                         last_submenu = submenu
                     else:
-                        # print 'SAME SUBMENU DO NADA ' + submenu
                         subs['menu'] = []
                         subs['exitmenu'] = []
 
@@ -165,12 +156,9 @@ class Keystroker:
                     justcommand = command[1:]
                     continue
             if not justcommand:
-                # print 'NO SUBMENU WITH COMMAND: ' + command
                 if last_submenu:
-                    # print 'EXITING THE LAST MENU WHICH WAS %s' % last_submenu
-                    subs['exitmenu'] = KEY_LIST['^']
+                    subs['exitmenu'] = ['^']
                 else:
-                    # print 'NO SUBMENU OR LAST SUBMENU, DOING NADA'
                     subs['exitmenu'] = []
                 subs['menu'] = []
                 last_submenu = ''
@@ -180,7 +168,16 @@ class Keystroker:
             cmdedit = re.sub(r'\{', '|{', justcommand)
             cmdedit = re.sub(r'\}', '}|', cmdedit)
             cmdedit = re.sub(r'\!', '|!|', cmdedit)
-            cmdkeys = re.split(r'\|', cmdedit)
+            cmdedit = re.sub(r'\+\!', '|+!|', cmdedit)
+            cmdedit = re.sub(r'\^', '|^|', cmdedit)
+            cmdsplit = re.split(r'\|', cmdedit)
+
+            cmdkeys = []
+            for k in cmdsplit:
+                if k[0] in ('{', '!', '^', '+'):
+                    cmdkeys.append(k) # preserve whole key-combos
+                else:
+                    cmdkeys.extend(k) # separate individual keystrokes
 
             # substitute cmdkeys into nextcmd
             nextcmdkeys = []
@@ -208,9 +205,6 @@ class Keystroker:
 
             # move cursor pos to end corner of built area
             cursor = newpos
-        # print 'out of keystroker:'
-        # print keys
-        # print self.translate(keys)
         return keys
 
     def move(self, start, end):
@@ -299,8 +293,8 @@ class Keystroker:
 
         # resize construction
         area = Area(start, end)
-        keys += KEY_LIST['[widen]'] * (area.width() - 1)
-        keys += KEY_LIST['[heighten]'] * (area.height() - 1)
+        keys += ['[widen]'] * (area.width() - 1)
+        keys += ['[heighten]'] * (area.height() - 1)
 
         return keys, midpoint
 
@@ -329,16 +323,14 @@ class Keystroker:
         """
         if areasize == 1: return ['#']
 
-        # reps = 1 + int(sqrt(areasize))
         reps = 2 * int(sqrt(areasize))
         keys = ['#', '[menudown]'] * (reps - 1)
         keys.append('#')
-        # print 'setmats ' + `keys`
         return keys
 
 
 
-def convert_keys(keys, mode, title=None):
+def convert_keys(keys, mode, title):
     keys = translate_keystrokes(keys, mode)
     if mode == 'macro':
         return '\n'.join(convert_to_macro(keys, title)) + '\n'
@@ -357,13 +349,11 @@ def translate_keystroke(key, mode):
 
 
 def convert_to_macro(keys, title):
-    keybinds = parse_interface_txt('interface.txt')
+    keybinds = parse_interface_txt(
+        os.path.join(exetest.get_main_dir(), 'interface.txt') )
 
     if not title:
         title = '@@@qf' + str(random.randrange(0, 999999999))
-    # for k in keybinds.iterkeys():
-    #     print 'Key %s' % k
-    #     print 'Binds %s' % '\n'.join(keybinds[k])
 
     output = [title] # first line of macro is macro title
 
@@ -372,7 +362,7 @@ def convert_to_macro(keys, title):
             raise Exception, \
                 "Key '%s' not bound in interface.txt" % key
         if key == '^':
-            output.append('LEAVESCREEN') # escape menu key
+            output.append('\t\tLEAVESCREEN') # escape menu key
         else:
             output.extend(keybinds[key])
         output.append('\tEnd of group')
@@ -387,10 +377,7 @@ def parse_interface_txt(path):
 
     groups = [re.split('\n', kb) for kb in re.split(r'\[BIND:', data)]
 
-    # keybinds = {'^': ['\t\tLEAVESCREEN']}
     keybinds = KEY_LIST
-    # print keybinds['^']
-    # print groups[0:100]
     for kb in groups:
         if kb == ['']:
             continue
@@ -404,9 +391,5 @@ def parse_interface_txt(path):
                 continue
             if keybinds.get(k) is None:
                 keybinds[k] = []
-            # print k
-            # print bind
-            # print keybinds[k]
             keybinds[k].append('\t\t' + bind)
-    # print sorted(keybinds.keys())
     return keybinds
