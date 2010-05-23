@@ -345,8 +345,6 @@ def convert_to_macro(keys, title):
                 "Key '%s' not bound in interface.txt" % key
         if key == '^':
             output.append('\t\tLEAVESCREEN') # escape menu key
-        elif key == '%':
-            output.append('\t\tJUST_DELAY') # wait
         else:
             output.extend(keybinds[key])
         output.append('\tEnd of group')

@@ -424,6 +424,7 @@ ShowFilePicker:
       {
         ExecuteMacro()
         FileDelete, %destfile%
+        FileDelete, %outfile%	
       }
     }
 
