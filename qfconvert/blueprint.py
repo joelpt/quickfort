@@ -111,6 +111,14 @@ class Blueprint:
 
 
     def get_info(self):
+        cells = flatten(layer.grid.cells for layer in self.layers)
+        commands = [c.command for c in cells]
+        cmdset = set(commands) # uniques
+        if '' in cmdset:
+            cmdset.remove('')
+        counts = [(c, commands.count(c)) for c in cmdset]
+        counts.sort(key=lambda x: x[1], reverse=True)
+
         return textwrap.dedent("""
             Blueprint name: %s
             Build type: %s
@@ -120,6 +128,7 @@ class Blueprint:
             First layer width: %d
             First layer height: %d
             Layer count: %d
+            Command frequencies: %s
             """).strip() % (
                 self.name,
                 self.build_type,
@@ -128,5 +137,6 @@ class Blueprint:
                 self.start_comment or '',
                 self.layers[0].grid.width,
                 self.layers[0].grid.height,
-                len(self.layers)
+                len(self.layers),
+                ', '.join("%s:%d" % c for c in counts)
                 )
