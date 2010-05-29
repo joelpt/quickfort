@@ -2,6 +2,7 @@
 
 from geometry import Point, Direction, Area
 import util
+import re
 
 class AreaPlotter:
     """Handles discovery of areas to be plotted by someone else."""
@@ -10,6 +11,44 @@ class AreaPlotter:
         self.grid = grid
         self.debug = debug
         self.buildconfig = buildconfig
+        self.label = '0'
+
+    def expand_fixed_size_areas(self):
+        """
+        Expand cells like d(20x20) to their corresponding areas,
+        and mark those areas as plotted.
+        """
+        if self.debug:
+            print ">>>> BEGIN AREA EXPANSION"
+
+        label = self.label
+        for y, row in enumerate(self.grid.cells):
+            for x, cell in enumerate(row):
+                # act on d(5x5) format cells which haven't been plotted over
+                m = re.match(r'(.+)\((\d+)x(\d+)\)', cell.command)
+                if cell.plottable and m:
+                    command = m.group(1)
+                    width, height = map(int, m.group(2, 3))
+
+                    area = Area(Point(x, y),
+                        Point(x + width - 1, y + height - 1))
+
+                    # mark this area as unavailable for subsequent plotting
+                    self.grid.set_area_plottable(area, False)
+                    self.grid.set_area_label(area, label)
+                    label = next_label(label)
+
+                    # set each corner's area variable
+                    for corner in area.corners:
+                        cornercell = self.grid.get_cell(corner)
+                        cornercell.command = command
+                        cornercell.area = area
+
+        if self.debug:
+            print self.grid.str_area_labels() + '\n'
+            print "<<<< END AREA EXPANSION"
+        self.label = label
+        return
 
     def discover_areas(self):
         """
@@ -17,7 +56,7 @@ class AreaPlotter:
         there are no more areas left to plot. Returns
         True when we plotted at least one area.
         """
-        label = '0'
+        label = self.label
         plotted_something = False
 
         if self.debug:
@@ -45,6 +84,7 @@ class AreaPlotter:
                 if self.debug:
                     print self.grid.str_area_labels() + '\n'
                     print "#### Grid is completely plotted"
+                self.label = label
                 return plotted_something
 
         if self.debug:

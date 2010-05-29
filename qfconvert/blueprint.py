@@ -11,12 +11,23 @@ from filereader import FileLayer
 import filereader
 import transformer
 
+def get_blueprint_info(path):
+    sheets = filereader.get_sheets(path)
+    s = ''
+    for sheet in sheets:
+        (layers, build_type, start, start_comment, comment) = \
+            filereader.parse_file(path, sheet[1])
+        bp = Blueprint(sheet[0], layers, build_type, start, start_comment,
+            comment)
+        s += '---- Sheet id %d ----\n' % sheet[1]
+        s += bp.get_info() + '\n'
+    return s
 
 def process_blueprint_file(path, options):
     if options.debugfile: print ">>>> BEGIN INPUT FILE PARSING"
-
+    sheetid = options.sheetid
     (layers, build_type, start, start_comment, comment) = \
-        filereader.parse_file(path)
+        filereader.parse_file(path, sheetid)
 
     if options.debugfile:
         print '#### Parsed %s' % path
@@ -28,46 +39,46 @@ def process_blueprint_file(path, options):
         transforms = transformer.parse_transform_str(options.transform)
         layers = transformer.transform(transforms, layers)
 
-        if options.debugfile: FileLayer.print_layers(layers)
+        if options.debugfile: FileLayer.str_layers(layers)
 
     # convert layers and other data to Blueprint
-    bp = Blueprint(layers, build_type, start, start_comment, comment)
+    bp = Blueprint('', layers, build_type, start, start_comment, comment)
 
     if options.debugfile: print ">>>> END INPUT FILE PARSING"
 
-    if options.info:
-        output = bp.get_info()
-    else:
-        keys = bp.plot(options)
-        output = convert_keys(keys, options.mode, options.title)
+    keys = bp.plot(options)
+    output = convert_keys(keys, options.mode, options.title)
 
-        if options.debugsummary:
-            print ">>>> BEGIN SUMMARY"
-            print "---- Layers:"
-            for layer in bp.layers:
-                print "#### Commands:"
-                print layer.grid.str_commands() + '\n'
-                print "#### Area labels:"
-                print layer.grid.str_area_labels() + '\n'
-                print "Initial cursor position: %s" % layer.start
-                print "Route order: %s" % ''.join(
-                    [layer.grid.get_cell(plot).label
-                    for plot in layer.plots]
-                    )
-                print "Layer onexit keys: %s" % layer.onexit
-            print "---- Overall:"
-            print "Total key cost: %d" % len(keys)
-            print "<<<< END SUMMARY"
+    if options.debugsummary:
+        print ">>>> BEGIN SUMMARY"
+        print "---- Layers:"
+        for layer in bp.layers:
+            print "#### Commands:"
+            print layer.grid.str_commands() + '\n'
+            print "#### Area labels:"
+            print layer.grid.str_area_labels() + '\n'
+            print "Initial cursor position: %s" % layer.start
+            print "Route order: %s" % ''.join(
+                [layer.grid.get_cell(plot).label
+                for plot in layer.plots]
+                )
+            print "Layer onexit keys: %s" % layer.onexit
+        print "---- Overall:"
+        print "Total key cost: %d" % len(keys)
+        print "<<<< END SUMMARY"
+
     return output
 
 
 class Blueprint:
 
-    def __init__(self, layers, build_type, start, start_comment, comment):
+    def __init__(self, name, layers, build_type, start, start_comment,
+        comment):
+
         gridlayers = filereader.FileLayers_to_GridLayers(layers)
-        (self.layers, self.build_type, self.start,
+        (self.name, self.layers, self.build_type, self.start,
             self.start_comment, self.comment) = \
-            (gridlayers, build_type, start, start_comment, comment)
+            (name, gridlayers, build_type, start, start_comment, comment)
 
     def plot(self, options):
         """Plots a route through the provided blueprint."""
@@ -79,12 +90,9 @@ class Blueprint:
             grid = layer.grid
             layer.start = start
 
-            ## TODO plot_predefined_areas()
-
-            # plot areas to be built on the grid
             plotter = AreaPlotter(grid, buildconfig, options.debugarea)
-            if not plotter.discover_areas():
-                raise
+            plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
+            plotter.discover_areas() # find contiguous areas
 
             grid = plotter.grid
             router = Router(grid, options.debugrouter)
@@ -104,6 +112,7 @@ class Blueprint:
 
     def get_info(self):
         return textwrap.dedent("""
+            Blueprint name: %s
             Build type: %s
             Comment: %s
             Start position: %s
@@ -112,6 +121,7 @@ class Blueprint:
             First layer height: %d
             Layer count: %d
             """).strip() % (
+                self.name,
                 self.build_type,
                 self.comment or '',
                 self.start,

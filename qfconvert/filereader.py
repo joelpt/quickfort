@@ -75,8 +75,23 @@ def FileLayers_to_GridLayers(file_layers):
         layers.append(GridLayer(fl.onexit, grid))
     return layers
 
+def get_sheets(filename):
+    """
+    Return list of sheets in file specified. For csv, just returns
+    the csv as the only sheet.
+    """
+    ext = os.path.splitext(filename)[1].lower()
+    if ext == '.csv':
+        lines = read_csv_file(filename)
+    elif ext == '.xls':
+        lines = read_xls_file(filename)
+    elif ext == '.xlsx':
+        return read_xlsx_sheets(filename)
+    else:
+        raise NameError
 
-def parse_file(filename):
+
+def parse_file(filename, sheetid):
     layers = []
 
     # read contents of the file into lines
@@ -84,9 +99,9 @@ def parse_file(filename):
     if ext == '.csv':
         lines = read_csv_file(filename)
     elif ext == '.xls':
-        lines = read_xls_file(filename)
+        lines = read_xls_file(filename, sheetid)
     elif ext == '.xlsx':
-        lines = read_xlsx_file(filename)
+        lines = read_xlsx_file(filename, sheetid)
     else:
         raise NameError
 
@@ -193,17 +208,41 @@ def read_xls_file(filename):
 
     return lines
 
-def read_xlsx_file(filename):
-    """
-    Read contents of first sheet in Excel 2007 (.xlsx) workbook file.
-    These .xlsx files are actually zip files containing xml files.
-    """
 
-    # get first sheet's rows
-    zf = zipfile.ZipFile(filename)
-    sheetdata = zf.read('xl/worksheets/sheet1.xml')
-    xml = xml2obj(sheetdata)
-    rows = xml.sheetData.row
+def read_xlsx_sheets(filename):
+    """Get a list of sheets and their ids from xlsx file."""
+    try:
+        zf = zipfile.ZipFile(filename)
+        sheetsdata = zf.read('xl/workbook.xml')
+        xml = xml2obj(sheetsdata)
+        sheets = xml.sheets.sheet
+    except:
+        raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
+            filename, sheetid)
+
+    output = []
+    for sheet in sheets:
+        m = re.match('rId(\d+)', sheet.r_id)
+        if not m:
+            raise Exception, "Could not read list of xlsx's worksheets."
+        output.append( (sheet.name, int(m.group(1))) )
+    return output
+
+
+def read_xlsx_file(filename, sheetid=1):
+    """
+    Read contents of specified sheet in Excel 2007 (.xlsx) workbook file.
+    .xlsx files are actually zip files containing xml files.
+    """
+    try:
+        zf = zipfile.ZipFile(filename)
+        sheetdata = zf.read('xl/worksheets/sheet%s.xml' % sheetid)
+        xml = xml2obj(sheetdata)
+        rows = xml.sheetData.row
+    except:
+        raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
+            filename, sheetid)
+
 
     # get shared strings xml
     stringdata = zf.read('xl/sharedStrings.xml')
@@ -239,7 +278,7 @@ def read_xlsx_file(filename):
 
             lastcolnum = colnum
             # add cell value looked-up from shared strings
-            line.append(str(strings[int(c.v)].t))
+            line.append(str('' if c.v is None else strings[int(c.v)].t))
         lines.append(line)
     # print lines
     return lines
