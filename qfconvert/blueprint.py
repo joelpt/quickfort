@@ -11,17 +11,23 @@ from filereader import FileLayer
 import filereader
 import transformer
 
+
 def get_blueprint_info(path):
     sheets = filereader.get_sheets(path)
     s = ''
     for sheet in sheets:
-        (layers, build_type, start, start_comment, comment) = \
-            filereader.parse_file(path, sheet[1])
-        bp = Blueprint(sheet[0], layers, build_type, start, start_comment,
-            comment)
-        s += '---- Sheet id %d ----\n' % sheet[1]
-        s += bp.get_info() + '\n'
+        try:
+            (layers, build_type, start, start_comment, comment) = \
+                filereader.parse_file(path, sheet[1])
+            layers = filereader.FileLayers_to_GridLayers(layers)
+            bp = Blueprint(sheet[0], layers, build_type, start, start_comment,
+                comment)
+            s += '---- Sheet id %d ----\n' % sheet[1]
+            s += bp.get_info() + '\n'
+        except:
+            continue
     return s
+
 
 def process_blueprint_file(path, options):
     if options.debugfile: print ">>>> BEGIN INPUT FILE PARSING"
@@ -41,6 +47,23 @@ def process_blueprint_file(path, options):
 
         if options.debugfile: FileLayer.str_layers(layers)
 
+    layers = filereader.FileLayers_to_GridLayers(layers)
+
+    # set startpos
+    if options.startpos is not None:
+        m = re.match(r'\(?(\d+)[,;](\d+)\)?', options.startpos)
+        if m is not None:
+            start = Point( int(m.group(1)), int(m.group(2)) )
+        else:
+            m = re.match(r'(ne|nw|se|sw)', options.startpos.lower())
+            if m is not None:
+                startcorner = Direction(m.group(1)).delta()
+                start = Point(startcorner.x, startcorner.y)
+                start.x = max(0, start.x) * (layers[0].grid.width - 1)
+                start.y = max(0, start.y) * (layers[0].grid.height - 1)
+            else:
+                raise Exception, "Invalid --position parameter '%s'" % \
+                    options.startpos
     # convert layers and other data to Blueprint
     bp = Blueprint('', layers, build_type, start, start_comment, comment)
 
@@ -75,10 +98,9 @@ class Blueprint:
     def __init__(self, name, layers, build_type, start, start_comment,
         comment):
 
-        gridlayers = filereader.FileLayers_to_GridLayers(layers)
         (self.name, self.layers, self.build_type, self.start,
             self.start_comment, self.comment) = \
-            (name, gridlayers, build_type, start, start_comment, comment)
+            (name, layers, build_type, start, start_comment, comment)
 
     def plot(self, options):
         """Plots a route through the provided blueprint."""
@@ -128,7 +150,7 @@ class Blueprint:
             First layer width: %d
             First layer height: %d
             Layer count: %d
-            Command frequencies: %s
+            Command use counts: %s
             """).strip() % (
                 self.name,
                 self.build_type,

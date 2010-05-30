@@ -170,18 +170,5 @@ def parse_transform_str(transform_str):
         readies.append((count, cmd))
 
     # put zup/zdown transforms at the end so we do x/y transforms first
-    readies.sort(cmp=lambda x, y: compare_transforms(x, y))
+    readies.sort(key=lambda x: 1 if x[1][0] in ('u', 'd') else 0)
     return readies
-
-
-def compare_transforms(t, u):
-    tz = t[1][0] in ('u', 'd')
-    uz = u[1][0] in ('u', 'd')
-
-    if tz and uz:
-        return 0
-    if tz:
-        return 1
-    if uz:
-        return -1
-    return 0

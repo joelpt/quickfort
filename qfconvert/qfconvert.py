@@ -15,7 +15,7 @@ def parse_options():
                       dest="sheetid", default="1",
                       help="worksheet index in xls/xlsx files; 1=first sheet")
     parser.add_option("-p", "--position",
-                      dest="cursor", default="(1,1)",
+                      dest="startpos", default=None,
                       help="starting position [format: (#,#) or ne|nw|se|sw]")
     parser.add_option("-t", "--transform",
                       dest="transform", default=False,

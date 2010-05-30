@@ -264,18 +264,13 @@ class Grid:
     def get_length_of_axis(self, direction):
         return self.height if direction.axis() == 'y' else self.width
 
-    def set_area_plottable(self, area, plottable):
+    def set_area_cells(self, area, plottable=None, label=None, command=None):
         for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
             for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
                 cell = self.get_cell(Point(x, y))
-                cell.plottable = plottable
-        return
-
-    def set_area_label(self, area, label):
-        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
-            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
-                cell = self.get_cell(Point(x, y))
-                cell.label = label
+                if plottable is not None: cell.plottable = plottable
+                if label is not None: cell.label = label
+                if command is not None: cell.command = command
         return
 
     def set_entire_grid_plottable(self, plottable):

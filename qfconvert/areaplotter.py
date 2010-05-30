@@ -33,9 +33,8 @@ class AreaPlotter:
                     area = Area(Point(x, y),
                         Point(x + width - 1, y + height - 1))
 
-                    # mark this area as unavailable for subsequent plotting
-                    self.grid.set_area_plottable(area, False)
-                    self.grid.set_area_label(area, label)
+                    # mark this area as plotted
+                    self.grid.set_area_cells(area, False, label, command)
                     label = next_label(label)
 
                     # set each corner's area variable
@@ -101,7 +100,7 @@ class AreaPlotter:
         """
         areas = self.find_largest_areas()
 
-        areas.sort(cmp=lambda a, b: cmp(a.size(), b.size()), reverse=True)
+        areas.sort(key=lambda x: x.size(), reverse=True)
 
         label = initial_label
 
@@ -111,10 +110,8 @@ class AreaPlotter:
             # not overlapping any already-plotted area?
             if self.grid.is_area_plottable(area):
 
-                # mark this area as unavailable for subsequent plotting
-                self.grid.set_area_plottable(area, False)
-                self.grid.set_area_label(area, label)
-
+                # mark this area as plotted
+                self.grid.set_area_cells(area, False, label)
                 label = next_label(label)
 
                 # store area in grid cell for each of the area's corners

@@ -98,7 +98,6 @@ class Keystroker:
             else:
                 nextcmd = self.buildconfig.get('diffcmd', command) or []
                 last_command = command
-
             # moveto = keys to move cursor to starting area-corner
             subs['moveto'] = self.move(cursor, pos)
 

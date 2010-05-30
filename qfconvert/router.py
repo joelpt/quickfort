@@ -43,7 +43,7 @@ class Router:
                 # mark the plot on the grid
                 cell = self.grid.get_cell(nearest_pos)
                 area = cell.area
-                self.grid.set_area_plottable(area, False)
+                self.grid.set_area_cells(area, False)
 
                 if self.debug:
                     print "#### Plotting area starting at %s, area %s" % (
