@@ -73,11 +73,14 @@ Building := 0
 Mode := ""
 Comment := ""
 LastSelectedFile := ""
+LastSelectedFilename := ""
+LastSelectedSheetIndex := 0
 SelectedFile := ""
 SelectedFilename := ""
+SelectedSheetIndex =
 Tooltip := ""
-StartPositionLabel := "Top left"
 StartPos := 0
+StartPosLabel := "Top left"
 StartPosAbsX := 0
 StartPosAbsY := 0
 StartPosComment := ""
@@ -97,6 +100,7 @@ Visualizing := 0
 SysGet, ScreenWidth, 16
 SysGet, ScreenHeight, 17
 
+;InitGui()
 ShowTip()
 
 ;;; ---------------------------------------------------------------------------
@@ -202,22 +206,26 @@ $!C::
 ;; ---------------------------------------------------------------------------
 ; Start position switch
 $!Q::
-  SetStartPos(0, "Top left")
+  SetStartPos("nw", "Top left")
+  UpdateTip()
   return
 
 ;; ---------------------------------------------------------------------------
 $!W::
-  SetStartPos(1, "TOP RIGHT")
+  SetStartPos("ne", "TOP RIGHT")
+  UpdateTip()
   return
 
 ;; ---------------------------------------------------------------------------
 $!A::
-  SetStartPos(2, "BOTTOM LEFT")
+  SetStartPos("sw", "BOTTOM LEFT")
+  UpdateTip()
   return
 
 ;; ---------------------------------------------------------------------------
 $!S::
-  SetStartPos(3, "BOTTOM RIGHT")
+  SetStartPos("se", "BOTTOM RIGHT")
+  UpdateTip()
   return
 
 ;; ---------------------------------------------------------------------------
@@ -239,8 +247,9 @@ $!X::
     }
 
     SelectedFile := LastSelectedFile
-    ReadyToBuild := True
     UpdateTip()
+    if (SheetCount > 1)
+      ShowSheetInfoGui()
   }
   ;else
   ;{
@@ -382,11 +391,25 @@ Examples:
 !F::
 ShowFilePicker:
 {
-  if (!Building && !ReadyToBuild)
+  if (!Building)
   {
+    SelectedFile =
+    SelectedSheetIndex =
     SelectedFile := SelectFile()
+
     if (SelectedFile)
+    {
+      ; get the filename on its own for use by mousetip
+      SplitPath, SelectedFile, SelectedFilename
+
       ReadyToBuild := True
+      if (GetBlueprintInfo(SelectedFile))
+      {
+        SelectedSheetIndex =
+        ShowSheetInfoGui()
+      }
+    }
+
     ShowTip()
   }
   return
@@ -400,19 +423,14 @@ ShowFilePicker:
   if (!Building && ReadyToBuild)
   {
     Building := True
-
-    ; We use macro names that should always go in decreasing sort order in DF's UI
-    ; (between reboots); and we always delete our macros after use. However DF doesn't
-    ; update its macro list when macros are deleted; thus the desire to have our new
-    ; macro always be sorted to the top item in DF's macro list. It allows QF to just
-    ; use Ctrl+L, Enter to select our just-created macro.
-    inverseticks := 4294967296 - A_TickCount
-    title = @@@qf%inverseticks%
+    title := GetNewMacroName()
     outfile := A_ScriptDir "\" title ".mak"
     destfile := "A:\games\dwarffortress3104\data\init\macros\" title ".mak"
     ; TODO make destfile figure out the path from the currently active DF window's exe path
 
-    if (ConvertFile(SelectedFile, outfile, title, RepeatPattern))
+    ; Clock how long it takes
+    starttime := A_TickCount
+    if (ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, title, StartPos, RepeatPattern))
     {
       ; Copy to DF dir
       FileCopy, %outfile%, %destfile%, 1
@@ -422,23 +440,23 @@ ShowFilePicker:
       }
       else
       {
-        ExecuteMacro()
+        elapsed := A_TickCount - starttime
+        PlayMacro(elapsed / 3) ; macro playback delays are proportional to qfconvert runtime
         FileDelete, %destfile%
-        FileDelete, %outfile%	
+        FileDelete, %outfile%
       }
     }
 
-    ; TODO copy file here? rename ConvertFile to GenerateMacro and extract qfconvert executor to new method
-    ;data := ConvertFile(SelectedFile, RepeatPattern)
+    ; TODO copy file here? rename ConvertBlueprint to GenerateMacro and extract qfconvert executor to new method
+    ;data := ConvertBlueprint(SelectedFile, RepeatPattern)
     ;if (data)
     ;  SendKeys(data)
 
     Building := False
     ReadyToBuild := False
     LastSelectedFile := SelectedFile
-
-    ; get the filename on its own
-    SplitPath, LastSelectedFile, LastSelectedFilename
+    LastSelectedFilename := SelectedFilename
+    LastSelectedSheetIndex := SelectedSheetIndex
 
     SelectedFile =
     If (RepeatPattern)
@@ -467,21 +485,21 @@ SelectFile()
 
 ;; ---------------------------------------------------------------------------
 ;; execute macro by sending keys to DF window
-ExecuteMacro()
+PlayMacro(delay)
 {
   ActivateGameWin()
   ReleaseModifierKeys()
   Send ^l
-  Sleep 2000
+  Sleep %delay%
   Send {Enter}
-  Sleep 2000
+  Sleep %delay%
   Send ^p
   return
 }
 
 ;; ---------------------------------------------------------------------------
 ;; do blueprint conversion via qfconvert
-ConvertFile(filename, outfile, title, transformation)
+ConvertBlueprint(filename, outfile, sheetid, title, startpos, transformation)
 {
   Tip("Thinking...")
 
@@ -495,8 +513,84 @@ ConvertFile(filename, outfile, title, transformation)
     transcmd = --transform="%transformation%"
   }
 
-  cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%filename%" "%outfile%" %transcmd% %titlecmd%
+  startposcmd =
+  if (startpos) {
+    startposcmd = --position="%startpos%"
+  }
 
+  sheetidcmd =
+  if (sheetid) {
+    sheetidcmd = --sheetid="%sheetid%"
+  }
+
+
+  params = %titlecmd% %transcmd% %startposcmd% %sheetidcmd%
+  return ExecQfConvert(filename, outfile, params)
+}
+
+;; ---------------------------------------------------------------------------
+;; get info about blueprint via qfconvert
+GetBlueprintInfo(filename)
+{
+  global
+  local params
+  local outfile
+  local result
+
+  Tip("Reading blueprint...")
+
+  params = --info
+  outfile := GetNewMacroName() ".tmp"
+  result := ExecQfConvert(filename, outfile, params)
+  FileDelete, %outfile%
+
+  ClearTip()
+
+  if (result)
+  {
+    ; prepare data for Loop Parse
+    StringReplace, result, result, ----, ¢, All
+    ; parse contents out
+    cnt := 0
+    Loop, Parse, result, ¢
+    {
+      info = %A_LoopField% ; whitespace trim
+      if (StrLen(info) > 3)
+      {
+        needle := "Sheet id (\d+)\RBlueprint name: (.+)\RBuild type: (.+)\RComment: (.*)\RStart position: (.+)\RStart comment: (.*)\RFirst layer width: (.+)\RFirst layer height: (.+)\RLayer count: (.+)\RCommand use counts: (.*)\R*"
+        if (!RegExMatch(info, needle, matches))
+        {
+          MsgBox, Error reading blueprint information from qfconvert.py output file %outfile%
+          return False
+        }
+        Name%cnt% := matches2
+        BuildType%cnt% := matches3
+        StringReplace, Comment%cnt%, matches4, \n, `n, All
+        StartPosition%cnt% := matches5
+        StartComment%cnt% := matches6
+        Width%cnt% := matches7
+        Height%cnt% := matches8
+        LayerCount%cnt% := matches9
+        CommandUseCounts%cnt% := matches10
+
+        cnt += 1
+      }
+      SheetCount := cnt
+    }
+    return True
+  }
+  else
+    return False
+}
+
+
+;; ---------------------------------------------------------------------------
+;; call qfconvert with given parameters
+ExecQfconvert(infile, outfile, params)
+{
+  FileDelete, %outfile%
+
+  cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%infile%" "%outfile%" %params%
   ;MsgBox %cmd%
   RunWait %cmd%, , Hide
 
@@ -516,9 +610,6 @@ ConvertFile(filename, outfile, title, transformation)
     return False
   }
 
-  ; Read converter results
-  FileRead, output, %outfile%
-
   ; Check for exceptions
   Loop, Read, %outfile%
   {
@@ -533,9 +624,11 @@ ConvertFile(filename, outfile, title, transformation)
     }
     break
   }
-
   ClearTip()
-  return True
+
+  ; Return the call results
+  FileRead, output, %outfile%
+  return %output%
 }
 
 HideTip()
@@ -571,6 +664,8 @@ UpdateTip()
   ; Determine tip mode.
   if (!SelectedFile)
     mode := "pickfile"
+  else if SelectedSheetIndex =
+    mode := "pickfile"
   else if (Building)
     mode := "build"
   else
@@ -582,7 +677,17 @@ UpdateTip()
     header := "Quickfort 2.0.`n`nPick a blueprint file with Alt+F." . (LastSelectedFile ? "`nPress Alt+E to use " LastSelectedFilename " again." : "")
   }
   else {
-    header := "details about the blueprint and selected modes`nrepeat: " . RepeatPattern
+    header := SelectedFilename "`n"
+    n := Name%SelectedSheetIndex%
+    if (Name%SelectedSheetIndex% != SelectedFilename)
+    {
+      header := header Name%SelectedSheetIndex% "`n"
+    }
+
+    if (RepeatPattern)
+      header := header "TRANSFORMATION: " RepeatPattern "`n"
+    if (StartPos)
+      header := header "STARTING CORNER: " StartPosLabel "`n"
   }
 
   if (Tooltip)
@@ -1455,9 +1560,9 @@ RepeatReplace(subject, pattern, replace)
 ;; ---------------------------------------------------------------------------
 SetStartPos(position, label)
 {
-  global StartPos, StartPositionLabel, StartPosAbsX, StartPosAbsY, LastStartPosAbsX, LastStartPosAbsY
+  global StartPos, StartPosLabel, StartPosAbsX, StartPosAbsY, LastStartPosAbsX, LastStartPosAbsY
   StartPos := position
-  StartPositionLabel := label
+  StartPosLabel := label
   ForceMouseTipUpdate()
 
   if (StartPosAbsX > 0) {
@@ -1578,7 +1683,7 @@ ShowMouseTip:
       ;}
       ;else
       ;{
-      ;  tip := tip . "Start corner: " . StartPositionLabel . (StartPosComment ? "`nUse Alt+E to reset start position." : "")
+      ;  tip := tip . "Start corner: " . StartPosLabel . (StartPosComment ? "`nUse Alt+E to reset start position." : "")
       ;}
 
       xpos += 25
@@ -1665,4 +1770,143 @@ ActivateGameWin()
     WinActivate, Dwarf Fortress
     SendInput {Alt up}{Ctrl up}{Shift up}
   }
+}
+
+;; ---------------------------------------------------------------------------
+GetNewMacroName()
+{
+  ; We use macro names that should always go in decreasing sort order in DF's UI
+  ; (between reboots); and we always delete our macros after use. However DF doesn't
+  ; update its macro list when macros are deleted; thus the desire to have our new
+  ; macro always be sorted to the top item in DF's macro list. It allows QF to just
+  ; use Ctrl+L, Enter to select our just-created macro.
+  inverseticks := 4294967296 - A_TickCount
+  title = @@@qf%inverseticks%
+  return title
+}
+
+
+InitGui(withSelector)
+{
+  global
+  local offset
+
+  if (withSelector == LastInitGuiSelectorMode)
+    return
+
+  LastInitGuiSelectorMode := withSelector
+
+  Gui, Destroy
+  Gui, Font, S9, Verdana
+
+  offset := 175
+  if (withSelector) {
+    Gui, Add, ListView, r20 w220 h360 gMyListView vSelectedSheetIndex AltSubmit -Hdr, Blueprint
+    offset += 220
+  }
+
+  Gui, Font, bold
+  Gui, Add, Text, x+5 ym+5 w400 vSheetName, sheetname
+  Gui, Font, norm
+  Gui, Add, Text, y+10 w400 h300 vSheetInfo, sometext
+  Gui, Add, Button, Default y+5 xm+%offset% w75, OK
+  Gui, Add, Button, x+5 w75, Cancel
+  Gui, Add, Button, x+5 w75 gButtonCopyText, Copy text
+  ;Send, {Down 5} ; work around for having to press down twice to initially change selection
+}
+
+ShowSheetInfoGui()
+{
+  global
+  SelectedSheetIndex =
+
+  if (SheetCount > 1)
+  {
+    ; show gui with sheet selector and populate the listview
+    InitGui(True)
+    LV_Delete()
+    Loop, % SheetCount
+    {
+      index := A_Index - 1
+      name := Name%index%
+      if (index == LastSelectedSheetIndex)
+        opts := "Select"
+      else
+        opts := ""
+      LV_Add(opts, name)
+    }
+  }
+  else
+  {
+    ; show gui without sheet selector and default SelectedSheetIndex to 0
+    SelectedSheetIndex := 0
+    InitGui(False)
+  }
+  ; Set showing sheet info to first sheet
+  UpdateGuiSheetInfo(0)
+  Gui, Show
+  WinWaitActive, ahk_class AutoHotkeyGUI
+  if (SheetCount > 0)
+  {
+    ; workaround for listview needing an extra keypress to start working (focus issue?)
+    ControlSend, SysListView321, {Down}{Up}, ahk_class AutoHotkeyGUI
+  }
+  return
+}
+
+MyListView:
+if ( (A_GuiEvent == "I" && InStr(ErrorLevel, "S", true)) || (A_GuiEvent == "DoubleClick") )
+{
+  LV_GetText(RowText, A_EventInfo)  ; Get the text from the row's first field.
+  ;MsgBox, You selected row number %A_EventInfo%. Text: "%RowText%"
+  index := A_EventInfo - 1
+  UpdateGuiSheetInfo(index)
+  SelectedSheetIndex := index
+}
+return
+
+ButtonOK:
+  Gui, Submit
+  ShowTip()
+  ReadyToBuild := True
+  return
+
+ButtonCancel:
+GuiClose:
+GuiEscape:
+  Gui, Cancel
+  SelectedSheetIndex =
+  ReadyToBuild := False
+  ShowTip()
+  return
+
+ButtonCopyText:
+  clipboard := GuiText
+
+UpdateGuiSheetInfo(index)
+{
+  global
+  local newtext, newtitle
+
+  newtitle := SelectedFilename
+  if (SelectedFilename != Name%index%)
+    newtitle := newtitle ": " Name%index%
+
+  newtext =
+  if (StartPosition%index% != "(1, 1)" && !StartComment%index%)
+  {
+    newtext := "Starts at " StartPosition%index%
+
+    if (StartComment%index%)
+    {
+      newtext := newtext " (" StartComment%index% ")"
+    }
+    newtext := newtext "`n`n"
+  }
+
+  newtext := newtext Comment%index%
+  newtext := newtext "`n`nCommand usage frequencies:`n" CommandUseCounts%index%
+  GuiControl,, SheetName, %newtitle%
+  GuiControl,, SheetInfo, %newtext%
+  GuiText := newtitle "`n`n" newtext
 }

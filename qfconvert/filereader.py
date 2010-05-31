@@ -75,16 +75,18 @@ def FileLayers_to_GridLayers(file_layers):
         layers.append(GridLayer(fl.onexit, grid))
     return layers
 
+
 def get_sheets(filename):
     """
     Return list of sheets in file specified. For csv, just returns
     the csv as the only sheet.
     """
     ext = os.path.splitext(filename)[1].lower()
+    name = os.path.basename(filename)
     if ext == '.csv':
-        lines = read_csv_file(filename)
+        return [(name, 0)]
     elif ext == '.xls':
-        lines = read_xls_file(filename)
+        return read_xls_sheets(filename)
     elif ext == '.xlsx':
         return read_xlsx_sheets(filename)
     else:
@@ -93,6 +95,10 @@ def get_sheets(filename):
 
 def parse_file(filename, sheetid):
     layers = []
+
+    # verify file exists
+    if not os.path.isfile(filename):
+        raise Exception, 'File not found "%s"' % filename
 
     # read contents of the file into lines
     ext = os.path.splitext(filename)[1].lower()
@@ -103,7 +109,8 @@ def parse_file(filename, sheetid):
     elif ext == '.xlsx':
         lines = read_xlsx_file(filename, sheetid)
     else:
-        raise NameError
+        raise Exception, "Invalid file type '%s' (csv, xls, xlsx accepted)" \
+            % ext
 
     # remove last line if it starts with a #
     if lines[-1][0] == '#':
@@ -195,12 +202,12 @@ def read_csv_file(filename):
     return lines
 
 
-def read_xls_file(filename):
+def read_xls_file(filename, sheetid):
     """
     Read contents of first sheet in Excel 95-2003 (.xls) workbook file.
     """
     wb = xlrd.open_workbook(filename)
-    sh = wb.sheet_by_index(0)
+    sh = wb.sheet_by_index(sheetid or 0)
 
     lines = []
     for rownum in range(sh.nrows):
@@ -209,31 +216,22 @@ def read_xls_file(filename):
     return lines
 
 
-def read_xlsx_sheets(filename):
-    """Get a list of sheets and their ids from xlsx file."""
-    try:
-        zf = zipfile.ZipFile(filename)
-        sheetsdata = zf.read('xl/workbook.xml')
-        xml = xml2obj(sheetsdata)
-        sheets = xml.sheets.sheet
-    except:
-        raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
-            filename, sheetid)
-
-    output = []
-    for sheet in sheets:
-        m = re.match('rId(\d+)', sheet.r_id)
-        if not m:
-            raise Exception, "Could not read list of xlsx's worksheets."
-        output.append( (sheet.name, int(m.group(1))) )
-    return output
+def read_xls_sheets(filename):
+    """Get a list of sheets and their ids from xls file."""
+    wb = xlrd.open_workbook(filename)
+    return [(name, i) for i, name in enumerate(wb.sheet_names())]
 
 
-def read_xlsx_file(filename, sheetid=1):
+def read_xlsx_file(filename, sheetid):
     """
     Read contents of specified sheet in Excel 2007 (.xlsx) workbook file.
     .xlsx files are actually zip files containing xml files.
     """
+    if sheetid is None:
+        sheetid = 1
+    else:
+        sheetid += 1 # sheets are numbered starting from 1 in xlsx files
+
     try:
         zf = zipfile.ZipFile(filename)
         sheetdata = zf.read('xl/worksheets/sheet%s.xml' % sheetid)
@@ -241,7 +239,7 @@ def read_xlsx_file(filename, sheetid=1):
         rows = xml.sheetData.row
     except:
         raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
-            filename, sheetid)
+            filename, sheetid-1)
 
 
     # get shared strings xml
@@ -282,6 +280,26 @@ def read_xlsx_file(filename, sheetid=1):
         lines.append(line)
     # print lines
     return lines
+
+
+def read_xlsx_sheets(filename):
+    """Get a list of sheets and their ids from xlsx file."""
+    try:
+        zf = zipfile.ZipFile(filename)
+        sheetsdata = zf.read('xl/workbook.xml')
+        xml = xml2obj(sheetsdata)
+        sheets = xml.sheets.sheet
+    except:
+        raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
+            filename, sheetid)
+
+    output = []
+    for sheet in sheets:
+        m = re.match('rId(\d+)', sheet.r_id)
+        if not m:
+            raise Exception, "Could not read list of xlsx's worksheets."
+        output.append( ( sheet.name, int(m.group(1)) - 1 ) )
+    return output
 
 
 def colcode_to_colnum(colcode):

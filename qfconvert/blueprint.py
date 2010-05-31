@@ -22,7 +22,7 @@ def get_blueprint_info(path):
             layers = filereader.FileLayers_to_GridLayers(layers)
             bp = Blueprint(sheet[0], layers, build_type, start, start_comment,
                 comment)
-            s += '---- Sheet id %d ----\n' % sheet[1]
+            s += '---- Sheet id %d\n' % sheet[1]
             s += bp.get_info() + '\n'
         except:
             continue
@@ -155,7 +155,7 @@ class Blueprint:
                 self.name,
                 self.build_type,
                 self.comment or '',
-                self.start,
+                Point(self.start.x + 1, self.start.y + 1),
                 self.start_comment or '',
                 self.layers[0].grid.width,
                 self.layers[0].grid.height,

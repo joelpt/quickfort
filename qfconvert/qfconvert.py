@@ -12,7 +12,7 @@ def parse_options():
     usage = "usage: %prog [options] input_file [output_file]"
     parser = OptionParser(usage=usage, version="%prog 1.0")
     parser.add_option("-s", "--sheetid",
-                      dest="sheetid", default="1",
+                      dest="sheetid", default=None,
                       help="worksheet index in xls/xlsx files; 1=first sheet")
     parser.add_option("-p", "--position",
                       dest="startpos", default=None,
@@ -55,10 +55,18 @@ def parse_options():
             "Invalid mode '%s', must be either 'key' or 'macro'" % \
                 options.mode
 
+    if options.sheetid is not None:
+      try:
+          options.sheetid = int(options.sheetid)
+      except:
+          raise Exception, "sheetid must be numeric, not '%s'" % \
+              options.sheetid
+
     return options, args
 
 
 def run():
+    """Perform filereading/conversion work and output result."""
     global options, args
     infile = args[0]
     outfile = args[1] if len(args) > 1 else None
@@ -81,15 +89,21 @@ def run():
                 outf.write('Exception: ' + str(ex))
     return
 
-def main():
-    global options, args
-    options, args = parse_options()
 
-    if args is not None:
-        if options.profile:
-            cProfile.run('run()')
-        else:
-            run()
+def main():
+    """Parse options file, then read/convert file and output result."""
+    global options, args
+
+    try:
+      options, args = parse_options()
+      if args is not None:
+          if options.profile:
+              cProfile.run('run()')
+          else:
+              run()
+    except Exception as ex:
+      print 'Error: ' + str(ex)
+
 
 if __name__ == "__main__":
     main()
