@@ -2,128 +2,137 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 Version := "2.00"
 
+Init()
+return
+;; ---- end of initial script execution; only functions and hotkey definitions follow ----
 
-SetTitleMatchMode, 3
-;Menu, Tray, MainWindow
+#Include compile.ahk
+#Include mousetip.ahk
 
-if (!A_IsCompiled)
-  Hotkey, #!C, CompileToExe
-
-; -----------------------------
-; Set system default options
-; -----------------------------
-; ... so players don't necessarily have to overwrite options.txt for new versions with new options:
-DelayMultiplier := 1
-KeyPressDuration := 1
-EmbeddedDelayDuration := 250
-SendMode := "ControlSend"
-KeyExitMenu := "{Esc}"
-KeyLeft := "4"
-KeyRight := "6"
-KeyUp := "8"
-KeyDown := "2"
-KeyUpZ := "+5"
-KeyDownZ := "^5"
-KeyUpLeft := "7"
-KeyUpRight := "9"
-KeyDownLeft := "1"
-KeyDownRight := "3"
-UseDiagonalMoveKeys := 1
-UseLongConstructions := 1
-DisableBacktrackingOptimization := 0
-DisableKeyOptimizations := 0
-DisableShiftOptimizations := 1
-ShowSplashBox := 1
-ShowStartupTrayTip := 1
-ShowMouseTooltip := 1
-ShowCommentBox := 1
-MutedSound := 0
-DisableSafetyAbort := 0
-MouseTooltipInGameUpdateEveryMs := 10
-MouseTooltipPlaybackUpdateEveryMs := 500
-MouseTooltipOutOfGameUpdateEveryMs := 50
-AliasesPath := "aliases.txt"
-DebugOn := 0
-
-
-; -----------------------------
-; Load options from options.txt (overrides above)
-; -----------------------------
-
-if (!FileExist("options.txt"))
+Init()
 {
-  MsgBox, Error: Quickfort missing options.txt. Make sure options.txt exists and you are launching Quickfort from its own directory.`n`nExiting.
-  ExitApp
-}
+  global
+  SetTitleMatchMode, 3
+  ;Menu, Tray, MainWindow
 
-Loop, Read, options.txt
-{
-  if (SubStr(A_LoopReadLine, 1, 1) != "#" && StrLen(A_LoopReadLine) > 3) ; skip comments and empty lines
+  if (!A_IsCompiled)
+    Hotkey, #!C, CompileToExe
+
+  ; -----------------------------
+  ; Set system default options
+  ; -----------------------------
+  ; ... so players don't necessarily have to overwrite options.txt for new versions with new options:
+  DelayMultiplier := 1
+  KeyPressDuration := 1
+  EmbeddedDelayDuration := 250
+  SendMode := "ControlSend"
+  KeyExitMenu := "{Esc}"
+  KeyLeft := "4"
+  KeyRight := "6"
+  KeyUp := "8"
+  KeyDown := "2"
+  KeyUpZ := "+5"
+  KeyDownZ := "^5"
+  KeyUpLeft := "7"
+  KeyUpRight := "9"
+  KeyDownLeft := "1"
+  KeyDownRight := "3"
+  UseDiagonalMoveKeys := 1
+  UseLongConstructions := 1
+  DisableBacktrackingOptimization := 0
+  DisableKeyOptimizations := 0
+  DisableShiftOptimizations := 1
+  ShowSplashBox := 1
+  ShowStartupTrayTip := 1
+  ShowMouseTooltip := 1
+  ShowCommentBox := 1
+  MutedSound := 0
+  DisableSafetyAbort := 0
+  MouseTooltipInGameUpdateEveryMs := 10
+  MouseTooltipPlaybackUpdateEveryMs := 500
+  MouseTooltipOutOfGameUpdateEveryMs := 50
+  AliasesPath := "aliases.txt"
+  DebugOn := 0
+
+
+  ; -----------------------------
+  ; Load options from options.txt (overrides above)
+  ; -----------------------------
+
+  if (!FileExist("options.txt"))
   {
-    StringSplit, optionsArray, A_LoopReadLine, `=, %A_Space%%A_Tab%
-    if (optionsArray0 == 2) {
-      %optionsArray1% := optionsArray2  ; sometimes AHK is pretty cool
+    MsgBox, Error: Quickfort missing options.txt. Make sure options.txt exists and you are launching Quickfort from its own directory.`n`nExiting.
+    ExitApp
+  }
+
+  Loop, Read, options.txt
+  {
+    if (SubStr(A_LoopReadLine, 1, 1) != "#" && StrLen(A_LoopReadLine) > 3) ; skip comments and empty lines
+    {
+      StringSplit, optionsArray, A_LoopReadLine, `=, %A_Space%%A_Tab%
+      if (optionsArray0 == 2) {
+        %optionsArray1% := optionsArray2  ; sometimes AHK is pretty cool
+      }
     }
   }
+
+
+  ReadyToBuild := 0
+  Building := 0
+  Mode := ""
+  Comment := ""
+  LastSelectedFile := ""
+  LastSelectedFilename := ""
+  LastSelectedSheetIndex := 0
+  SelectedFile := ""
+  SelectedFilename := ""
+  SelectedSheetIndex =
+  Tooltip := ""
+  StartPos := 0
+  StartPosLabel := "Top left"
+  StartPosAbsX := 0
+  StartPosAbsY := 0
+  StartPosComment := ""
+  RepeatPattern =
+  ShowCSVIntro := 0
+  EvalMode := ""
+  EvalCommands := ""
+  MouseTipOn := 0
+  LastTooltip := ""
+  LastMouseX := 0
+  LastMouseY := 0
+  SuspendMouseTipOn := 0
+  HideTooltip := 0
+  Visualizing := 0
+
+  ; Get display dimensions
+  SysGet, ScreenWidth, 16
+  SysGet, ScreenHeight, 17
+
+  ;InitGui()
+  ShowTip()
+
+  ;;; ---------------------------------------------------------------------------
+  ;;; Determine whether to show initial mouse tip
+  ;if (ShowSplashBox)
+  ;{
+  ;  Tooltip := "" ; we don't set the actual splash text - that is assembled in ShowMouseTip when Tooltip is ""
+  ;  MouseTipOn := 1
+  ;  SetTimer, ShowMouseTip, %MouseTooltipInGameUpdateEveryMs%
+  ;  ;SetTimer, HideMouseTip, -6000
+  ;}
+  ;else {
+  ;  SetTimer, ShowMouseTip, 10
+  ;  TurnMouseTipOff()
+  ;}
+
+  if (ShowStartupTrayTip && !WinActive("Dwarf Fortress"))
+  {
+    TrayTip, Quickfort, Version %Version%, , 1
+  }
+
+  return
 }
-
-
-ReadyToBuild := 0
-Building := 0
-Mode := ""
-Comment := ""
-LastSelectedFile := ""
-LastSelectedFilename := ""
-LastSelectedSheetIndex := 0
-SelectedFile := ""
-SelectedFilename := ""
-SelectedSheetIndex =
-Tooltip := ""
-StartPos := 0
-StartPosLabel := "Top left"
-StartPosAbsX := 0
-StartPosAbsY := 0
-StartPosComment := ""
-RepeatPattern =
-ShowCSVIntro := 0
-EvalMode := ""
-EvalCommands := ""
-MouseTipOn := 0
-LastTooltip := ""
-LastMouseX := 0
-LastMouseY := 0
-SuspendMouseTipOn := 0
-HideTooltip := 0
-Visualizing := 0
-
-; Get display dimensions
-SysGet, ScreenWidth, 16
-SysGet, ScreenHeight, 17
-
-;InitGui()
-ShowTip()
-
-;;; ---------------------------------------------------------------------------
-;;; Determine whether to show initial mouse tip
-;if (ShowSplashBox)
-;{
-;  Tooltip := "" ; we don't set the actual splash text - that is assembled in ShowMouseTip when Tooltip is ""
-;  MouseTipOn := 1
-;  SetTimer, ShowMouseTip, %MouseTooltipInGameUpdateEveryMs%
-;  ;SetTimer, HideMouseTip, -6000
-;}
-;else {
-;  SetTimer, ShowMouseTip, 10
-;  TurnMouseTipOff()
-;}
-
-if (ShowStartupTrayTip && !WinActive("Dwarf Fortress"))
-{
-  TrayTip, Quickfort, Version %Version%, , 1
-}
-
-return
-
 
 
 
@@ -135,13 +144,13 @@ $+!Z::
     Suspend, Off
     ; show mouse tip if it was visible before
     if (SuspendMouseTipOn) {
-      TurnMouseTipOn()
+      ShowTip()
     }
   }
   else {
     ; store mouse tip state
     SuspendMouseTipOn := MouseTipOn
-    TurnMouseTipOff()
+    HideTip()
     Suspend, On
   }
   return
@@ -162,7 +171,7 @@ $^p:: Send ^p
 ;; ---------------------------------------------------------------------------
 ; Exit the script (Shift-Alt-X)
 $+!X::
-  TurnMouseTipOff()
+  HideTip()
   ExitApp
   return
 
@@ -175,14 +184,13 @@ $+!R::
 ;; ---------------------------------------------------------------------------
 ; Hide/show mousetip
 $!H::
-  SwitchNoticeShown := 1
   if (HideTooltip) {
     HideTooltip := 0
-    ForceMouseTipUpdate()
+    ShowTip()
   }
   else {
     HideTooltip := 1
-    Tooltip,
+    HideTip()
   }
   return
 
@@ -190,15 +198,13 @@ $!H::
 ; Cancel build (Alt+C)
 $!C::
   Critical
-  ;TurnMouseTipOff()
-  SwitchNoticeShown := 1
   if (ReadyToBuild)
   {
     ReadyToBuild := 0
     Building := 0
     RepeatPattern =
     Tooltip := "Build Cancelled!"
-    ForceMouseTipUpdate()
+    UpdateTip()
     SetTimer, ClearMouseTip, -1750
   }
   return
@@ -393,24 +399,22 @@ ShowFilePicker:
 {
   if (!Building)
   {
-    SelectedFile =
-    SelectedSheetIndex =
-    SelectedFile := SelectFile()
-
-    if (SelectedFile)
+    newfile := SelectFile()
+    if (newfile)
     {
+      SelectedFile := newfile
+      SelectedSheetIndex =
+      RepeatPattern =
+
       ; get the filename on its own for use by mousetip
       SplitPath, SelectedFile, SelectedFilename
 
-      ReadyToBuild := True
       if (GetBlueprintInfo(SelectedFile))
       {
         SelectedSheetIndex =
         ShowSheetInfoGui()
       }
     }
-
-    ShowTip()
   }
   return
 }
@@ -423,10 +427,14 @@ ShowFilePicker:
   if (!Building && ReadyToBuild)
   {
     Building := True
+    Tip("Building...")
+
     title := GetNewMacroName()
     outfile := A_ScriptDir "\" title ".mak"
-    destfile := "A:\games\dwarffortress3104\data\init\macros\" title ".mak"
-    ; TODO make destfile figure out the path from the currently active DF window's exe path
+    ActivateGameWin()
+    dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
+    SplitPath, dfpath, , dfpath
+    destfile := dfpath "\data\init\macros\" title ".mak"
 
     ; Clock how long it takes
     starttime := A_TickCount
@@ -452,17 +460,18 @@ ShowFilePicker:
     ;if (data)
     ;  SendKeys(data)
 
-    Building := False
-    ReadyToBuild := False
+    ;ReadyToBuild := False
     LastSelectedFile := SelectedFile
     LastSelectedFilename := SelectedFilename
     LastSelectedSheetIndex := SelectedSheetIndex
 
-    SelectedFile =
+    ;SelectedFile =
     If (RepeatPattern)
       LastRepeatPattern := RepeatPattern
-    RepeatPattern =
-    UpdateTip()
+    ;RepeatPattern =
+
+    Building := False
+    ClearTip()
   }
   return
 }
@@ -487,10 +496,12 @@ SelectFile()
 ;; execute macro by sending keys to DF window
 PlayMacro(delay)
 {
+  if (delay < 500)
+    delay := 500
   ActivateGameWin()
   ReleaseModifierKeys()
   Send ^l
-  Sleep %delay%
+  Sleep 1000
   Send {Enter}
   Sleep %delay%
   Send ^p
@@ -631,88 +642,6 @@ ExecQfconvert(infile, outfile, params)
   return %output%
 }
 
-HideTip()
-{
-  TurnMouseTipOff()
-}
-
-ShowTip()
-{
-  UpdateTip()
-  TurnMouseTipOn()
-}
-
-Tip(value)
-{
-  global
-  Tooltip := value
-  UpdateTip()
-}
-
-ClearTip()
-{
-  global
-  Tooltip := ""
-  UpdateTip()
-}
-
-UpdateTip()
-{
-  global
-  local mode, header, body
-
-  ; Determine tip mode.
-  if (!SelectedFile)
-    mode := "pickfile"
-  else if SelectedSheetIndex =
-    mode := "pickfile"
-  else if (Building)
-    mode := "build"
-  else
-    mode := "prebuild"
-
-  ; Determine contents of mouse tooltip based on mode.
-  if (mode == "pickfile")
-  {
-    header := "Quickfort 2.0.`n`nPick a blueprint file with Alt+F." . (LastSelectedFile ? "`nPress Alt+E to use " LastSelectedFilename " again." : "")
-  }
-  else {
-    header := SelectedFilename "`n"
-    n := Name%SelectedSheetIndex%
-    if (Name%SelectedSheetIndex% != SelectedFilename)
-    {
-      header := header Name%SelectedSheetIndex% "`n"
-    }
-
-    if (RepeatPattern)
-      header := header "TRANSFORMATION: " RepeatPattern "`n"
-    if (StartPos)
-      header := header "STARTING CORNER: " StartPosLabel "`n"
-  }
-
-  if (Tooltip)
-  {
-    body := Tooltip
-  }
-  else
-  {
-    if (mode == "build")
-    {
-      body := "Building...(% of % done)"
-    }
-    else if (mode == "prebuild")
-    {
-      body := "Alt+V shows area size. Alt+D starts building."
-    }
-    else
-    {
-      body := "--"
-    }
-  }
-
-  FullTip := header "`n`n" body "`n`n" mode
-}
-
 ;; ---------------------------------------------------------------------------
 ;; send keystrokes to game window
 SendKeys(keys)
@@ -736,7 +665,7 @@ SendKeys(keys)
     if (!Visualizing)
     {
       Tooltip = Quickfort running (%pctDone%`%)`nHold Alt+C to cancel.
-      ForceMouseTipUpdateDelayed()
+      RequestMouseTipUpdate()
     }
 
     Sleep, 0
@@ -773,7 +702,7 @@ SendKeys(keys)
         {
           ; prevent mass sending keys to wrong window (no reliable way to make DF receive all keys in background; ControlSend is flaky w/ DF)
           Building := 0
-          TurnMouseTipOff()
+          HideTip()
           msg := "Macro aborted!`n`nYou switched windows. The Dwarf Fortress window must be focused while Quickfort is running.`n`n"
             . (Mode = "b" ? "Use Alt+X to send the x key 30 times to DF (useful for destructing aborted builds).`n`n" : "")
             . (EvalMode ? "Hit Alt+f to choose a .csv file." : "Hit Alt+F to choose another .csv file. `nHit Alt+E to redo the same .csv file again.")
@@ -1410,7 +1339,7 @@ ReleaseModifierKeys()
   ;    if (!Visualizing)
   ;    {
   ;      Tooltip = Quickfort running (%pctDone%`%)`nHold Alt+C to cancel.
-  ;      ForceMouseTipUpdateDelayed()
+  ;      RequestMouseTipUpdate()
   ;    }
 
   ;    Sleep, 0
@@ -1563,7 +1492,6 @@ SetStartPos(position, label)
   global StartPos, StartPosLabel, StartPosAbsX, StartPosAbsY, LastStartPosAbsX, LastStartPosAbsY
   StartPos := position
   StartPosLabel := label
-  ForceMouseTipUpdate()
 
   if (StartPosAbsX > 0) {
     LastStartPosAbsX := StartPosAbsX
@@ -1602,156 +1530,7 @@ Log(debugstr)
 }
 
 
-;; ---------------------------------------------------------------------------
-TurnMouseTipOn()
-{
-  global
-  MouseTipOn := 1
-  SetTimer, ShowMouseTip, %MouseTooltipInGameUpdateEveryMs%
-  ;SetTimer, HideMouseTip, Off ; make sure a timed mouse tip hiding event (e.g. the splash tip) doesn't close a different tip
-  Sleep 50 ; let the timer tick a bit, so the tip gets updated right after being turned on (Send can block the timer otherwise)
-  ForceMouseTipUpdate()
-}
 
-;; ---------------------------------------------------------------------------
-TurnMouseTipOff()
-{
-  global
-  SetTimer, ShowMouseTip, Off
-  MouseTipOn := 0
-  ToolTip,
-}
-
-;; ---------------------------------------------------------------------------
-ForceMouseTipUpdate()
-{
-  ForceMouseTipUpdateDelayed()
-  SetTimer, ShowMouseTip, 1 ; "undelayed"
-}
-
-;; ---------------------------------------------------------------------------
-ForceMouseTipUpdateDelayed()
-{
-  global LastMouseX, LastMouseY
-
-  ; this forces the mouse tip to get updated next timer tick
-  LastMouseX := LastMouseY := 0
-}
-
-;; ---------------------------------------------------------------------------
-ShowMouseTip:
-{
-  CoordMode, Mouse, Screen
-  MouseGetPos, xpos, ypos
-
-  if (!ShowMouseTooltip) {
-    Tooltip,
-    return
-  }
-
-  if (!WinActive("Dwarf Fortress"))
-  {
-    Tooltip,
-    LastToolTip =
-  }
-  else
-  {
-    SetTimer, ShowMouseTip, %MouseTooltipInGameUpdateEveryMs%
-
-    xpos += 25
-    if (ypos + 100 > ScreenHeight)
-      ypos := ScreenHeight - 100 ; put tooltip above mouse pointer if we're near the bottom
-    else
-      ypos += 10 ; below
-
-    if (LastTooltip != FullTip || LastMouseX != xpos || LastMouseY != ypos)
-    {
-      LastTooltip := FullTip
-      LastMouseX := xpos
-      LastMouseY := ypos
-
-      ;tip := ""
-      ;. (LastSelectedFile ? LastSelectedFilename . " complete.`n`nTo begin, hit Alt+F and select a CSV file.`nAlt+E will run " . LastSelectedFilename . " again." : "Quickfort " . Version . "`nhttp://sun2design.com/quickfort`n`nTo begin, hit Alt+F and select a CSV file.")
-      ;. "`n`nAlt+H hides/shows this tooltip.`nAlt+T opens QF command line.`nShift+Alt+Z suspends/resumes QF.`nShift+Alt+X exits QF."
-
-      ToolTip, %FullTip%, xpos, ypos
-
-      ;tip := "[" SelectedFilename "]" . (RepeatPattern ? "`n** REPEATING: " RepeatPattern " **" : "") . "`n"
-      ;if (StartPosAbsX > 0)
-      ;{
-      ;  tip := tip . "START POSITION:" . (StartPosComment ? " " . StartPosComment : "") . " (" . StartPosAbsX . ", " . StartPosAbsY . ")"
-      ;}
-      ;else
-      ;{
-      ;  tip := tip . "Start corner: " . StartPosLabel . (StartPosComment ? "`nUse Alt+E to reset start position." : "")
-      ;}
-
-      xpos += 25
-      ;if (ypos + 170 > ScreenHeight)
-      ;  ypos -= 170 ; put tooltip above mouse pointer if we're near the bottom
-      ;else
-      ;  ypos += 10 ; below
-
-      ;ToolTip, %tip%, xpos, ypos
-    }
-  }
-  return
-}
-
-;; ---------------------------------------------------------------------------
-HideMouseTip:
-  TurnMouseTipOff()
-  Tooltip := ""
-  return
-
-;; ---------------------------------------------------------------------------
-ClearMouseTip:
-  Tooltip := ""
-  return
-
-;; ---------------------------------------------------------------------------
-CompileToExe:
-  CompileToExeFunc()
-  return
-
-CompileToExeFunc()
-{
-  global Version
-
-  if (A_IsCompiled)
-    return
-
-  MsgBox, Compiling as version %Version%
-  icon := A_ScriptDir . ReplaceExtension(A_ScriptName, ".ico")
-
-  MsgBox, "c:\Program Files (x86)\AutoHotkey\Compiler\Ahk2Exe.exe" /in "%A_ScriptFullPath%" /icon "%icon%"
-
-  FileDelete, Quickfort.exe
-  RunWait, "c:\Program Files (x86)\AutoHotkey\Compiler\Ahk2Exe.exe" /in "%A_ScriptFullPath%" /icon "%icon%"
-
-  FileDelete, releases\Quickfort.zip
-  FileDelete, releases\Quickfort_%Version%.zip
-  Sleep 1000
-
-  RunWait, zip -9 -r releases\Quickfort.zip aliases.txt Blueprints options.txt Quickfort.ahk Quickfort.exe readme.txt
-  Sleep 1000
-
-  FileCopy, releases\Quickfort.zip, releases\Quickfort_%Version%.zip
-  Sleep 1000
-
-  Run, releases\Quickfort_%Version%.zip
-
-  MsgBox, 4, , Upload?
-
-  IfMsgBox Yes
-  {
-    to := "m:\sun2design.com\quickfort\"
-    FileCopy, releases\Quickfort_%Version%.zip, %to%, 1
-    FileCopy, releases\Quickfort.zip, %to%, 1
-    FileCopy, readme.txt, %to%, 1
-    Run, http://sun2design.com/quickfort
-  }
-}
 
 ;; ---------------------------------------------------------------------------
 ReplaceExtension(path, newExtension)
@@ -1849,6 +1628,7 @@ ShowSheetInfoGui()
   if (SheetCount > 0)
   {
     ; workaround for listview needing an extra keypress to start working (focus issue?)
+    Sleep 100
     ControlSend, SysListView321, {Down}{Up}, ahk_class AutoHotkeyGUI
   }
   return
@@ -1909,4 +1689,35 @@ UpdateGuiSheetInfo(index)
   GuiControl,, SheetName, %newtitle%
   GuiControl,, SheetInfo, %newtext%
   GuiText := newtitle "`n`n" newtext
+  return
+}
+
+
+;; ---------------------------------------------------------------------------
+;; Get the path of the window with given title parameter. Windows-only.
+GetWinPath(title)
+{
+  WinGet, pid, PID, %title%
+
+  VarSetCapacity(sFilePath, 260)
+
+  pFunc := DllCall("GetProcAddress"
+     , "Uint", DllCall("GetModuleHandle", "str", "kernel32.dll")
+     , "str", "GetCommandLineA")
+
+  hProc := DllCall("OpenProcess", "Uint", 0x043A, "int", 0, "Uint", pid)
+
+  hThrd := DllCall("CreateRemoteThread", "Uint", hProc, "Uint", 0, "Uint", 0
+     , "Uint", pFunc, "Uint", 0, "Uint", 0, "Uint", 0)
+
+  DllCall("WaitForSingleObject", "Uint", hThrd, "Uint", 0xFFFFFFFF)
+  DllCall("GetExitCodeThread", "Uint", hThrd, "UintP", pcl)
+
+  DllCall("psapi\GetModuleFileNameExA", "Uint", hProc, "Uint", 0, "str", sFilePath, "Uint", 260)
+  ; DllCall("psapi\GetProcessImageFileNameA", "Uint", hProc, "str", sFilePath, "Uint", 281)
+
+  DllCall("CloseHandle", "Uint", hThrd)
+  DllCall("CloseHandle", "Uint", hProc)
+
+  return sFilePath
 }
