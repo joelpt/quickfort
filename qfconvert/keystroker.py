@@ -6,9 +6,11 @@ from geometry import *
 import exetest
 import util
 
-
+# Keycode translation definitions for each output mode.
 KEY_LIST = {
     'key': {
+        '>': '^5',
+        '<': '+5',
         '[n]': '8',
         '[ne]': '9',
         '[e]': '6',
@@ -27,13 +29,15 @@ KEY_LIST = {
         '[+nw]': '+7',
         '[widen]': 'k',
         '[heighten]': 'u',
-        '[menudown]': '{NumpadAdd}',
-        '!': '{Enter}',
-        '#': '+{Enter}',
-        '%': '%wait%',
-        '^': '{Esc}'
+        '[menudown]': '{NumpadAdd}', # move to next menu item
+        '!': '{Enter}', # select
+        '#': '+{Enter}', # shift-select (select all)
+        '%': '%wait%', # pause
+        '^': '{Esc}' # exit current menu
         },
     'macro': {
+        '>': '>',
+        '<': '<',
         '[n]': '0:8',
         '[ne]': '0:9',
         '[e]': '0:6',
@@ -187,12 +191,23 @@ class Keystroker:
             cursor = newpos
         return keys
 
-    def move(self, start, end):
+    def move(self, start, end, zoffset=0):
+        """
+        Returns list of keycodes to move DF cursor from Point start
+        to Point end, as well as adjust z-level by zoffset if provided.
+        """
+
         keys = []
-        allow_backtrack = True
+
+        # do z-moves first if needed
+        if zoffset > 0:
+            keys.extend(['>'] * zoffset)
+        elif zoffset < 0:
+            keys.extend(['<'] * abs(zoffset))
 
         # while there are moves left to make..
-        while (start != end):
+        allow_backtrack = True
+        while start != end:
             direction = Direction.get_direction(start, end)
 
             # Get x and y component of distance between start and end

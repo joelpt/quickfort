@@ -1,10 +1,11 @@
 from copy import deepcopy
 import re
 from itertools import count
-from geometry import Grid
+from geometry import Grid, GridLayer
+
 
 def transform(transforms, layers):
-    # print transforms
+    """Transforms the given layers using the given list of transforms."""
 
     for i, layer in enumerate(layers):
         a = layer.rows
@@ -16,29 +17,15 @@ def transform(transforms, layers):
                 break
             left = left[1:]
             if cmd == '!':
-                # update original blueprint memory slot
+                # The ! command updates A to match B
                 a = deepcopy(b)
             elif cmd in ('n', 's', 'e', 'w'):
-                # print 'calling transform %s,%s with this:' % t
-                # print 'A:'
-                # print Grid.print_cells(a)
-                # print 'B:'
-                # print Grid.print_cells(b)
                 new = apply_transform(t, a, b)
-                a, b = new, deepcopy(new)
+                a, b = new, deepcopy(new) # direction commands update A & B
             else:
-                # print 'calling transform %s,%s with this:' % t
-                # 'B:'
-                # print Grid.print_cells(b)
-                # print
                 new = apply_transform(t, b)
-                b = new
+                b = new # other commands update B and leave A unaltered
             layers[i].rows = b
-            # layers[i].grid.height = len(layers[i].grid.cells)
-            # layers[i].grid.width = len(layers[i].grid.cells[0])
-            # print
-            # print layers[i].grid
-            # print '--- ^b ---'
 
     # do remaining zup/zdown transforms, if any
     for t in left:
@@ -49,16 +36,9 @@ def transform(transforms, layers):
         addlayers = deepcopy(layers)
 
         # determine z-level offset after drawing layers
-        zoffset = sum(
-            sum(1 if x == '>' else -1 if x == '<' else 0
-                for x in layer.onexit
-                )
-            for layer in addlayers
-            )
+        zoffset = GridLayer.zoffset(addlayers)
 
-        # print 'zoffset %d' % zoffset
-        # add appropriate z-up/down chars for transitioning
-        # between zlevels
+        # add appropriate z-up/down chars for transitioning between zlevels
         if cmd == 'd':
             if zoffset >= 0:
                 zfix = ['>']
@@ -69,16 +49,13 @@ def transform(transforms, layers):
                 zfix = ['<']
             else:
                 zfix = ['<'] * ((zoffset * 2) + 1)
-        # print 'layercount at %d' % len(layers)
 
         for i in xrange(1, count):
             layers[-1].onexit += zfix
             layers.extend(deepcopy(addlayers))
 
-    # print 'done with xform:'
-    # print layers[0].grid
-    # print '---------------'
     return layers
+
 
 def apply_transform(transform, a, b=None):
     """
@@ -89,40 +66,30 @@ def apply_transform(transform, a, b=None):
     if b and (len(a) != len(b) or len(a[0]) != len(b[0])):
         raise Exception, (
             "Cannot apply '%d%s' because " % transform +
-            "grids to combine have differing dimensions.\n\n"
-            "To use e.g. 'rotcw 2e', ensure your blueprint is perfectly square.\n\n"
-            "To use e.g. 'rotcw 2e rotcw 2s', instead use "
-            "'rotcw 2e fliph flipv 2s'."
+            "grids to combine have differing dimensions.\n"
+            "For 'rotcw 2e', ensure your blueprint is perfectly square.\n"
+            "For 'rotcw 2e rotcw 2s', instead use 'rotcw 2e fliph flipv 2s'."
             )
-    # a, b = deepcopy(a), deepcopy(b)
-    # print 'applying %s %d' % (action, count)
-    # print 'A:'
-    # print Grid.print_cells(a)
-    # if b:
-    #     print 'B:'
-    #     print Grid.print_cells(b)
 
     if action == 'flipv':
         # flip a vertically
         a.reverse()
-        # print 'flipv:'
-        # print Grid.print_cells(a)
         return a
+
     elif action == 'fliph':
         # flip a horizontally
         for row in a:
             row.reverse()
-        # print 'fliph:'
-        # print Grid.print_cells(a)
         return a
+
     elif action in ('rotcw', 'rotccw'):
+        # rotate a clockwise or counterclockwise 90 degrees
         rot = [list(x) for x in zip(*a)]
-        # print 'rot:'
-        # print Grid.print_cells(rot)
         if action == 'rotcw':
             return apply_transform((1, 'fliph'), rot)
         if action == 'rotccw':
             return apply_transform((1, 'flipv'), rot)
+
     elif action in ('n', 's', 'e', 'w'):
         # repeat (a+b) in given direction the requested number
         # of times:
@@ -143,8 +110,7 @@ def apply_transform(transform, a, b=None):
             for s in series:
                 out.extend(s)
         else: # 'e', 'w'
-            # combine each row of each series item
-            # into a new row
+            # combine each row of each series item into a new row
             rows = zip(*series)
             out = []
             for r in rows:
@@ -156,6 +122,7 @@ def apply_transform(transform, a, b=None):
 
     else:
         raise Exception, 'Unknown transformation type: %d %s' % transform
+
 
 def parse_transform_str(transform_str):
     transforms = transform_str.lower().split(' ')
@@ -172,3 +139,4 @@ def parse_transform_str(transform_str):
     # put zup/zdown transforms at the end so we do x/y transforms first
     readies.sort(key=lambda x: 1 if x[1][0] in ('u', 'd') else 0)
     return readies
+

@@ -181,6 +181,16 @@ class GridLayer:
         self.plots = plots or []
         self.start = start or Point(0, 0)
 
+    @staticmethod
+    def zoffset(layers):
+        """determine sum z-level offset of some GridLayers"""
+        return sum(
+            sum(1 if x == '>' else -1 if x == '<' else 0
+                for x in layer.onexit
+                )
+            for layer in layers
+            )
+
 
 class Grid:
 

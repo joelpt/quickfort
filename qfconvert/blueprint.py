@@ -1,3 +1,8 @@
+# how to remove the most recent macro as qf keycode -
+# hand convert this to the actual macro things
+# won't really work b/c you have to exit designation positioning mode (bdqp menu)
+# ['OPTIONS', 'CURSOR_DOWN', 'CURSOR_DOWN', 'SELECT', 'SELECT', 'BACKSPACE', 'LEAVESCREEN', 'CURSOR_UP', 'CURSOR_UP', 'SELECT', 'LEAVESCREEN']
+
 import textwrap
 
 from util import Struct
@@ -126,8 +131,8 @@ class Blueprint:
             keys += ks.plot(plots, start) + layer.onexit
             start = end
 
-        # move cursor back to start pos
-        keys += ks.move(end, self.start)
+        # move cursor back to start pos x, y, z
+        keys += ks.move(end, self.start, -GridLayer.zoffset(self.layers))
 
         return keys
 

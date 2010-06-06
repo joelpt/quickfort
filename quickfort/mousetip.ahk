@@ -59,7 +59,7 @@ UpdateTip()
   ; Determine contents of mouse tooltip based on mode.
   if (mode == "pickfile")
   {
-    header := "Quickfort 2.0.`n`nPick a blueprint file with Alt+F." . (LastSelectedFile ? "`nPress Alt+E to use " LastSelectedFilename " again." : "")
+    header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F." . (LastSelectedFile ? "`nPress Alt+E to use " LastSelectedFilename " again." : "")
   }
   else {
     header := SelectedFilename
@@ -70,9 +70,9 @@ UpdateTip()
     }
 
     if (RepeatPattern)
-      header := header "`nTRANSFORMATION: " RepeatPattern
+      header := header "`nTRANSFORM: " RepeatPattern
     if (StartPos)
-      header := header "`nSTARTING CORNER: " StartPosLabel
+      header := header "`nSTARTS AT: " StartPosLabel
   }
 
   if (Tooltip)
@@ -83,16 +83,19 @@ UpdateTip()
   {
     if (mode == "build")
     {
-      body := "Building...(% of % done)"
+      body := "Working..."
     }
     else if (mode == "prebuild")
     {
-        body := "TYPE " . userInitKey . " (" . userInitText . "). Position cursor with KEYBOARD.`n`n"
+        body := "TYPE " . UserInitKey . " (" . UserInitText . "). Position cursor with KEYBOARD.`n`n"
             . "Alt+V shows footprint.`n"
             . "Alt+D starts playback.`n"
-            . "Alt+F picks another file.`n`n"
-            . "Alt+R for repeat mode.`n"
-            . "Alt+Q/W/A/S sets starting corner."
+            . "Alt+F picks another file.`n"
+            . (SheetCount > 1 ? "Alt+E switches worksheets.`n" : "")
+            . "`n"
+            . "Alt+Q/W/A/S sets starting corner.`n"
+            . "Alt+R transforms blueprint.`n"
+            . "Alt+H toggles this tooltip.`n"
     }
     else
     {
@@ -100,7 +103,7 @@ UpdateTip()
     }
   }
 
-  FullTip := header "`n`n" body "`n`n" mode
+  FullTip := header (body ? "`n`n" body : "")
   RequestMouseTipUpdate()
 }
 

@@ -196,18 +196,18 @@ $!H::
 
 ;; ---------------------------------------------------------------------------
 ; Cancel build (Alt+C)
-$!C::
-  Critical
-  if (ReadyToBuild)
-  {
-    ReadyToBuild := 0
-    Building := 0
-    RepeatPattern =
-    Tooltip := "Build Cancelled!"
-    UpdateTip()
-    SetTimer, ClearMouseTip, -1750
-  }
-  return
+;$!C::
+;  Critical
+;  if (ReadyToBuild)
+;  {
+;    ReadyToBuild := 0
+;    Building := 0
+;    RepeatPattern =
+;    Tooltip := "Build Cancelled!"
+;    UpdateTip()
+;    SetTimer, ClearMouseTip, -1750
+;  }
+;  return
 
 ;; ---------------------------------------------------------------------------
 ; Start position switch
@@ -241,31 +241,14 @@ $!X::
   return
 
 ;; ---------------------------------------------------------------------------
-; redo last construction effort (Alt+E)
-; Only does anything after a build finishes (successfully or cancelled)
+; switch worksheet (Alt+E)
 !E::
-  if (!ReadyToBuild)
+  if (!Building && SelectedFile)
   {
-    if (LastSelectedFile = "")
-    {
-      Goto ShowFilePicker
-      return ; gratuitous
-    }
-
-    SelectedFile := LastSelectedFile
-    UpdateTip()
-    if (SheetCount > 1)
-      ShowSheetInfoGui()
+    ShowSheetInfoGui()
   }
-  ;else
-  ;{
-  ;  ; Re-enable use of the start() specification from the blueprint
-  ;  SetStartPos(0, "Top left")
-  ;  StartPosAbsX := LastStartPosAbsX
-  ;  StartPosAbsY := LastStartPosAbsY
-  ;  ForceMouseTipUpdate()
-  ;}
   return
+
 
 ;; Autorepeat build (Alt+R)
 !R::
@@ -488,6 +471,7 @@ SelectFile()
   HideTip()
   FileSelectFile, filename, , , Select a Quickfort blueprint file to open, Blueprints (*.xls`; *.xlsx`; *.csv)
   ActivateGameWin()
+  ShowTip()
   return filename
 }
 
@@ -498,6 +482,9 @@ PlayMacro(delay)
 {
   if (delay < 500)
     delay := 500
+  else if (delay > 5000)
+    delay := 5000
+
   ActivateGameWin()
   ReleaseModifierKeys()
   Send ^l
@@ -627,6 +614,7 @@ ExecQfconvert(infile, outfile, params)
     if (RegExMatch(A_LoopReadLine, "Exception:"))
     {
       ; Inform the user.
+      FileRead, output, %outfile%
       StringReplace, output, output, Exception:, Error:
       StringReplace, output, output, \n, `n
       MsgBox % output
@@ -809,27 +797,27 @@ ReleaseModifierKeys()
 ;    ; -----------------------------
 ;    if (Mode = "b")
 ;    {
-;      userInitKey = b o
-;      userInitText = build road
+;      UserInitKey = b o
+;      UserInitText = build road
 ;      startKeys := "{ExitMenu}%"
 ;      KeyDelay := DelayMultiplier * 3
 ;    }
 ;    else if (Mode = "d")
 ;    {
-;      userInitKey = d
-;      userInitText = designations
+;      UserInitKey = d
+;      UserInitText = designations
 ;      KeyDelay := DelayMultiplier
 ;    }
 ;    else if (Mode = "p")
 ;    {
-;      userInitKey = p
-;      userInitText = stockpiles
+;      UserInitKey = p
+;      UserInitText = stockpiles
 ;      KeyDelay := DelayMultiplier * 2
 ;    }
 ;    else if (Mode = "q")
 ;    {
-;      userInitKey = q
-;      userInitText = set building tasks/prefs
+;      UserInitKey = q
+;      UserInitText = set building tasks/prefs
 ;      KeyDelay := DelayMultiplier * 2
 ;    }
 ;    else
@@ -866,7 +854,7 @@ ReleaseModifierKeys()
 ;    ; -----------------------------
 ;    ; Show howto mouse-tip
 ;    ; -----------------------------
-;    Tooltip := "TYPE " . userInitKey . " (" . userInitText . "). Position cursor with KEYBOARD.`n`n"
+;    Tooltip := "TYPE " . UserInitKey . " (" . UserInitText . "). Position cursor with KEYBOARD.`n`n"
 ;             . "Alt+V shows footprint.`n"
 ;             . "Alt+D starts playback.`n`n"
 ;             . "Alt+R for repeat mode.`n"
@@ -1597,7 +1585,6 @@ InitGui(withSelector)
 ShowSheetInfoGui()
 {
   global
-  SelectedSheetIndex =
 
   if (SheetCount > 1)
   {
@@ -1608,7 +1595,7 @@ ShowSheetInfoGui()
     {
       index := A_Index - 1
       name := Name%index%
-      if (index == LastSelectedSheetIndex)
+      if (index == SelectedSheetIndex)
         opts := "Select"
       else
         opts := ""
@@ -1649,6 +1636,40 @@ ButtonOK:
   Gui, Submit
   ShowTip()
   ReadyToBuild := True
+
+  ; Set user-init key description based on build mode
+  mode := BuildType%SelectedSheetIndex%
+  if (mode = "build")
+  {
+    UserInitKey = b o
+    UserInitText = build road
+    KeyDelay := DelayMultiplier * 3
+  }
+  else if (mode = "dig")
+  {
+    UserInitKey = d
+    UserInitText = designations
+    KeyDelay := DelayMultiplier
+  }
+  else if (mode = "place")
+  {
+    UserInitKey = p
+    UserInitText = stockpiles
+    KeyDelay := DelayMultiplier * 2
+  }
+  else if (mode = "query")
+  {
+    UserInitKey = q
+    UserInitText = set building tasks/prefs
+    KeyDelay := DelayMultiplier * 2
+  }
+  else
+  {
+    MsgBox, Unrecognized mode '%mode%' specified in %SelectedFilename%. Mode should be one of #build #dig #place #query
+  }
+
+  ShowTip()
+
   return
 
 ButtonCancel:
