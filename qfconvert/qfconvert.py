@@ -1,8 +1,5 @@
 #! /usr/bin/python
 
-import sys
-sys.path.append('Packages')
-
 from optparse import OptionParser
 import traceback
 import cProfile
