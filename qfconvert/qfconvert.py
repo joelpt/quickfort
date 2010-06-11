@@ -1,5 +1,8 @@
 #! /usr/bin/python
 
+import sys
+sys.path.append('Modules')
+
 from optparse import OptionParser
 import traceback
 import cProfile
