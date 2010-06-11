@@ -5,66 +5,15 @@
 # You can use Shift+Alt+R while QF is running to restart QF, which
 # will reload options.txt.
 
-#----------------------------
-# Keystrokes
-#----------------------------
-
-# EDIT THIS DEPENDING ON YOUR VERSION OF DWARF FORTRESS!
-# You might have to change this depending on the version of DF
-# you're running.
-#   DF v0.31.# uses {Esc} to exit menus.
-#   DF v0.28.181.40d# uses {Space} to exit menus.
-KeyExitMenu = {Esc}
-#KeyExitMenu = {Space}
-
-# Your Dwarf Fortress cursor movement keys.
-# By default NSEW movements are performed with 8246, and Z up/down
-# is performed with Shift+5/Ctrl+5.
-KeyLeft = 4
-KeyRight = 6
-KeyUp = 8
-KeyDown = 2
-KeyUpLeft = 7
-KeyUpRight = 9
-KeyDownLeft = 1
-KeyDownRight = 3
-KeyUpZ = +5
-KeyDownZ = ^5
-
 
 #----------------------------
-# Optimization options
+# Macro vs keystrokes
 #----------------------------
 
-# When set to 1, QF will turn repeating cells like Cw,Cw,Cw,... into
-# single constructions up to 10 cells wide using DF resizing keys.
-# Works for building: Cw Cf CF Cr o
-# This setting can sometimes cause problems if you don't have a big
-# stockpile of a single rock/material type nearby.
-# Set to 0 if you don't want to worry about this.
-UseLongConstructions = 0
-
-# Use diagonal movement keys optimization?
-UseDiagonalMoveKeys = 1
-
-# Set to 0 to use shift-key optimizations (e.g. Shift+4 to move left
-# 10 units). DF seems to work better when this optimization is
-# disabled.
-DisableShiftOptimizations = 1
-
-# Note: the below option is irrelevant if DisableShiftOptimizations=1.
-# Set to 1 to disable converting cursor movements such as
-# {Left}x9 into {Shift+Right}{Left}. While this can be a much faster
-# method of cursor movement, it can cause problems if you're
-# building very close to the edges of the map, since QF can
-# overshoot the edges of your blueprint area and thus cause the DF
-# cursor to get off-position if close to an edge.
-DisableBacktrackingOptimization = 0
-
-# Set to 1 to disable all key-sending optimizations. This will make
-# the macro take much longer to run, but may help with weird
-# behavior or lag problems.
-DisableKeyOptimizations = 0
+# Set this to 'macro' to use DF 0.31.x's macro ability (very fast).
+# Set this to 'key' to send keystrokes to the DF game window (slower).
+# The visualize command (Alt+V) always sends keystrokes.
+PlaybackMode = macro
 
 
 #----------------------------
@@ -89,11 +38,11 @@ ShowCommentBox = 1
 # Set to 1 to disable.
 MuteCompletedSound = 0
 
-# If set to 0, QF will immediately abort building if the Dwarf
+# If set to 1, QF will immediately abort building if the Dwarf
 # Fortress window becomes inactive, avoiding sending keystrokes
-# intended for DF to another program. Setting this to 1 will disable
+# intended for DF to another program. Setting this to 0 will disable
 # this feature.
-DisableSafetyAbort = 1
+EnableSafetyAbort = 1
 
 # Try increasing these values if you have trouble with a flickering
 # mouse tooltip. Increasing MouseTooltipPlaybackUpdateEveryMs may
@@ -103,6 +52,36 @@ DisableSafetyAbort = 1
 MouseTooltipInGameUpdateEveryMs = 10
 MouseTooltipPlaybackUpdateEveryMs = 500
 MouseTooltipOutOfGameUpdateEveryMs = 50
+
+
+#----------------------------
+# Keystrokes
+#----------------------------
+
+# You probably only need to edit this section if you have set
+# SendingMode to 'key' or use strange movement keys.
+
+# EDIT THIS DEPENDING ON YOUR VERSION OF DWARF FORTRESS!
+# You might have to change this depending on the version of DF
+# you're running.
+#   DF v0.31.# uses {Esc} to exit menus.
+#   DF v0.28.181.40d# uses {Space} to exit menus.
+KeyExitMenu = {Esc}
+#KeyExitMenu = {Space}
+
+# Your Dwarf Fortress cursor movement keys.
+# By default NSEW movements are performed with 8246, and Z up/down
+# is performed with Shift+5/Ctrl+5.
+KeyLeft = 4
+KeyRight = 6
+KeyUp = 8
+KeyDown = 2
+KeyUpLeft = 7
+KeyUpRight = 9
+KeyDownLeft = 1
+KeyDownRight = 3
+KeyUpZ = +5
+KeyDownZ = ^5
 
 
 #----------------------------

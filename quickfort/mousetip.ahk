@@ -59,42 +59,52 @@ UpdateTip()
   ; Determine contents of mouse tooltip based on mode.
   if (mode == "pickfile")
   {
-    header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F." . (LastSelectedFile ? "`nPress Alt+E to use " LastSelectedFilename " again." : "")
+    header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F."
   }
   else {
     header := SelectedFilename
-    n := Name%SelectedSheetIndex%
     if (Name%SelectedSheetIndex% != SelectedFilename)
     {
-      header := header "`n" Name%SelectedSheetIndex%
+      header := header ": " Name%SelectedSheetIndex%
     }
 
+    header := header " (" BuildType%SelectedSheetIndex% " mode)"
+
     if (RepeatPattern)
-      header := header "`nTRANSFORM: " RepeatPattern
+      header := header "`n>> TRANSFORM: " RepeatPattern
+
     if (StartPos)
-      header := header "`nSTARTS AT: " StartPosLabel
+      header := header "`n>> STARTS AT: " StartPosLabel
+    else if (StartComment%SelectedSheetIndex% || (StartPosition%SelectedSheetIndex% && StartPosition%SelectedSheetIndex% != "(1, 1)"))
+      header := header "`n>> STARTS AT: " StartPosition%SelectedSheetIndex%
+      if (StartComment%SelectedSheetIndex%)
+      	header := header " (" StartComment%SelectedSheetIndex% ")"
   }
 
-  if (Tooltip)
+  if (MouseTip)
   {
-    body := Tooltip
+    body := MouseTip
   }
   else
   {
     if (mode == "build")
     {
-      body := "Working..."
+      body := "Designating..."
     }
     else if (mode == "prebuild")
     {
-        body := "TYPE " . UserInitKey . " (" . UserInitText . "). Position cursor with KEYBOARD.`n`n"
+        body := "TYPE " . UserInitKey . " (" . UserInitText . ").`n"
+            . "Position cursor with KEYBOARD.`n"
+            . "`n"
             . "Alt+V shows footprint.`n"
             . "Alt+D starts playback.`n"
-            . "Alt+F picks another file.`n"
-            . (SheetCount > 1 ? "Alt+E switches worksheets.`n" : "")
             . "`n"
             . "Alt+Q/W/A/S sets starting corner.`n"
+            . (StartPos ? "Alt+Z resets starting corner.`n" : "")
             . "Alt+R transforms blueprint.`n"
+            . "`n"
+            . "Alt+F picks another file.`n"
+            . (SheetCount > 1 ? "Alt+E picks another worksheet.`n" : "Alt+E shows blueprint info.`n")
             . "Alt+H toggles this tooltip.`n"
     }
     else
@@ -112,7 +122,9 @@ UpdateTip()
 ForceMouseTipUpdate()
 {
   RequestMouseTipUpdate()
-  SetTimer, ShowMouseTip, 1 ; "undelayed"
+  ;SetTimer, ShowMouseTip, 1 ; "undelayed"
+  Gosub ShowMouseTip
+  return
 }
 
 ;; ---------------------------------------------------------------------------
@@ -121,7 +133,8 @@ RequestMouseTipUpdate()
   global LastMouseX, LastMouseY
 
   ; this forces the mouse tip to get updated next timer tick
-  LastMouseX := LastMouseY := 0
+  LastMouseX := LastMouseY := -1
+  return
 }
 
 ;; ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@ from optparse import OptionParser
 import traceback
 import cProfile
 
-from blueprint import process_blueprint_file, get_blueprint_info
+import blueprint
 
 
 def parse_options():
@@ -29,6 +29,9 @@ def parse_options():
     parser.add_option("-i", "--info",
                       action="store_true", dest="info", default=False,
                       help="output information about input_file")
+    parser.add_option("-v", "--visualize",
+                      action="store_true", dest="visualize", default=False,
+                      help="just moves cursor around blueprint's perimeter")
     parser.add_option("-C", "--show-csv-parse",
                       action="store_true", dest="debugfile", default=False,
                       help="show blueprint parsing steps on stdout")
@@ -73,9 +76,9 @@ def run():
 
     try:
         if options.info:
-          output = get_blueprint_info(infile)
+          output = blueprint.get_blueprint_info(infile)
         else:
-          output = process_blueprint_file(infile, options)
+          output = blueprint.process_blueprint_file(infile, options)
 
         if outfile:
             with open(outfile, 'w') as outf:

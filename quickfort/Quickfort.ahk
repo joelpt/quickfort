@@ -22,6 +22,7 @@ Init()
   ; Set system default options
   ; -----------------------------
   ; ... so players don't necessarily have to overwrite options.txt for new versions with new options:
+  PlaybackMode := "key"
   DelayMultiplier := 1
   KeyPressDuration := 1
   EmbeddedDelayDuration := 250
@@ -79,24 +80,17 @@ Init()
 
   ReadyToBuild := 0
   Building := 0
-  Mode := ""
   Comment := ""
-  LastSelectedFile := ""
-  LastSelectedFilename := ""
-  LastSelectedSheetIndex := 0
   SelectedFile := ""
   SelectedFilename := ""
   SelectedSheetIndex =
-  Tooltip := ""
-  StartPos := 0
-  StartPosLabel := "Top left"
-  StartPosAbsX := 0
-  StartPosAbsY := 0
+  StartPos := ""
   StartPosComment := ""
   RepeatPattern =
   ShowCSVIntro := 0
   EvalMode := ""
   EvalCommands := ""
+  MouseTip := ""
   MouseTipOn := 0
   LastTooltip := ""
   LastMouseX := 0
@@ -157,9 +151,8 @@ $+!Z::
 
 
 
+;; -- remaining commands only work when DF window is active --
 #IfWinActive Dwarf Fortress
-
-
 
 ;; ---------------------------------------------------------------------------
 ; Intercept Ctrl-P command to DF and resend it. If sent manually, for large
@@ -211,28 +204,11 @@ $!H::
 
 ;; ---------------------------------------------------------------------------
 ; Start position switch
-$!Q::
-  SetStartPos("nw", "Top left")
-  UpdateTip()
-  return
-
-;; ---------------------------------------------------------------------------
-$!W::
-  SetStartPos("ne", "TOP RIGHT")
-  UpdateTip()
-  return
-
-;; ---------------------------------------------------------------------------
-$!A::
-  SetStartPos("sw", "BOTTOM LEFT")
-  UpdateTip()
-  return
-
-;; ---------------------------------------------------------------------------
-$!S::
-  SetStartPos("se", "BOTTOM RIGHT")
-  UpdateTip()
-  return
+$!Q:: SetStartPos("nw", "North-west corner")
+$!W:: SetStartPos("ne", "North-east corner")
+$!A:: SetStartPos("sw", "South-west corner")
+$!S:: SetStartPos("se", "South-east corner")
+$!Z:: SetStartPos("", "") ; unset start corner
 
 ;; ---------------------------------------------------------------------------
 ; Helper to mass-demolish misplaced constuctions
@@ -241,7 +217,7 @@ $!X::
   return
 
 ;; ---------------------------------------------------------------------------
-; switch worksheet (Alt+E)
+; Switch worksheet (Alt+E)
 !E::
   if (!Building && SelectedFile)
   {
@@ -250,7 +226,8 @@ $!X::
   return
 
 
-;; Autorepeat build (Alt+R)
+;; ---------------------------------------------------------------------------
+;; Repeat/transform (Alt+R)
 !R::
   if (!Building && ReadyToBuild)
   {
@@ -294,14 +271,21 @@ Examples:
       ActivateGameWin()
     }
 
-    if (!RegExMatch(pattern, "^(\d*([dunsew]|flip[vh]|rotc?cw|\!)\s*)+$"))
-    {
-      MsgBox, Invalid transformation syntax:`n%pattern%
-    }
-    else
+    pattern = %pattern% ; whitespace trim
+
+    if (RegExMatch(pattern, "^(\d*([dunsew]|flip[vh]|rotc?cw|\!)\s*)+$"))
     {
       RepeatPattern := LastRepeatPattern := pattern
       UpdateTip()
+    }
+    else if (!pattern)
+    {
+      RepeatPattern =
+      UpdateTip()
+    }
+    else
+    {
+      MsgBox, Invalid transformation syntax:`n%pattern%
     }
   }
   return
@@ -342,7 +326,7 @@ Examples:
 ;        StartPosAbsX =
 ;        StartPosAbsY =
 ;        StartPosComment =
-;        SetStartPos(0, "Top left")
+;  etOrResetStartPos(0, "Top left")
 
 ;        EvalMode := evalMatch1
 ;        EvalCommands := evalMatch2 . ",#"
@@ -412,46 +396,13 @@ ShowFilePicker:
     Building := True
     Tip("Building...")
 
-    title := GetNewMacroName()
-    outfile := A_ScriptDir "\" title ".mak"
-    ActivateGameWin()
-    dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
-    SplitPath, dfpath, , dfpath
-    destfile := dfpath "\data\init\macros\" title ".mak"
+    if (PlaybackMode == "macro")
+      ConvertAndPlayMacro()
+    else
+      ConvertAndSendKeys(false)
 
-    ; Clock how long it takes
-    starttime := A_TickCount
-    if (ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, title, StartPos, RepeatPattern))
-    {
-      ; Copy to DF dir
-      FileCopy, %outfile%, %destfile%, 1
-      if (ErrorLevel > 0)
-      {
-        MsgBox, Error: Could not copy macro file`nFrom: %outfile%`nTo: %destfile%
-      }
-      else
-      {
-        elapsed := A_TickCount - starttime
-        PlayMacro(elapsed / 3) ; macro playback delays are proportional to qfconvert runtime
-        FileDelete, %destfile%
-        FileDelete, %outfile%
-      }
-    }
-
-    ; TODO copy file here? rename ConvertBlueprint to GenerateMacro and extract qfconvert executor to new method
-    ;data := ConvertBlueprint(SelectedFile, RepeatPattern)
-    ;if (data)
-    ;  SendKeys(data)
-
-    ;ReadyToBuild := False
-    LastSelectedFile := SelectedFile
-    LastSelectedFilename := SelectedFilename
-    LastSelectedSheetIndex := SelectedSheetIndex
-
-    ;SelectedFile =
     If (RepeatPattern)
-      LastRepeatPattern := RepeatPattern
-    ;RepeatPattern =
+      LastRepeatPattern := RepeatPattern ; remembered for transform GUI default
 
     Building := False
     ClearTip()
@@ -459,6 +410,91 @@ ShowFilePicker:
   return
 }
 
+
+;; ---------------------------------------------------------------------------
+; Visualize blueprint's footprint (Alt+V)
+!V::
+{
+  if (!Building && ReadyToBuild)
+  {
+    Building := True
+    Tip("Visualizing...")
+    ConvertAndSendKeys(true)
+    Building := False
+    ClearTip()
+  }
+  return
+}
+
+;; ---------------------------------------------------------------------------
+;; convert blueprint to specification, move output macro file to DF macros dir
+;; and execute the macro in the DF window
+ConvertAndPlayMacro()
+{
+  global
+  local title, outfile, dfpath, destfile, starttime
+
+  title := GetNewMacroName()
+  outfile := A_ScriptDir "\" title ".mak"
+  ActivateGameWin()
+  dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
+  SplitPath, dfpath, , dfpath
+  destfile := dfpath "\data\init\macros\" title ".mak"
+
+  ; Clock how long it takes
+  starttime := A_TickCount
+  if (ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "macro", title, StartPos, RepeatPattern, false))
+  {
+    ; Copy to DF dir
+    FileCopy, %outfile%, %destfile%, 1
+    if (ErrorLevel > 0)
+    {
+      MsgBox, Error: Could not copy macro file`nFrom: %outfile%`nTo: %destfile%
+      return false
+    }
+    else
+    {
+      elapsed := A_TickCount - starttime
+      PlayMacro(elapsed / 3) ; macro playback delays are proportional to qfconvert runtime
+      FileDelete, %destfile%
+      FileDelete, %outfile%
+    }
+  }
+  return true
+}
+
+
+;; ---------------------------------------------------------------------------
+;; convert blueprint to specification and output keystrokes to game window
+;; if visualizing is true we just outline the blueprint perimeter
+ConvertAndSendKeys(visualizing)
+{
+  global
+  local outfile, output
+
+  outfile := A_ScriptDir "\keys.tmp"
+  FileDelete, %outfile%
+  ActivateGameWin()
+
+  if (ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "key", "visualize", StartPos, RepeatPattern, visualizing))
+  {
+    ; Read file contents
+    FileRead, output, %outfile%
+    if (!output)
+    {
+      MsgBox, Error: Could not read keys output file`nFrom: %outfile%`
+      return false
+    }
+    else
+    {
+      ;MsgBox % output
+      SendKeys(output)
+    }
+  }
+  ; clean up
+  FileDelete, %outfile%
+  return true
+}
 
 ;; ---------------------------------------------------------------------------
 ;; file picker
@@ -497,9 +533,11 @@ PlayMacro(delay)
 
 ;; ---------------------------------------------------------------------------
 ;; do blueprint conversion via qfconvert
-ConvertBlueprint(filename, outfile, sheetid, title, startpos, transformation)
+ConvertBlueprint(filename, outfile, sheetid, mode, title, startpos, transformation, visualize)
 {
   Tip("Thinking...")
+
+  modecmd = --mode="%mode%"
 
   titlecmd =
   if (title) {
@@ -521,8 +559,13 @@ ConvertBlueprint(filename, outfile, sheetid, title, startpos, transformation)
     sheetidcmd = --sheetid="%sheetid%"
   }
 
+  visualizecmd =
+  if (visualize) {
+    visualizecmd = --visualize
+  }
 
-  params = %titlecmd% %transcmd% %startposcmd% %sheetidcmd%
+
+  params = %modecmd% %titlecmd% %transcmd% %startposcmd% %sheetidcmd% %visualizecmd%
   return ExecQfConvert(filename, outfile, params)
 }
 
@@ -639,22 +682,22 @@ SendKeys(keys)
   Sleep, 250
   Sleep, 0
 
-  ; Count total number of % chars
-  StringSplit, pctarray, keys, `%
+  ; Convert {wait} statements to ¢ so we can Loop Parse in chunks
+  ; and sleep between each chunk.
+  StringReplace, keys, keys, {wait}, ¢, All
+
+  ; Count total number of ¢ chars
+  StringSplit, pctarray, keys, ¢
   numPctChars := pctarray0
 
   SetKeyDelay, KeyDelay, KeyPressDuration
   SetKeyDelay, 1, 1, Play
 
-  Loop, parse, keys, `%
+  Loop, parse, keys, ¢
   {
     pctDone := Floor((A_Index/numPctChars) * 100)
 
-    if (!Visualizing)
-    {
-      Tooltip = Quickfort running (%pctDone%`%)`nHold Alt+C to cancel.
-      RequestMouseTipUpdate()
-    }
+    Tip("Quickfort running (" pctDone "% done)`nHold Alt+C to cancel.")
 
     Sleep, 0
     Sleep, KeyDelay
@@ -670,65 +713,60 @@ SendKeys(keys)
     ch := SubStr(keys, 1, 1)
     asc := Asc(ch)
 
-    if ((ch = "^" || ch = "+" || ch = "!" || ch = "<" || ch = ">" || SubStr(keys, 1, 6) = "{Shift" || (asc >= 65 && asc <= 90)) && SendMode = "ControlSend") {
+    if (SendMode = "ControlSend" && (ch = "^" || ch = "+" || ch = "!" || ch = "<" || ch = ">" || SubStr(keys, 1, 6) = "{Shift" || (asc >= 65 && asc <= 90))) {
       ; We have to use special handling when send mode is ControlSend and we have to send modifier keys; ControlSend
       ; fails miserably when such modifier keys are sent.
       UseSafeMode := 1
     }
 
-    if (keys = "wait")
+    if (EnableSafetyAbort)
     {
-      ;Sleep, (DelayMultiplier * 5)
-      ;MsgBox, %EmbeddedDelayDuration%
-      Sleep, %EmbeddedDelayDuration%
-    }
-    else
-    {
-      if (!DisableSafetyAbort)
+      IfWinNotActive Dwarf Fortress
       {
-        IfWinNotActive Dwarf Fortress
-        {
-          ; prevent mass sending keys to wrong window (no reliable way to make DF receive all keys in background; ControlSend is flaky w/ DF)
-          Building := 0
-          HideTip()
-          msg := "Macro aborted!`n`nYou switched windows. The Dwarf Fortress window must be focused while Quickfort is running.`n`n"
-            . (Mode = "b" ? "Use Alt+X to send the x key 30 times to DF (useful for destructing aborted builds).`n`n" : "")
-            . (EvalMode ? "Hit Alt+f to choose a .csv file." : "Hit Alt+F to choose another .csv file. `nHit Alt+E to redo the same .csv file again.")
-            . "`nHit Alt+T to enter a command directly.`n`nShift+Alt+Z suspends/resumes Quickfort hotkeys.`nShift+Alt+X exits QF."
-          MsgBox, %msg%
-          break
-        }
-      }
-
-      ; actually send the keys!
-      if (UseSafeMode)
-      {
-        ;MsgBox % "safe mode on " keys
-        ; Make sure the DF window is active
-
-        ActivateGameWin()
-
-        ; Send desired keys "safely"
-        SetKeyDelay, 150, 25
-        Send %keys%
-        SetKeyDelay, KeyDelay, KeyPressDuration
-        ;SetKeyDelay, KeyDelay, KeyPressDuration, Play
-      }
-      else if (SendMode = "SendPlay")
-        SendPlay %keys%
-      else if (SendMode = "SendInput")
-        SendInput %keys%
-      else if (SendMode = "Send")
-        Send %keys%
-      else if (SendMode = "SendEvent")
-        SendEvent %keys%
-      else { ; SendMode = "ControlSend"
-        ReleaseModifierKeys()
-        ControlSend,, %keys% ,Dwarf Fortress
-        BlockInput, Off
+        ; prevent mass sending keys to wrong window (no reliable way to make DF receive all keys in background; ControlSend is flaky w/ DF)
+        Building := 0
+        HideTip()
+        msg := "Macro aborted!`n`nYou switched windows. The Dwarf Fortress window must be focused while Quickfort is running."
+        MsgBox, %msg%
+        break
       }
     }
+
+    ; actually send the keys!
+    if (UseSafeMode)
+    {
+      ;MsgBox % "safe mode on " keys
+      ; Make sure the DF window is active
+
+      ActivateGameWin()
+
+      ; Send desired keys "safely"
+      SetKeyDelay, 150, 25
+      Send %keys%
+      SetKeyDelay, KeyDelay, KeyPressDuration
+      ;SetKeyDelay, KeyDelay, KeyPressDuration, Play
+    }
+    else if (SendMode = "SendPlay")
+      SendPlay %keys%
+    else if (SendMode = "SendInput")
+      SendInput %keys%
+    else if (SendMode = "Send")
+      Send %keys%
+    else if (SendMode = "SendEvent")
+      SendEvent %keys%
+    else if (SendMode = "ControlSend") {
+      ReleaseModifierKeys()
+      ControlSend,, %keys% ,Dwarf Fortress
+      BlockInput, Off
+    }
+    else {
+      MsgBox, Unsupported SendMode '%SendMode%'.
+      return
+    }
+
+    Sleep, %EmbeddedDelayDuration%
   }
+  return
 }
 
 
@@ -1477,15 +1515,13 @@ RepeatReplace(subject, pattern, replace)
 ;; ---------------------------------------------------------------------------
 SetStartPos(position, label)
 {
-  global StartPos, StartPosLabel, StartPosAbsX, StartPosAbsY, LastStartPosAbsX, LastStartPosAbsY
+  global StartPos, StartPosLabel
+
+  ; set start pos
   StartPos := position
   StartPosLabel := label
 
-  if (StartPosAbsX > 0) {
-    LastStartPosAbsX := StartPosAbsX
-    LastStartPosAbsY := StartPosAbsY
-    StartPosAbsX := StartPosAbsY := 0
-  }
+  UpdateTip()
 }
 
 
@@ -1668,6 +1704,9 @@ ButtonOK:
     MsgBox, Unrecognized mode '%mode%' specified in %SelectedFilename%. Mode should be one of #build #dig #place #query
   }
 
+  StartPos := ""
+  StartPosLabel := ""
+
   ShowTip()
 
   return
@@ -1676,8 +1715,10 @@ ButtonCancel:
 GuiClose:
 GuiEscape:
   Gui, Cancel
-  SelectedSheetIndex =
-  ReadyToBuild := False
+  if (!ReadyToBuild)
+  {
+    SelectedFile =
+  }
   ShowTip()
   return
 

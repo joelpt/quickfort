@@ -32,7 +32,7 @@ KEY_LIST = {
         '[menudown]': '{NumpadAdd}', # move to next menu item
         '!': '{Enter}', # select
         '#': '+{Enter}', # shift-select (select all)
-        '%': '%wait%', # pause
+        '%': '{wait}', # pause
         '^': '{Esc}' # exit current menu
         },
     'macro': {
@@ -191,7 +191,7 @@ class Keystroker:
             cursor = newpos
         return keys
 
-    def move(self, start, end, zoffset=0):
+    def move(self, start, end, zoffset=0, allowjumps=True):
         """
         Returns list of keycodes to move DF cursor from Point start
         to Point end, as well as adjust z-level by zoffset if provided.
@@ -226,12 +226,13 @@ class Keystroker:
             keycode = ['[' + direction.compass + ']']
             jumpkeycode = ['[+' + direction.compass + ']']
             move = direction.delta()
-            if steps < 8 or not allow_backtrack:
-                # render keystrokes
+            if not allowjumps or steps < 8 or not allow_backtrack:
+                # render single movement keys
                 keys.extend(keycode * steps)
                 start = start + (move * steps)
                 allow_backtrack = True
             else:
+                # use DF's move-by-10-units commands
                 jumps = (steps // 10)
                 leftover = steps % 10
                 jumpmove = move * 10

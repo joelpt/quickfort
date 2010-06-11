@@ -15,7 +15,7 @@ from transformer import *
 from filereader import FileLayer
 import filereader
 import transformer
-
+import itertools
 
 def get_blueprint_info(path):
     sheets = filereader.get_sheets(path)
@@ -74,7 +74,13 @@ def process_blueprint_file(path, options):
 
     if options.debugfile: print ">>>> END INPUT FILE PARSING"
 
-    keys = bp.plot(options)
+    if options.visualize:
+        # get keys/macrocode to outline the blueprint's top layer perimeter
+        keys = bp.outline(options)
+    else:
+        # get keys/macrocode needed to designate the whole blueprint
+        keys = bp.plot(options)
+
     output = convert_keys(keys, options.mode, options.title)
 
     if options.debugsummary:
@@ -133,6 +139,39 @@ class Blueprint:
 
         # move cursor back to start pos x, y, z
         keys += ks.move(end, self.start, -GridLayer.zoffset(self.layers))
+
+        return keys
+
+
+    def outline(self, options):
+        """
+        Moves the cursor to the northwest corner, then clockwise to each
+        other corner, before returning to the starting position.
+        """
+        buildconfig = BuildConfig('dig', options)
+        grid = self.layers[0].grid
+        ks = Keystroker(grid, buildconfig)
+        keys = []
+
+        # move to each corner beginning with NW, going clockwise, and wait
+        # at each one
+        lastpos = self.start
+        for cornerdir in [Direction(d) for d in
+                ['nw', 'ne', 'se', 'sw', 'nw'] ]:
+            newpos = Point(
+                max(0, cornerdir.delta().x) * (grid.width - 1),
+                max(0, cornerdir.delta().y) * (grid.height - 1)
+                )
+
+            keys += ks.move(lastpos, newpos, allowjumps=False) + ['%', '%']
+            lastpos = newpos
+        keys += ks.move(lastpos, self.start, allowjumps=False)
+
+        # trim any pauses off the ends
+        while keys[0] == '%':
+            keys = keys[1:]
+        while keys[-1] == '%':
+            keys = keys[:-1]
 
         return keys
 
