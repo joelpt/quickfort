@@ -60,6 +60,7 @@ KEY_LIST = {
         '!': '0:Enter',
         '#': '1:Enter',
         '%': ''
+        # '^' (exit menu) gets special handling for macro output mode
     }
 }
 
@@ -102,15 +103,15 @@ class Keystroker:
             else:
                 nextcmd = self.buildconfig.get('diffcmd', command) or []
                 last_command = command
-            # moveto = keys to move cursor to starting area-corner
+            # moveto: keys to move cursor to starting area-corner
             subs['moveto'] = self.move(cursor, pos)
 
-            # setsize = keys to set area to desired dimensions
+            # setsize: keys to set area to desired dimensions
             setsizefun = self.buildconfig.get('setsize', command)
             setsize, newpos = setsizefun(self, pos, endpos)
             subs['setsize'] = setsize
 
-            # setmats - keys to select mats for an area
+            # setmats: keys to select mats for an area
             setmatsfun = self.buildconfig.get('setmats', command)
             if setmatsfun:
                 subs['setmats'] = self.setmats(cell.area.size())
@@ -259,7 +260,6 @@ class Keystroker:
                     # move the last few cells needed when using
                     # jumpmoves to land on the right spot
                     keys.extend(keycode * leftover)
-                    # keys.append('%')
                     start = start + (move * steps)
                     allow_backtrack = True
 
