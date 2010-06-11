@@ -44,14 +44,12 @@ MuteCompletedSound = 0
 # this feature.
 EnableSafetyAbort = 1
 
-# Try increasing these values if you have trouble with a flickering
+# Try increasing this value if you have trouble with a flickering
 # mouse tooltip. Increasing MouseTooltipPlaybackUpdateEveryMs may
 # also permit use of lower values for DelayMultiplier (faster
 # building) in 40d11 (40d can have a value of 10 here without
 # issue).
-MouseTooltipInGameUpdateEveryMs = 10
-MouseTooltipPlaybackUpdateEveryMs = 500
-MouseTooltipOutOfGameUpdateEveryMs = 50
+MouseTooltipUpdateMs = 20
 
 
 #----------------------------
