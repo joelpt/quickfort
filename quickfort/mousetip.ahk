@@ -69,6 +69,10 @@ UpdateTip()
     }
 
     header := header " (" BuildType%SelectedSheetIndex% " mode)"
+    header := header ", " Width%SelectedSheetIndex% "x" Height%SelectedSheetIndex%
+
+    if (LayerCount%SelectedSheetIndex% > 1)
+      header := header "x" LayerCount%SelectedSheetIndex%
 
     if (RepeatPattern)
       header := header "`n>> TRANSFORM: " RepeatPattern
