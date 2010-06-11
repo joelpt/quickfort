@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 import sys
-sys.path.append('Modules')
+sys.path.append('Packages')
 
 from optparse import OptionParser
 import traceback
