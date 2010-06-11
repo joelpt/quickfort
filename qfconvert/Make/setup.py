@@ -3,6 +3,6 @@ import py2exe
 
 setup(
         options={"py2exe":{"optimize":2}},
-        console=["qfconvert.py"]
+        console=["temp/qfconvert.py"]
 )
 

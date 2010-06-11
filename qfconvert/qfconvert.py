@@ -16,10 +16,10 @@ def parse_options():
     parser = OptionParser(usage=usage, version="%prog 1.0")
     parser.add_option("-s", "--sheetid",
                       dest="sheetid", default=None,
-                      help="worksheet index in xls/xlsx files; 1=first sheet")
+                      help="worksheet index for xls/xlsx files [default: 1]")
     parser.add_option("-p", "--position",
                       dest="startpos", default=None,
-                      help="starting position [format: (#,#) or ne|nw|se|sw]")
+                      help="starting position [format: (1,1) or ne|nw|se|sw]")
     parser.add_option("-t", "--transform",
                       dest="transform", default=False,
                       help="transformation rules, e.g. 2e flipv 2s")
