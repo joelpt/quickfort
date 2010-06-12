@@ -49,7 +49,7 @@ EnableSafetyAbort = 1
 # also permit use of lower values for DelayMultiplier (faster
 # building) in 40d11 (40d can have a value of 10 here without
 # issue).
-MouseTooltipUpdateMs = 20
+MouseTooltipUpdateMs = 15
 
 
 #----------------------------

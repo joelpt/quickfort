@@ -32,6 +32,7 @@ Init()
   RepeatPattern =
   SheetGuiSelectedFile := ""
   SheetGuiLastListViewEnabled =
+  ShowFullTip := 1
 
   ; Init saved gui state
   LoadAppState()
@@ -85,7 +86,7 @@ SetDefaultOptions()
   ShowCommentBox := 1
   MutedSound := 0
   DisableSafetyAbort := 0
-  MouseTooltipUpdateMs := 20
+  MouseTooltipUpdateMs := 15
   AliasesPath := "aliases.txt"
   DebugOn := 0
   return
@@ -118,15 +119,19 @@ LoadOptions()
 ;; Load app state from state.ini
 LoadAppState()
 {
-  global SelectedFolder, LastRepeatPattern
+  global SelectedFolder, LastRepeatPattern, ShowFullTip
   IniRead, SelectedFolder, state.ini, GUI, LastFolder
   IniRead, LastRepeatPattern, state.ini, GUI, LastRepeatPattern
+  IniRead, ShowFullTip, state.ini, GUI, ShowFullTip
 
   if (SelectedFolder == "ERROR")
     SelectedFolder := ""
 
   if (LastRepeatPattern == "ERROR")
     LastRepeatPattern := ""
+
+  if (ShowFullTip == "ERROR")
+    ShowFullTip := 1
 
   return
 }
@@ -136,8 +141,9 @@ LoadAppState()
 ;; Save app state to state.ini
 SaveAppState()
 {
-  global SelectedFolder, LastRepeatPattern
+  global SelectedFolder, LastRepeatPattern, ShowFullTip
   IniWrite, %SelectedFolder%, state.ini, GUI, LastFolder
+  IniWrite, %ShowFullTip%, state.ini, GUI, ShowFullTip
 
   if (LastRepeatPattern)
     IniWrite, %LastRepeatPattern%, state.ini, GUI, LastRepeatPattern

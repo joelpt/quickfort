@@ -61,6 +61,15 @@ $^p:: Send ^p
 
 
 ;; ---------------------------------------------------------------------------
+;; Toggle mini/full tip
+!M::
+  ShowFullTip := !ShowFullTip
+  UpdateTip()
+  SaveAppState()
+  return
+
+
+;; ---------------------------------------------------------------------------
 ;; Cancel build (Alt+C)
 $!C::
   Critical

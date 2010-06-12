@@ -121,6 +121,8 @@ UpdateTip()
     }
     else if (mode == "prebuild")
     {
+      if (ShowFullTip)
+      {
         body := "TYPE " . UserInitKey . " (" . UserInitText . ").`n"
             . "Position cursor with KEYBOARD.`n"
             . "`n"
@@ -131,9 +133,15 @@ UpdateTip()
             . (StartPos ? "Alt+Z resets starting corner.`n" : "")
             . "Alt+R transforms blueprint.`n"
             . "`n"
-            . "Alt+F picks another file.`n"
-            . (SheetCount > 1 ? "Alt+E picks another worksheet.`n" : "Alt+E shows blueprint info.`n")
-            . "Alt+H toggles this tooltip.`n"
+            . "Alt+F picks a new file.`n"
+            . (SheetCount > 1 ? "Alt+E changes sheets.`n" : "Alt+E shows blueprint info.`n")
+            . "Alt+H toggles tooltip.`n"
+            . "Alt+M switches to minitip."
+      }
+      else
+      {
+        body := "TYPE " . UserInitKey . " (" . UserInitText . ").`nAlt+M shows full tip."
+      }
     }
     else
     {
