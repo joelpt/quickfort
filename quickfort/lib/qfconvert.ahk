@@ -7,7 +7,7 @@ ExecQfconvert(infile, outfile, params)
   FileDelete, %outfile%
 
   cmd = "c:\lang\Python26\python" "d:\code\Quickfort\trunk\qfconvert\qfconvert.py" "%infile%" "%outfile%" %params%
-  MsgBox %cmd%
+  ;MsgBox %cmd%
   RunWait %cmd%, d:\code\Quickfort\trunk\qfconvert, Hide
 
   ready := False

@@ -129,4 +129,3 @@ AliasesPath = aliases.txt
 # Turn on for debugging (doesn't actually send any keys to DF, just
 # writes to debug.txt)
 DebugOn = 0
-

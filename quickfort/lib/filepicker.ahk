@@ -4,13 +4,25 @@
 ;; file picker
 SelectFile()
 {
-  global
-  local filename =
+  global SelectedFolder
+  filename =
+
+  ; determine path
+  if (!SelectedFolder)
+  {
+    if (A_IsCompiled)
+        SelectedFolder := A_ScriptDir "\blueprints"
+    else
+        SelectedFolder := A_ScriptDir "\..\blueprints"
+  }
+
+  HideTip()
 
   ; show file selection box
-  HideTip()
-  FileSelectFile, filename, , , Select a Quickfort blueprint file to open, Blueprints (*.xls`; *.xlsx`; *.csv)
+  FileSelectFile, filename, , %SelectedFolder%, Select a Quickfort-compatible blueprint file, Blueprints (*.xls`; *.xlsx`; *.csv)
   ActivateGameWin()
+
   ShowTip()
+
   return filename
 }

@@ -26,9 +26,15 @@ Init()
   SelectedFile := ""
   SelectedFilename := ""
   SelectedSheetIndex =
+  SelectedFolder := ""
   StartPos := ""
   StartPosLabel := ""
   RepeatPattern =
+  SheetGuiSelectedFile := ""
+  SheetGuiLastListViewEnabled =
+
+  ; Init saved gui state
+  LoadAppState()
 
   ; Init mousetip
   InitMouseTip()
@@ -105,4 +111,36 @@ LoadOptions()
       }
     }
   }
+}
+
+
+;; ---------------------------------------------------------------------------
+;; Load app state from state.ini
+LoadAppState()
+{
+  global SelectedFolder, LastRepeatPattern
+  IniRead, SelectedFolder, state.ini, GUI, LastFolder
+  IniRead, LastRepeatPattern, state.ini, GUI, LastRepeatPattern
+
+  if (SelectedFolder == "ERROR")
+    SelectedFolder := ""
+
+  if (LastRepeatPattern == "ERROR")
+    LastRepeatPattern := ""
+
+  return
+}
+
+
+;; ---------------------------------------------------------------------------
+;; Save app state to state.ini
+SaveAppState()
+{
+  global SelectedFolder, LastRepeatPattern
+  IniWrite, %SelectedFolder%, state.ini, GUI, LastFolder
+
+  if (LastRepeatPattern)
+    IniWrite, %LastRepeatPattern%, state.ini, GUI, LastRepeatPattern
+
+  return
 }

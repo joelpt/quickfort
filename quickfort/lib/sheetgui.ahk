@@ -4,22 +4,17 @@
 
 ;; ---------------------------------------------------------------------------
 ;; Initialize the sheet selection/info GUI.
-InitGui(withSelector)
+InitGui(listViewEnabled)
 {
   global
-  local offset
-
-  if (withSelector == LastInitGuiSelectorMode)
-    return
-
-  LastInitGuiSelectorMode := withSelector
+  local offset =
 
   Gui, Destroy
   Gui, Font, S9, Verdana
 
   offset := 175
-  if (withSelector) {
-    Gui, Add, ListView, r20 w220 h360 gSheetListView vSelectedSheetIndex AltSubmit -Hdr, Blueprint
+  if (listViewEnabled) {
+    Gui, Add, ListView, r20 w220 h360 gSheetListView vSelectedSheetIndex AltSubmit -Hdr -Multi, Blueprint
     offset += 220
   }
 
@@ -39,39 +34,46 @@ InitGui(withSelector)
 ShowSheetInfoGui()
 {
   global
+  local listViewEnabled, selectorChanged, needRefresh
 
-  if (SheetCount > 1)
+  needRefresh := (SheetGuiSelectedFile != SelectedFile)
+  listViewEnabled := (SheetCount > 1)
+
+  if (needRefresh)
+    SelectedSheetIndex := 0 ; default to selecting first row
+
+  if (needRefresh) ; need to update the GUI layout/listview?
   {
-    ; show gui with sheet selector and populate the listview
-    InitGui(True)
-    LV_Delete()
-    Loop, % SheetCount
+    ; rebuild the gui
+    InitGui(listViewEnabled)
+
+    if (listViewEnabled)
     {
-      index := A_Index - 1
-      name := Name%index%
-      if (index == SelectedSheetIndex)
-        opts := "Select"
-      else
-        opts := ""
-      LV_Add(opts, name)
+      ; reload the ListView's elements
+      LV_Delete()
+      Loop, % SheetCount
+      {
+        index := A_Index - 1
+        name := Name%index%
+        LV_Add("", name)
+      }
     }
   }
-  else
-  {
-    ; show gui without sheet selector and default SelectedSheetIndex to 0
-    SelectedSheetIndex := 0
-    InitGui(False)
-  }
-  ; Set showing sheet info to first sheet
-  UpdateGuiSheetInfo(0)
+
+  ; Update gui to our current sheet
+  UpdateGuiSheetInfo(SelectedSheetIndex)
+
+  ; Show the GUI now
   Gui, Show
   WinWaitActive, ahk_class AutoHotkeyGUI
-  if (SheetCount > 0)
+
+  ; Set the current selection of the ListView
+  if (listViewEnabled)
   {
-    ; workaround for listview needing an extra keypress to start working (focus issue?)
-    Sleep 100
-    ControlSend, SysListView321, {Down}{Up}, ahk_class AutoHotkeyGUI
+    LV_Modify(SelectedSheetIndex + 1, "Select Focus")
   }
+
+  SheetGuiSelectedFile := SelectedFile
   return
 }
 
@@ -104,7 +106,7 @@ ButtonOK:
 
   StartPos := ""
   StartPosLabel := ""
-
+  RepeatPattern := ""
   SetVarsByBuildType(BuildType%SelectedSheetIndex%)
 
   ShowTip()

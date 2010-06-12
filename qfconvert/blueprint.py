@@ -163,7 +163,7 @@ class Blueprint:
                 max(0, cornerdir.delta().y) * (grid.height - 1)
                 )
 
-            keys += ks.move(lastpos, newpos, allowjumps=False) + ['%', '%']
+            keys += ks.move(lastpos, newpos, allowjumps=False) + ['%']
             lastpos = newpos
         keys += ks.move(lastpos, self.start, allowjumps=False)
 

@@ -52,7 +52,7 @@ GetBlueprintInfo(filename)
   Tip("Reading blueprint...")
 
   params = --info
-  outfile := GetNewMacroName() ".tmp"
+  outfile := A_ScriptDir "\" GetNewMacroName() ".tmp"
   result := ExecQfConvert(filename, outfile, params)
   FileDelete, %outfile%
 

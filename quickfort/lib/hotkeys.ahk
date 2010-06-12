@@ -1,8 +1,9 @@
 ;; Hotkey definitions.
 
 ;; ---------------------------------------------------------------------------
-;; Toggle suspend of the script (Shift-Alt-Z)
-$+!Z::
+;; Toggle suspend of the script (Shift-Alt-Z) while also letting it pass
+;; through to OS
+~$+!Z::
   Suspend, Permit
   if (A_IsSuspended) {
     Suspend, Off
@@ -61,11 +62,10 @@ $^p:: Send ^p
 
 ;; ---------------------------------------------------------------------------
 ;; Cancel build (Alt+C)
-!C::
+$!C::
   Critical
   if (Building)
   {
-    ReadyToBuild := 0
     Building := 0
     Tooltip := "Build Cancelled!"
     UpdateTip()
@@ -76,16 +76,16 @@ $^p:: Send ^p
 
 ;; ---------------------------------------------------------------------------
 ;; Set start corner with Alt+Q/W/A/S or unset with Alt+Z
-$!Q:: SetStartPos("nw", "North-west corner")
-$!W:: SetStartPos("ne", "North-east corner")
-$!A:: SetStartPos("sw", "South-west corner")
-$!S:: SetStartPos("se", "South-east corner")
-$!Z:: SetStartPos("", "") ; unset start corner
+!Q:: SetStartPos("nw", "North-west corner")
+!W:: SetStartPos("ne", "North-east corner")
+!A:: SetStartPos("sw", "South-west corner")
+!S:: SetStartPos("se", "South-east corner")
+!Z:: SetStartPos("", "") ; unset start corner
 
 
 ;; ---------------------------------------------------------------------------
 ;; Helper to mass-demolish misplaced constuctions
-$!X::
+!X::
   Send {x 30}
   return
 
@@ -150,6 +150,7 @@ Examples:
     if (RegExMatch(pattern, "^(\d*([dunsew]|flip[vh]|rotc?cw|\!)\s*)+$"))
     {
       RepeatPattern := LastRepeatPattern := pattern
+      SaveAppState()
       UpdateTip()
     }
     else if (!pattern)
@@ -179,8 +180,11 @@ ShowFilePicker:
       SelectedSheetIndex =
       RepeatPattern =
 
-      ; get the filename on its own for use by mousetip
-      SplitPath, SelectedFile, SelectedFilename
+      ; split filename up into parts we use elsewhere
+      SplitPath, SelectedFile, SelectedFilename, SelectedFolder
+
+      ; save change to app state (SelectedFolder)
+      SaveAppState()
 
       if (GetBlueprintInfo(SelectedFile))
       {
@@ -195,7 +199,7 @@ ShowFilePicker:
 
 ;; ---------------------------------------------------------------------------
 ;; Build starter (Alt+D)
-!D::
+$!D::
 {
   if (!Building && ReadyToBuild)
   {
@@ -219,7 +223,7 @@ ShowFilePicker:
 
 ;; ---------------------------------------------------------------------------
 ;; Visualize blueprint's footprint (Alt+V)
-!V::
+$!V::
 {
   if (!Building && ReadyToBuild)
   {

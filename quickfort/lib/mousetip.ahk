@@ -97,10 +97,16 @@ UpdateTip()
 
     if (StartPos)
       header := header "`n>> STARTS AT: " StartPosLabel
-    else if (StartComment%SelectedSheetIndex% || (StartPosition%SelectedSheetIndex% && StartPosition%SelectedSheetIndex% != "(1, 1)"))
-      header := header "`n>> STARTS AT: " StartPosition%SelectedSheetIndex%
+    else if (StartPosition%SelectedSheetIndex%)
+    {
+      if (StartPosition%SelectedSheetIndex% == "(1, 1)")
+        header := header "`nStarts at: North-west corner"
+      else
+        header := header "`n>> STARTS AT: " StartPosition%SelectedSheetIndex%
+
       if (StartComment%SelectedSheetIndex%)
       	header := header " (" StartComment%SelectedSheetIndex% ")"
+    }
   }
 
   if (MouseTip)
@@ -192,9 +198,6 @@ ShowMouseTip:
       LastTooltip := FullTip
       LastMouseX := xpos
       LastMouseY := ypos
-
-      xpos += 25
-      ypos += 25
 
       ToolTip, %FullTip%, %xpos%, %ypos%
     }
