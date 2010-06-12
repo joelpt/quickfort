@@ -15,16 +15,16 @@ return
 
 ; Includes are best put at the end of AHK scripts because they are added and executed inline
 ; wherever the #include appears
-#include blueprint.ahk
-#include compile.ahk
-#include convert.ahk
-#include df.ahk
-#include filepicker.ahk
-#include hotkeys.ahk
-#include init.ahk
-#include log.ahk
-#include misc.ahk
-#include mousetip.ahk
-#include qfconvert.ahk
-#include sheetgui.ahk
-#include win32.ahk
+#include lib/blueprint.ahk
+#include lib/compile.ahk
+#include lib/convert.ahk
+#include lib/df.ahk
+#include lib/filepicker.ahk
+#include lib/hotkeys.ahk
+#include lib/init.ahk
+#include lib/log.ahk
+#include lib/misc.ahk
+#include lib/mousetip.ahk
+#include lib/qfconvert.ahk
+#include lib/sheetgui.ahk
+#include lib/win32.ahk
