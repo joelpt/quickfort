@@ -7,13 +7,22 @@
 
 
 #----------------------------
-# Macro vs keystrokes
+# Playback
 #----------------------------
 
 # Set this to 'macro' to use DF 0.31.x's macro ability (very fast).
 # Set this to 'key' to send keystrokes to the DF game window (slower).
 # The visualize command (Alt+V) always sends keystrokes.
 PlaybackMode = macro
+
+# If PlaybackMode=key, you may need to un/comment the below setting
+# based on your version of Dwarf Fortress.
+
+# DF v0.31+ uses {Esc} to exit menus.
+KeyExitMenu = {Esc}
+
+# DF v0.28.181.40d- uses {Space} to exit menus.
+#KeyExitMenu = {Space}
 
 
 #----------------------------
@@ -23,25 +32,12 @@ PlaybackMode = macro
 # Set this to 0 to disable the startup balloon traytip.
 ShowStartupTrayTip = 1
 
-# Set this to 0 to disable the instructional mousetip shown when not
-# in placement or playback modes.
-ShowSplash = 1
-
 # Set to 0 to disable the mouse tooltip entirely.
 ShowMouseTooltip = 1
 
-# Set to 0 if you don't like the CSV file's comment text popup
-# appearing after loading a CSV.
-ShowCommentBox = 1
-
-# When set to 0, QF will play a sound when playback is completed.
-# Set to 1 to disable.
-MuteCompletedSound = 0
-
-# If set to 1, QF will immediately abort building if the Dwarf
-# Fortress window becomes inactive, avoiding sending keystrokes
-# intended for DF to another program. Setting this to 0 will disable
-# this feature.
+# If set to 1, QF will abort building if the Dwarf Fortress window
+# becomes inactive, avoiding sending keystrokes intended for DF to
+# another program. Setting this to 0 will disable this feature.
 EnableSafetyAbort = 1
 
 # Try increasing this value if you have trouble with a flickering
@@ -51,39 +47,8 @@ EnableSafetyAbort = 1
 # issue).
 MouseTooltipUpdateMs = 15
 
-
 #----------------------------
-# Keystrokes
-#----------------------------
-
-# You probably only need to edit this section if you have set
-# SendingMode to 'key' or use strange movement keys.
-
-# EDIT THIS DEPENDING ON YOUR VERSION OF DWARF FORTRESS!
-# You might have to change this depending on the version of DF
-# you're running.
-#   DF v0.31.# uses {Esc} to exit menus.
-#   DF v0.28.181.40d# uses {Space} to exit menus.
-KeyExitMenu = {Esc}
-#KeyExitMenu = {Space}
-
-# Your Dwarf Fortress cursor movement keys.
-# By default NSEW movements are performed with 8246, and Z up/down
-# is performed with Shift+5/Ctrl+5.
-KeyLeft = 4
-KeyRight = 6
-KeyUp = 8
-KeyDown = 2
-KeyUpLeft = 7
-KeyUpRight = 9
-KeyDownLeft = 1
-KeyDownRight = 3
-KeyUpZ = +5
-KeyDownZ = ^5
-
-
-#----------------------------
-# Key-sending controls
+# Key-sending
 #----------------------------
 
 # Determines key-sending method, one of: ControlSend Send SendEvent
@@ -120,12 +85,3 @@ KeyPressDuration = -1
 # aliases.txt for a few examples. Path is relative to QF's starting
 # directory by default.
 AliasesPath = aliases.txt
-
-
-#----------------------------
-# Debugging
-#----------------------------
-
-# Turn on for debugging (doesn't actually send any keys to DF, just
-# writes to debug.txt)
-DebugOn = 0

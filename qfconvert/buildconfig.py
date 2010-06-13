@@ -10,7 +10,7 @@ BUILD_TYPE_CFG = {
         'submenukeys': '',
         'sizebounds': None,
         'custom': None,
-        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        'setsize': 'setsize_standard'
      },
 
     'build': {
@@ -20,7 +20,7 @@ BUILD_TYPE_CFG = {
         'diffcmd': ['cmd'],
         'submenukeys': ['i', 'w', 'e', 'C', 'T', 'M'],
         'sizebounds': (1, 1, 1, 1), # minwidth, maxwidth, minheight, maxheight
-        'setsize': lambda keystroker, start, end: keystroker.setsize_build(start, end),
+        'setsize': 'setsize_build',
         'custom': {
 
             # farm plot
@@ -30,7 +30,7 @@ BUILD_TYPE_CFG = {
             # all constructions
             r'C.':      { 'sizebounds': (1, 10, 1, 10),
                           'designate': 'exitmenu menu cmd moveto setsize ! % setmats'.split(),
-                          'setmats': lambda keystroker, start, end: keystroker.setmats(areasize)
+                          'setmats': 'setmats'
                         },
 
             # un/paved roads and bridges
@@ -38,24 +38,24 @@ BUILD_TYPE_CFG = {
 
             # 5x5 siege workshop
             r'ws':      { 'sizebounds': (5, 5, 5, 5),
-                          'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
+                          'setsize': 'setsize_fixed'
                         },
 
             # metalsmith forge, magma forge
             r'w[fv]':   { 'designate': 'exitmenu menu cmd moveto setsize ! % ! % # %'.split(),
                           'sizebounds': (3, 3, 3, 3),
-                          'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
+                          'setsize': 'setsize_fixed'
                         },
 
             # 3x3 workshops other than those already accounted for
             r'w[^sfv]': { 'sizebounds': (3, 3, 3, 3),
-                          'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
+                          'setsize': 'setsize_fixed'
                         },
 
             # trade depot
             r'D':       { 'designate': 'exitmenu cmd moveto setsize ! % ! % # %'.split(),
                           'sizebounds': (5, 5, 5, 5),
-                          'setsize': lambda keystroker, start, end: keystroker.setsize_fixed(start, end)
+                          'setsize': 'setsize_fixed'
                         },
 
             # screw pump
@@ -76,7 +76,7 @@ BUILD_TYPE_CFG = {
         'submenukeys': '',
         'sizebounds': None,
         'custom': None,
-        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        'setsize': 'setsize_standard'
     },
 
     'query': { # set building/task prefs
@@ -87,7 +87,7 @@ BUILD_TYPE_CFG = {
         'submenukeys': '',
         'sizebounds': None,
         'custom': None,
-        'setsize': lambda keystroker, start, end: keystroker.setsize_standard(start, end)
+        'setsize': 'setsize_standard'
     }
 }
 

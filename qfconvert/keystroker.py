@@ -106,44 +106,52 @@ class Keystroker:
             subs['moveto'] = self.move(cursor, pos)
 
             # setsize = keys to set area to desired dimensions
-            setsizefun = self.buildconfig.get('setsize', command)
-            setsize, newpos = setsizefun(self, pos, endpos)
+            setsizefun = getattr(self,
+                self.buildconfig.get('setsize', command))
+            setsize, newpos = setsizefun(pos, endpos)
             subs['setsize'] = setsize
 
             # setmats - keys to select mats for an area
-            setmatsfun = self.buildconfig.get('setmats', command)
-            if setmatsfun:
-                subs['setmats'] = self.setmats(cell.area.size())
+            setmatscfg = self.buildconfig.get('setmats', command)
+            if setmatscfg:
+                setmatsfun = getattr(self, setmatscfg)
+                subs['setmats'] = setmats(cell.area.size())
 
             # submenu?
             justcommand = None
             for k in submenukeys:
                 if re.match(k, command):
+                    # this command needs to be called in a DF submenu
                     submenu = command[0]
 
-                    # entering a submenu from not being in one?
                     if not last_submenu:
+                        # entering a new submenu and not currently in one
                         subs['menu'] = submenu
                         subs['exitmenu'] = []
                         last_submenu = submenu
                     elif last_submenu != submenu:
-                        # exit previous submenu
-                        subs['exitmenu'] = ['^']
-                        # enter new menu
-                        subs['menu'] = submenu
+                        # switching from one submenu to another
+                        subs['exitmenu'] = ['^'] # exit previous submenu
+                        subs['menu'] = submenu # enter new menu
                         last_submenu = submenu
                     else:
+                        # same submenu
                         subs['menu'] = []
                         subs['exitmenu'] = []
 
                     # drop the submenu key from command
                     justcommand = command[1:]
                     continue
+
+            # no known submenu found in command?
             if not justcommand:
                 if last_submenu:
+                    # was in a submenu, now want to be at parent menu
                     subs['exitmenu'] = ['^']
                 else:
+                    # was at root menu and want to continue being there
                     subs['exitmenu'] = []
+
                 subs['menu'] = []
                 last_submenu = ''
                 justcommand = command[:]
@@ -156,23 +164,24 @@ class Keystroker:
             cmdedit = re.sub(r'\^', '|^|', cmdedit)
             cmdsplit = re.split(r'\|+', cmdedit)
 
-            cmdkeys = []
+            # break command into individual keycodes
+            codes = []
             for k in cmdsplit:
                 if k[0] in ('{', '!', '^', '+'):
-                    cmdkeys.append(k) # preserve whole key-combos
+                    codes.append(k) # preserve whole key-combos
                 else:
-                    cmdkeys.extend(k) # separate individual keystrokes
+                    codes.extend(k) # separate individual keystrokes
 
-            # substitute cmdkeys into nextcmd
-            nextcmdkeys = []
+            # substitute codes into nextcmd where we find string 'cmd'
+            nextcodes = []
             for c in nextcmd:
                 if c == 'cmd':
-                    nextcmdkeys.extend(cmdkeys)
+                    nextcodes.extend(codes)
                 else:
                     nextcmd.append(c)
 
-            # nextcmdkeys is now our command-key string
-            subs['cmd'] = nextcmdkeys
+            # nextcodes is now our command-key string
+            subs['cmd'] = nextcodes
 
             pattern = self.buildconfig.get('designate', command)
 
