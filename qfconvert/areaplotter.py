@@ -28,7 +28,7 @@ class AreaPlotter:
                 m = re.match(r'(.+)\((\d+)x(\d+)\)', cell.command)
                 if cell.plottable and m:
                     command = m.group(1)
-                    width, height = map(int, m.group(2, 3))
+                    width, height = (int(c) for c in m.group(2, 3))
 
                     area = Area(Point(x, y),
                         Point(x + width - 1, y + height - 1))
@@ -156,8 +156,8 @@ class AreaPlotter:
         quad overlaps on two edges with adjacent quads.
         """
         dir_pairs = []
-        for dir_ in ('e', 's', 'w', 'n'):
-            direction = Direction(dir_)
+        for d in ('e', 's', 'w', 'n'):
+            direction = Direction(d)
             dir_pairs.append([direction, direction.right_turn()])
             dir_pairs.append([direction, direction.left_turn()])
 
@@ -183,7 +183,7 @@ class AreaPlotter:
 
         # Get the min/max size that this area may be, based on the command
         sizebounds = self.buildconfig.get('sizebounds', command) \
-            or (1, 1000, 1, 1000) # default sizebounds
+            or (1, 1000, 1, 1000) # default sizebounds are very large
 
         # Get the max width of this area on the axis defined by
         # pos and primary direction, and max width from
@@ -243,5 +243,5 @@ class AreaPlotter:
 
 
 def next_label(label):
-    """label character cycles through the printable ASCII chars"""
+    """Get next label char by cycling through ASCII chars '0' through '}'."""
     return chr( ((ord(label) - 48 + 1) % 78) + 48 )

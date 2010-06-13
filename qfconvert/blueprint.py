@@ -1,24 +1,22 @@
-# how to remove the most recent macro as qf keycode -
-# hand convert this to the actual macro things
-# won't really work b/c you have to exit designation positioning mode (bdqp menu)
-# ['OPTIONS', 'CURSOR_DOWN', 'CURSOR_DOWN', 'SELECT', 'SELECT', 'BACKSPACE', 'LEAVESCREEN', 'CURSOR_UP', 'CURSOR_UP', 'SELECT', 'LEAVESCREEN']
+"""Blueprint class and associated processing functions."""
 
 import textwrap
 
-from util import Struct
+from util import flatten
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
-from geometry import *
+from geometry import Point, Direction, GridLayer
 from keystroker import Keystroker, convert_keys
 from router import Router
-from transformer import *
 from filereader import FileLayer
 import filereader
 import transformer
-import itertools
+import re
 
 def get_blueprint_info(path):
+    """Returns information about the blueprint at path."""
     sheets = filereader.get_sheets(path)
+
     s = ''
     for sheet in sheets:
         try:
@@ -30,13 +28,25 @@ def get_blueprint_info(path):
             s += '---- Sheet id %d\n' % sheet[1]
             s += bp.get_info() + '\n'
         except:
-            continue
-    return s
+            continue # ignore blank/missing sheets
+
+    if s:
+        return s
+    else:
+        raise Exception, "No valid blueprints found in '%s'." % path
 
 
 def process_blueprint_file(path, options):
-    if options.debugfile: print ">>>> BEGIN INPUT FILE PARSING"
+    """
+    Main routine for reading a blueprint, transforming it, and rendering
+    keystrokes/macros required to plot or visualize the blueprint specified.
+    """
+
+    if options.debugfile:
+        print ">>>> BEGIN INPUT FILE PARSING"
+
     sheetid = options.sheetid
+
     (layers, build_type, start, start_comment, comment) = \
         filereader.parse_file(path, sheetid)
 
@@ -47,40 +57,30 @@ def process_blueprint_file(path, options):
     if options.transform:
         if options.debugfile:
             print "#### Transforming with: %s" % options.transform
-        transforms = transformer.parse_transform_str(options.transform)
-        layers = transformer.transform(transforms, layers)
 
-        if options.debugfile: FileLayer.str_layers(layers)
+        start, layers = transformer.transform(
+            transformer.parse_transform_str(options.transform),
+            start, layers)
+
+        if options.debugfile:
+            FileLayer.str_layers(layers)
 
     layers = filereader.FileLayers_to_GridLayers(layers)
 
     # set startpos
     if options.startpos is not None:
-        m = re.match(r'\(?(\d+)[,;](\d+)\)?', options.startpos)
-        if m is not None:
-            start = Point( int(m.group(1)), int(m.group(2)) )
-        else:
-            m = re.match(r'(ne|nw|se|sw)', options.startpos.lower())
-            if m is not None:
-                startcorner = Direction(m.group(1)).delta()
-                start = Point(startcorner.x, startcorner.y)
-                start.x = max(0, start.x) * (layers[0].grid.width - 1)
-                start.y = max(0, start.y) * (layers[0].grid.height - 1)
-            else:
-                raise Exception, "Invalid --position parameter '%s'" % \
-                    options.startpos
+        start = parse_startpos(options.startpos,
+            layers[0].grid.width,
+            layers[0].grid.height)
+
     # convert layers and other data to Blueprint
     bp = Blueprint('', layers, build_type, start, start_comment, comment)
 
-    if options.debugfile: print ">>>> END INPUT FILE PARSING"
+    if options.debugfile:
+        print ">>>> END INPUT FILE PARSING"
 
-    if options.visualize:
-        # get keys/macrocode to outline the blueprint's top layer perimeter
-        keys = bp.outline(options)
-    else:
-        # get keys/macrocode needed to designate the whole blueprint
-        keys = bp.plot(options)
-
+    # get keys/macrocode to outline or plot the blueprint
+    keys = bp.outline(options) if options.visualize else bp.plot(options)
     output = convert_keys(keys, options.mode, options.title)
 
     if options.debugsummary:
@@ -104,7 +104,29 @@ def process_blueprint_file(path, options):
     return output
 
 
+def parse_startpos(start, width, height):
+    """Transform startpos string like (1,1) or nw to corresponding Point."""
+    m = re.match(r'\(?(\d+)[,;](\d+)\)?', start)
+    if m is not None:
+        new = Point( int(m.group(1)), int(m.group(2)) )
+    else:
+        m = re.match(r'(ne|nw|se|sw)', start.lower())
+        if m is not None:
+            newcorner = Direction(m.group(1)).delta()
+            new = Point(newcorner.x, newcorner.y)
+            new.x = max(0, new.x) * (width - 1)
+            new.y = max(0, new.y) * (height - 1)
+        else:
+            raise Exception, "Invalid --position parameter '%s'" % start
+    return start
+
+
 class Blueprint:
+    """
+    Represents a single blueprint (csv file or sheet in xls/x file).
+    Provides high level methods for plotting, outlining, and retrieving
+    information about the blueprint.
+    """
 
     def __init__(self, name, layers, build_type, start, start_comment,
         comment):
@@ -115,7 +137,7 @@ class Blueprint:
 
     def plot(self, options):
         """Plots a route through the provided blueprint."""
-        buildconfig = BuildConfig(self.build_type, options)
+        buildconfig = BuildConfig(self.build_type)
         keys = []
         start = self.start
         ks = None
@@ -177,6 +199,7 @@ class Blueprint:
 
 
     def get_info(self):
+        """Retrieve various bits of info about the blueprint."""
         cells = flatten(layer.grid.cells for layer in self.layers)
         commands = [c.command for c in cells]
         cmdset = set(commands) # uniques

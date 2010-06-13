@@ -1,47 +1,80 @@
+"""Blueprint file reading/parsing operations."""
+
 import re
 import os.path
-from itertools import dropwhile, repeat
-import csv
 import zipfile
 from xml2obj import xml2obj
 
 import xlrd
 
-from geometry import *
-import blueprint
+from geometry import Point, Grid, GridLayer
 
 
 class FileLayer:
+    """
+    Represents the rows/cells of a single layer within a blueprint/sheet.
+    Includes an onexit member which specifies what keycodes should be used
+    to transition from one FileLayer to the next (in a list of FileLayers).
+    """
 
     def __init__(self, onexit, rows=None):
         self.onexit = onexit
         self.rows = rows or []
 
     def fixup(self):
-        """Add missing cells to rows which ended prematurely"""
-        # remove trailing empty and # cells
-        for cells in self.rows:
-            while cells and cells[-1] in ('', '#'):
-                # print cells
-                cells = cells[:-1]
+        """
+        Trim off extra cells to right of # symbols and make sure every row
+        is of the same length.
+        """
+        maxwidth = 0
 
-        maxlen = max([len(row) for row in self.rows])
+        # Find max width and trim off unwanted crap
+        for i, cells in enumerate(self.rows):
+            try:
+                endat = cells.index('#') # find first # (row ender) in any
+                if endat == 0:
+                    raise Exception, "Blueprint has '#' in unexpected cell."
+                else:
+                    # trim off stuff from the found # to the right
+                    cells = cells[0:endat]
+            except:
+                # trim off empty cells at end of row
+                while cells and cells[-1] == '':
+                    cells = cells[:-1]
+                endat = len(cells)
+            self.rows[i] = cells
+
+            # update maxwidth
+            maxwidth = max(maxwidth, endat)
+
+        if maxwidth == 0:
+            raise Exception, "Blueprint appears to be empty or zero-width."
+
+        # Make all rows the same width
         for row in self.rows:
-            # print row
-            if len(row) < maxlen:
-                row.extend(
-                    [''] * (maxlen - len(row))
-                    )
+            if len(row) < maxwidth:
+                row.extend( [''] * (maxwidth - len(row)) )
+
         return
+
+    def width(self):
+        """Returns current width of FileLayer rows."""
+        return len(self.rows[0]) if self.rows else 0
+
+    def height(self):
+        """Returns current height of FileLayer's rows (row count)."""
+        return len(self.rows) if self.rows else 0
 
     @staticmethod
     def str_rows(layer, colsep = ''):
+        """Returns a pretty-formatted string showing the layer's rows."""
         rowstrings = [colsep.join(['.' if c == '' else c[0] for c in row]) + \
             '|' for row in layer.rows]
         return '\n'.join(rowstrings)
 
     @staticmethod
     def str_layers(file_layers):
+        """Returns a pretty-formatted string of the given file_layers."""
         s = ''
         for layer in file_layers:
             s += (FileLayer.str_rows(layer) + '\n') + \
@@ -66,7 +99,8 @@ def FileLayers_to_GridLayers(file_layers):
                     break
                 else:
                     # Blank out marking (non-sent) chars
-                    if cell in ('~', '`'): cell = ''
+                    if cell in ('~', '`'):
+                        cell = ''
 
                     # add this csv cell to the grid
                     grid.add_cell(Point(x, y), cell)
@@ -94,7 +128,10 @@ def get_sheets(filename):
 
 
 def parse_file(filename, sheetid):
-    layers = []
+    """
+    Parse the specified file/sheet into FileLayers and associated
+    other bits of information. CSV files are considered a single sheet.
+    """
 
     # verify file exists
     if not os.path.isfile(filename):
@@ -112,9 +149,11 @@ def parse_file(filename, sheetid):
         raise Exception, "Invalid file type '%s' (csv, xls, xlsx accepted)" \
             % ext
 
-    # remove last line if it starts with a #
-    if lines[-1][0] == '#':
-        lines = lines[:-1]
+    # if there's a line that starts with #, treat it as the last line of
+    # the blueprint and trim off everything from there to the end of lines
+    for i, line in enumerate(lines):
+        if line and line[0] == '#':
+            lines = lines[0:i]
 
     # break into the lines we want
     (top_line, lines) = (','.join(lines[0]), lines[1:])
@@ -157,12 +196,10 @@ def parse_file(filename, sheetid):
     for cells in lines:
         # whitespace-strip and de-unicode the cells
         cells = [str(c.strip()) for c in cells]
-        # print cells
 
         # remove trailing empty and # cells
-        while cells and cells[-1] in ('', '#'):
-            # print cells
-            cells = cells[:-1]
+        # while cells and cells[-1] in ('', '#'):
+        #     cells = cells[:-1]
 
         # test for multilayer separator #> or #<
         c = cells[0] if cells else ''
@@ -180,12 +217,15 @@ def parse_file(filename, sheetid):
     for fl in filelayers:
         fl.fixup()
 
-    # print FileLayer.print_layers(filelayers)
-
     return filelayers, build_type, start, start_comment, comment
 
 
 def read_csv_file(filename):
+    """
+    Read contents of a .csv file.
+    Returns a 2d list of cell values.
+    """
+
     # read file contents
     with open(filename) as f:
         lines = f.readlines()
@@ -205,7 +245,9 @@ def read_csv_file(filename):
 def read_xls_file(filename, sheetid):
     """
     Read contents of first sheet in Excel 95-2003 (.xls) workbook file.
+    Returns a 2d list of cell values.
     """
+
     wb = xlrd.open_workbook(filename)
     sh = wb.sheet_by_index(sheetid or 0)
 
@@ -216,17 +258,14 @@ def read_xls_file(filename, sheetid):
     return lines
 
 
-def read_xls_sheets(filename):
-    """Get a list of sheets and their ids from xls file."""
-    wb = xlrd.open_workbook(filename)
-    return [(name, i) for i, name in enumerate(wb.sheet_names())]
-
-
 def read_xlsx_file(filename, sheetid):
     """
     Read contents of specified sheet in Excel 2007 (.xlsx) workbook file.
     .xlsx files are actually zip files containing xml files.
+
+    Returns a 2d list of cell values.
     """
+
     if sheetid is None:
         sheetid = 1
     else:
@@ -249,16 +288,11 @@ def read_xlsx_file(filename, sheetid):
 
     # extract cell values into lines; cell values are given
     # as ordinal index references into sharedStrings.xml:ssi.si
-    # elements, whose actual value is found in node.t
-    # @@@ TODO raise an error when c.v=='d' and not an int; that means
-    # it is a formula and we don't do those. give back a useful error
-    # by catching all errors in main() and output to stderr Error: ...
-
+    # elements, whose string-value is found in the node's t element
     lines = []
     lastrownum = 0
     for row in rows:
         rownum = int(row.r)
-        # print "%d %d" % (rownum, lastrownum)
         if rownum > lastrownum + 1: # interpolate missing rows
             lines.extend([[]] * (rownum - lastrownum - 1))
         lastrownum = rownum
@@ -276,11 +310,18 @@ def read_xlsx_file(filename, sheetid):
 
             lastcolnum = colnum
             # add cell value looked-up from shared strings
-            line.append(str('' if c.v is None else strings[int(c.v)].t))
+            line.append(str(
+                '' if c.v is None or c.v == 'd' else strings[int(c.v)].t
+                ))
         lines.append(line)
-    # print lines
     return lines
 
+
+def read_xls_sheets(filename):
+    """Get a list of sheets and their ids from xls file."""
+
+    wb = xlrd.open_workbook(filename)
+    return [(name, i) for i, name in enumerate(wb.sheet_names())]
 
 def read_xlsx_sheets(filename):
     """Get a list of sheets and their ids from xlsx file."""
@@ -290,8 +331,7 @@ def read_xlsx_sheets(filename):
         xml = xml2obj(sheetsdata)
         sheets = xml.sheets.sheet
     except:
-        raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
-            filename, sheetid)
+        raise Exception, "Could not open '%s' for sheet listing." % filename
 
     output = []
     for sheet in sheets:
@@ -303,10 +343,9 @@ def read_xlsx_sheets(filename):
 
 
 def colcode_to_colnum(colcode):
-    """
-    Convert Excel style column ids, e.g. A, XFD, etc. to a column number.
-    """
+    """Convert Excel style column ids (A, BB, XFD, ...) to a column number."""
     if len(colcode) == 0:
         return 0
-    return (ord(colcode[-1]) - ord('A') + 1) + \
-        (26 * colcode_to_colnum(colcode[:-1]))
+    else:
+        return (ord(colcode[-1]) - ord('A') + 1) + \
+            (26 * colcode_to_colnum(colcode[:-1]))

@@ -65,30 +65,11 @@ SetDefaultOptions()
   EmbeddedDelayDuration := 250
   SendMode := "ControlSend"
   KeyExitMenu := "{Esc}"
-  KeyLeft := "4"
-  KeyRight := "6"
-  KeyUp := "8"
-  KeyDown := "2"
-  KeyUpZ := "+5"
-  KeyDownZ := "^5"
-  KeyUpLeft := "7"
-  KeyUpRight := "9"
-  KeyDownLeft := "1"
-  KeyDownRight := "3"
-  UseDiagonalMoveKeys := 1
-  UseLongConstructions := 1
-  DisableBacktrackingOptimization := 0
-  DisableKeyOptimizations := 0
-  DisableShiftOptimizations := 1
-  ShowSplashBox := 1
   ShowStartupTrayTip := 1
   ShowMouseTooltip := 1
-  ShowCommentBox := 1
-  MutedSound := 0
-  DisableSafetyAbort := 0
+  EnableSafetyAbort := 1
   MouseTooltipUpdateMs := 15
   AliasesPath := "aliases.txt"
-  DebugOn := 0
   return
 }
 
