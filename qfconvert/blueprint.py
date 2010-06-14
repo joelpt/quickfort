@@ -151,7 +151,7 @@ class Blueprint:
             plotter.discover_areas() # find contiguous areas
 
             grid, plots, end = plan_route(
-                plotter.grid, options.debugarea, start)
+                plotter.grid, options.debugrouter, start)
 
             # generate key sequence to render this series of plots in game
             ks = Keystroker(grid, buildconfig)
@@ -162,7 +162,6 @@ class Blueprint:
         keys += ks.move(end, self.start, -GridLayer.zoffset(self.layers))
 
         return keys
-
 
     def outline(self, options):
         """
@@ -196,7 +195,6 @@ class Blueprint:
 
         return keys
 
-
     def get_info(self):
         """Retrieve various bits of info about the blueprint."""
         cells = flatten(layer.grid.cells for layer in self.layers)
@@ -204,6 +202,8 @@ class Blueprint:
         cmdset = set(commands) # uniques
         if '' in cmdset:
             cmdset.remove('')
+
+        # count the number of occurrences of each command in the blueprint
         counts = [(c, commands.count(c)) for c in cmdset]
         counts.sort(key=lambda x: x[1], reverse=True)
 
