@@ -11,8 +11,8 @@ def transform(transforms, start, layers):
     """Transforms start, layers using the given transforms."""
 
     for i, layer in enumerate(layers):
-        a = layer.rows
-        b = layer.rows
+        a = layer.rows # aka the memory bucket
+        b = layer.rows # aka the current bucket
         left = transforms
         for t in transforms:
             count, cmd = t
@@ -20,20 +20,18 @@ def transform(transforms, start, layers):
                 break
             left = left[1:]
             if cmd == '!':
-                # The ! command updates A to match B
+                # The ! command just updates A to match B
                 a = deepcopy(b)
-            elif cmd in ('n', 's', 'e', 'w'):
-                new = apply_transform(t, a, b)
-                a, b = new, deepcopy(new) # direction commands update A & B
+            else:
+                a, b = apply_transform(t, a, b) # do the transform
 
-                # adjust start pos
+                # adjust start pos for 'n' and 'w' commands
                 if cmd == 'n':
                     start += Point(0, layers[0].height() * (count - 1))
                 elif cmd == 'w':
                     start += Point(layers[0].width() * (count - 1), 0)
-            else:
-                new = apply_transform(t, b)
-                b = new # other commands update B and leave A unaltered
+
+            # we'll return the result in b
             layers[i].rows = b
 
     # do remaining zup/zdown transforms, if any
@@ -67,16 +65,15 @@ def transform(transforms, start, layers):
             layers[-1].onexit += zfix
             layers.extend(deepcopy(addlayers))
 
-
-
     return start, layers
 
 
-def apply_transform(trans, a, b=None):
+def apply_transform(trans, a, b):
     """
     Apply the requested transformation to 2D lists [[]] a and possibly b,
     and return the result.
     """
+    b = deepcopy(b) # ensure a and b are different objects
     count, action = trans
     if b and (len(a) != len(b) or len(a[0]) != len(b[0])):
         raise Exception, (
@@ -88,23 +85,23 @@ def apply_transform(trans, a, b=None):
             )
 
     if action == 'flipv':
-        # flip a vertically
-        a.reverse()
-        return a
+        # flip b vertically
+        b.reverse()
+        return a, b
 
     elif action == 'fliph':
-        # flip a horizontally
-        for row in a:
+        # flip b horizontally
+        for row in b:
             row.reverse()
-        return a
+        return a, b
 
     elif action in ('rotcw', 'rotccw'):
         # rotate a clockwise or counterclockwise 90 degrees
-        rot = [list(x) for x in zip(*a)]
+        rot = [list(x) for x in zip(*b)]
         if action == 'rotcw':
-            return apply_transform((1, 'fliph'), rot)
+            return apply_transform((1, 'fliph'), rot, rot)
         if action == 'rotccw':
-            return apply_transform((1, 'flipv'), rot)
+            return apply_transform((1, 'flipv'), rot, rot)
 
     elif action in ('n', 's', 'e', 'w'):
         # repeat (a+b) in given direction the requested number
@@ -135,7 +132,7 @@ def apply_transform(trans, a, b=None):
                 for s in r:
                     newrow.extend(s)
                 out.append(newrow)
-        return out
+        return out, deepcopy(out) # must be treated as two different objects
 
     else:
         raise Exception, 'Unknown transformation type: %d %s' % trans

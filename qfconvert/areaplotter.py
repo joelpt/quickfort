@@ -4,6 +4,7 @@ from geometry import Point, Direction, Area, Grid
 import util
 import re
 
+
 class AreaPlotter:
     """Handles discovery of areas to be plotted by someone else."""
 
@@ -51,9 +52,9 @@ class AreaPlotter:
 
     def discover_areas(self):
         """
-        Repeatedly plot the largest areas possible until
-        there are no more areas left to plot. Returns
-        True when we plotted at least one area.
+        Repeatedly plot the largest contiguous areas possible until
+        there are no more areas left to plot.
+        Returns True when we plotted at least one area.
         """
         label = self.label
         plotted_something = False
@@ -93,7 +94,8 @@ class AreaPlotter:
         # this because of plottability test above
         return plotted_something
 
-    def mark_largest_plottable_areas(self, initial_label):
+
+    def mark_largest_plottable_areas(self, label):
         """
         Find the largest plottable (available) areas in the grid
         and sort them by size descending
@@ -101,8 +103,6 @@ class AreaPlotter:
         areas = self.find_largest_areas()
 
         areas.sort(key=lambda x: x.size(), reverse=True)
-
-        label = initial_label
 
         # Try to plot each area starting with the largest. If an area overlaps
         # a previously placed area, do not place it.
@@ -121,10 +121,12 @@ class AreaPlotter:
         # return our label when we plotted at least 1 new area
         return label
 
+
     def find_largest_areas(self):
         """
         Finds the largest areas that can *currently* be built from each
         area-corner-cell in the grid.
+        Returns a list of Areas.
         """
         areas = []
 
@@ -136,24 +138,28 @@ class AreaPlotter:
                     and self.grid.is_corner(pos):
                     areas.append(self.find_largest_area_from(pos))
 
-        areas = util.uniquify(
-            areas,
-            lambda area: ''.join([str(c) for c in area.corners])
-            )
+        areas = util.uniquify(areas,
+            lambda area: ''.join([str(c) for c in area.corners]))
+
         return areas
+
 
     def find_largest_area_from(self, pos):
         """
-        Build a list of direction pairs we'll want to test.
-        We need to check each compass direction paired with both
-        90-degree rotations from each compass direction:
-        NE, NW, EN, ES, ...
+        Find the largest area that can be drawn with pos as one of its corners.
+        Returns the Area found, which will be at least 1x1 in size.
+        """
 
-        These represent the 4 quadrants created by partitioning the
-        grid through the 2 axes which pos sits on, and
-        the inversions of each quad; SE & ES is one such pair.
-        Each quad includes the origin (0, 0); similarly, each
-        quad overlaps on two edges with adjacent quads.
+        """
+        To start we build a list of direction pairs we'll want to test.
+        We need to check each compass direction paired with both
+        90-degree rotations from each compass direction: NE, NW, EN,
+        ES, ...
+
+        These represent the 4 quadrants created by partitioning the grid
+        through the axes which pos sits on, and the inversions of each quad;
+        SE & ES is one such quad pair. Each quad overlaps at pos;
+        similarly, each quad shares two of its edges with adjacent quads.
         """
         dir_pairs = []
         for d in ('e', 's', 'w', 'n'):
@@ -172,11 +178,17 @@ class AreaPlotter:
 
         return bestarea
 
-    def find_largest_area_in_quad(self, pos, primary, secondary, bestarea):
+    def find_largest_area_in_quad(self, pos, dir1, dir2, bestarea):
         """
-        Given the quad starting at corner pos and extending first
-        in primary direction, then in secondary direction: return
-        the largest area we can find in the quad.
+        Given the quad starting at pos and formed by dir1 and dir2
+        (treated as rays with pos as origin), we find the max
+        contiguous-cell distance along dir1, then for each position
+        along dir1, we find the max contiguous-cell distance along
+        dir2. This allows us to find the largest contiguous area
+        constructable by travelling down dir1, then at a right angle
+        along dir2 for each position.
+
+        Returns the largest area found.
         """
 
         command = self.grid.get_cell(pos).command
@@ -186,12 +198,12 @@ class AreaPlotter:
             or (1, 1000, 1, 1000) # default sizebounds are very large
 
         # Get the max width of this area on the axis defined by
-        # pos and primary direction, and max width from
-        # the secondary.
+        # pos and dir1 direction, and max width from
+        # the dir2.
         # width and height are conceptually aligned to an
-        # east(primary) x south(secondary) quad below.
-        maxwidth = self.grid.count_contiguous_cells(pos, primary)
-        maxheight = self.grid.count_contiguous_cells(pos, secondary)
+        # east(dir1) x south(dir2) quad below.
+        maxwidth = self.grid.count_contiguous_cells(pos, dir1)
+        maxheight = self.grid.count_contiguous_cells(pos, dir2)
 
         if maxwidth < sizebounds[0]:
             # constructions narrower than the minimum width for this
@@ -217,13 +229,13 @@ class AreaPlotter:
             return Area(pos, pos)
 
         # (width x 1) sized area
-        bestarea = Area( pos, pos + (primary.delta() * (maxwidth - 1)) )
+        bestarea = Area( pos, pos + (dir1.delta() * (maxwidth - 1)) )
 
         for ydelta in range(1, maxheight):
-            check_point = pos + (secondary.delta() * ydelta)
+            check_point = pos + (dir2.delta() * ydelta)
 
             height = ydelta + 1
-            width = self.grid.count_contiguous_cells(check_point, primary)
+            width = self.grid.count_contiguous_cells(check_point, dir1)
 
             if width > maxwidth:
                 # this row can't be wider than previous rows
@@ -234,7 +246,7 @@ class AreaPlotter:
 
             if width * height > bestarea.size():
                 bestarea = Area(
-                    pos, check_point + ( primary.delta() * (width - 1)) )
+                    pos, check_point + ( dir1.delta() * (width - 1)) )
             else:
                 continue
 
@@ -242,5 +254,8 @@ class AreaPlotter:
 
 
 def next_label(label):
-    """Get next label char by cycling through ASCII chars '0' through '}'."""
+    """
+    Returns the next label char by cycling through ASCII chars
+    '0' through '}'.
+    """
     return chr( ((ord(label) - 48 + 1) % 78) + 48 )
