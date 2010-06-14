@@ -1,104 +1,91 @@
-import sys
+"""Handles route planning needed to move between areas and designate them."""
 
-from geometry import *
-from util import *
-from keystroker import Keystroker
+from geometry import Direction, Point, Grid
 
-class Router:
 
-    def __init__(self, grid, debug):
-        self.grid = grid
-        self.debug = debug
+def plan_route(grid, debug, cursor):
+    """
+    We assume the areas to be plotted are already loaded into grid.
+    Starting from cursor, we locate the nearest/smallest area
+    we can plot, and we plot it. Repeat until all areas are plotted.
+    """
 
-    def plan_route(self, cursor):
-        """
-        We assume the areas to be plotted are already loaded into grid.
-        Starting from cursor, we locate the nearest/smallest area
-        we can plot, and we plot it. Repeat until all areas are plotted.
-        """
+    plots = []
 
-        ks = Keystroker(self.grid, 'd')
-        plots = []
-        total_move_cost = 0
-        total_key_cost = 0
-        total_movekey_cost = 0
-        last_command = ''
+    grid.set_entire_grid_plottable(True)
 
-        self.grid.set_entire_grid_plottable(True)
+    if debug:
+        print Grid.str_area_labels(grid) + '\n'
+        print ">>>> BEGIN ROUTE PLANNING"
 
-        if self.debug:
-            print self.grid.str_area_labels() + '\n'
-            print ">>>> BEGIN ROUTE PLANNING"
+    while (True):
+        nearest_pos = get_nearest_plottable_area_from(grid, cursor)
 
-        while (True):
-            nearest_pos = self.get_nearest_plottable_area_from(cursor)
+        if nearest_pos is None:
+            # no more areas left to plot
+            break
+        else:
+            # record this plot start-coordinates in plots
+            plots.append(nearest_pos)
 
-            if nearest_pos is None:
-                # no more areas left to plot
-                break
-            else:
-                # record this plot start-coordinates in plots
-                plots.append(nearest_pos)
+            # mark the plot on the grid
+            cell = grid.get_cell(nearest_pos)
+            area = cell.area
+            grid.set_area_cells(area, False)
 
-                # mark the plot on the grid
-                cell = self.grid.get_cell(nearest_pos)
-                area = cell.area
-                self.grid.set_area_cells(area, False)
+            if debug:
+                print "#### Plotting area starting at %s, area %s" % (
+                    nearest_pos, area)
+                print Grid.str_plottable(grid) + '\n'
 
-                if self.debug:
-                    print "#### Plotting area starting at %s, area %s" % (
-                        nearest_pos, area)
-                    print self.grid.str_plottable() + '\n'
+            # move cursor to the ending corner of the plotted area
+            cursor = area.opposite_corner(nearest_pos)
 
-                # move cursor to the ending corner of the plotted area
-                cursor = area.opposite_corner(nearest_pos)
+    if debug:
+        print Grid.str_plottable(grid) + '\n'
+        print "#### Plotted all areas"
+        print Grid.str_area_labels(grid)
+        print "Route replay sequence: %s" % \
+            ''.join([grid.get_cell(plot).label for plot in plots])
+        print "Cursor position now: %s" % cursor
+        print "<<<< END ROUTE PLANNING"
 
-        if self.debug:
-            print self.grid.str_plottable() + '\n'
-            print "#### Plotted all areas"
-            print self.grid.str_area_labels()
-            print "Route replay sequence: %s" % \
-                ''.join([self.grid.get_cell(plot).label for plot in plots])
-            print "Cursor position now: %s" % cursor
-            print "<<<< END ROUTE PLANNING"
+    return grid, plots, cursor
 
-        return (plots, cursor)
 
-    def get_nearest_plottable_area_from(self, start):
-        nearest_pos, cheapest_cost = None, 999999999
+def get_nearest_plottable_area_from(grid, start):
+    """
+    Find the nearest plottable area corner from start.
+    Returns coordinate of nearest plottable area corner.
+    """
 
-        # check the cell we started in: if it is plottable, it becomes our
-        # starting cheapest_area
-        cell = self.grid.get_cell(start)
+    # check the cell we started in: if it is plottable, it becomes our
+    # starting cheapest_area
+    cell = grid.get_cell(start)
 
-        if cell.plottable and cell.area:
-            return start
+    if cell.plottable and cell.area:
+        return start
 
-        # start with the innermost ring of cells adjacent to start, then
-        # expand outward ring by ring
-        for ring in xrange(1, 1 + max([self.grid.width, self.grid.height])):
-            # starting position in this ring (=NW corner cell of ring)
-            pos = start + Point(-ring, -ring)
+    # start with the innermost ring of cells adjacent to start, then
+    # expand outward ring by ring
+    for ring in xrange(1, 1 + max([grid.width, grid.height])):
+        # starting position in this ring (=NW corner cell of ring)
+        pos = start + Point(-ring, -ring)
 
-            for dir in (Direction(d) for d in ['e','s','w','n']):
-                for step in xrange(0, 2*ring):
+        for direction in (Direction(d) for d in ['e', 's', 'w', 'n']):
+            for _ in xrange(0, 2*ring):
+                pos += direction.delta() # step once in direction
 
-                    # step once in the direction of dir
-                    pos += dir.delta()
+                if grid.is_out_of_bounds(pos):
+                    continue # outside grid bounds
 
-                    if self.grid.is_out_of_bounds(pos):
-                        # point is outside the grid so don't test further
-                        continue
+                corner = grid.get_cell(pos)
 
-                    cell = self.grid.get_cell(pos)
-
-                    if not cell.plottable or not cell.area:
-                        # cell is already plotted or is not an area
-                        continue
-
+                if corner.plottable and corner.area:
+                    # cell has an area that can be plotted, return it
                     return pos
 
-        # found no position with an area to build from
-        return None
+    # found no position with an area we can plot
+    return None
 
 

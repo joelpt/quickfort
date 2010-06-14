@@ -1,8 +1,11 @@
+"""Handles conversion from QF keycode lists to keystrokes or DF macros."""
+
+from math import sqrt
 import os
 import re
 import random
 
-from geometry import *
+from geometry import Area, Direction
 import exetest
 import util
 
@@ -65,6 +68,10 @@ KEY_LIST = {
 
 
 class Keystroker:
+    """
+    Computes keycodes needed to go through route and transforms those keycodes
+    into keystrokes or DF macro commands.
+    """
 
     def __init__(self, grid, buildconfig):
         self.grid = grid
@@ -72,10 +79,16 @@ class Keystroker:
         self.current_menu = None
 
     def plot(self, plots, cursor):
+        """
+        Plots a track through the grid following the positions in plots.
+        Returns list of keycodes generated.
+        """
+
         submenukeys = self.buildconfig.get('submenukeys')
         last_command = ''
         last_submenu = ''
         keys = self.buildconfig.get('init') or []
+
         # construct the list of keystrokes required to move to each
         # successive area and build it
         for pos in plots:
@@ -84,24 +97,13 @@ class Keystroker:
             endpos = cell.area.opposite_corner(pos)
             subs = {}
 
-            # only want to send (nonmenu) key command when we
-            # need to switch modes for dig, but for build
-            # we have to press the command key every time
-            # new config vars 'samecmd', 'diffcmd'
-            #  for 'd': [], ['cmd']
-            #  for 'b': ['cmd'], ['cmd']
-            # so when processing the 'cmd' replacement, get
-            # one of these from cfg, and replace into that
-            # .. plus submenu in/out logic, where if we change
-            #    submenus (indeed if the last_command does not
-            #    exactly match command), reset last_command to ''
-
-            # get samecmd or diffcmd depending
+            # get samecmd or diffcmd depending on if command changed
             if command == last_command:
                 nextcmd = self.buildconfig.get('samecmd', command) or []
             else:
                 nextcmd = self.buildconfig.get('diffcmd', command) or []
                 last_command = command
+
             # moveto = keys to move cursor to starting area-corner
             subs['moveto'] = self.move(cursor, pos)
 
@@ -115,9 +117,9 @@ class Keystroker:
             setmatscfg = self.buildconfig.get('setmats', command)
             if setmatscfg:
                 setmatsfun = getattr(self, setmatscfg)
-                subs['setmats'] = setmats(cell.area.size())
+                subs['setmats'] = setmatsfun(cell.area.size())
 
-            # submenu?
+            # handle submenus
             justcommand = None
             for k in submenukeys:
                 if re.match(k, command):
@@ -156,21 +158,8 @@ class Keystroker:
                 last_submenu = ''
                 justcommand = command[:]
 
-            # break command into keys
-            cmdedit = re.sub(r'\{', '|{', justcommand)
-            cmdedit = re.sub(r'\}', '}|', cmdedit)
-            cmdedit = re.sub(r'\+\!', '|+!|', cmdedit)
-            cmdedit = re.sub(r'\!', '|!|', cmdedit)
-            cmdedit = re.sub(r'\^', '|^|', cmdedit)
-            cmdsplit = re.split(r'\|+', cmdedit)
-
-            # break command into individual keycodes
-            codes = []
-            for k in cmdsplit:
-                if k[0] in ('{', '!', '^', '+'):
-                    codes.append(k) # preserve whole key-combos
-                else:
-                    codes.extend(k) # separate individual keystrokes
+            # break command into keycodes
+            codes = split_keystring_into_keycodes(justcommand)
 
             # substitute codes into nextcmd where we find string 'cmd'
             nextcodes = []
@@ -261,7 +250,7 @@ class Keystroker:
                         allow_backtrack = False
                     else:
                         # permit overjump/backtracking movement
-                        jumps +=1
+                        jumps += 1
                         start = start + (jumpmove * jumps)
                         allow_backtrack = True
                 else:
@@ -327,7 +316,8 @@ class Keystroker:
         qfconvert will attempt this 1+sqrt(areasize) times, which should
         be good enough most of the time.
         """
-        if areasize == 1: return ['#']
+        if areasize == 1:
+            return ['#']
 
         reps = 2 * int(sqrt(areasize))
         keys = ['#', '[menudown]'] * (reps - 1)
@@ -337,7 +327,11 @@ class Keystroker:
 
 
 def convert_keys(keys, mode, title):
-    keys = translate_keystrokes(keys, mode)
+    """
+    Convert keycodes to keystrokes or DF macro syntax based on mode.
+    Returns string of all keystrokes or macro-content.
+    """
+    keys = translate_keycodes(keys, mode)
     if mode == 'macro':
         return '\n'.join(convert_to_macro(keys, title)) + '\n'
     elif mode == 'key':
@@ -346,15 +340,21 @@ def convert_keys(keys, mode, title):
         raise Exception, 'Unknown Keystroker.render() mode "%s"' % mode
 
 
-def translate_keystrokes(keys, mode):
-    return util.flatten( [ translate_keystroke(k, mode) for k in keys ] )
+def translate_keycodes(keycodes, mode):
+    """Translate keycodes based on given output mode."""
+    return util.flatten( [ translate_keycode(k, mode) for k in keycodes ] )
 
 
-def translate_keystroke(key, mode):
-    return KEY_LIST[mode].get(key) or key
+def translate_keycode(keycode, mode):
+    """
+    Translate a given keycode against KEY_LIST and specified mode.
+    Returns translation if one exists, or original keycode otherwise.
+    """
+    return KEY_LIST[mode].get(keycode) or keycode
 
 
-def convert_to_macro(keys, title):
+def convert_to_macro(keycodes, title):
+    """Convert keycodes to DF macro syntax (complete macro file contents)."""
     keybinds = parse_interface_txt(
         os.path.join(exetest.get_main_dir(), 'interface.txt') )
 
@@ -363,7 +363,7 @@ def convert_to_macro(keys, title):
 
     output = [title] # first line of macro is macro title
 
-    for key in keys:
+    for key in keycodes:
         if keybinds.get(key) is None:
             raise Exception, \
                 "Key '%s' not bound in interface.txt" % key
@@ -377,7 +377,37 @@ def convert_to_macro(keys, title):
     return output
 
 
+def split_keystring_into_keycodes(keystring):
+    """
+    Breaks str into individual keycodes.
+    Returns a list of keycode strings.
+    """
+
+    # prepare to break keystring into keycodes
+    cmdedit = re.sub(r'\{', '|{', keystring)
+    cmdedit = re.sub(r'\}', '}|', cmdedit)
+    cmdedit = re.sub(r'\+\!', '|+!|', cmdedit)
+    cmdedit = re.sub(r'\!', '|!|', cmdedit)
+    cmdedit = re.sub(r'\^', '|^|', cmdedit)
+    cmdsplit = re.split(r'\|+', cmdedit)
+
+    # break into individual keycodes
+    codes = []
+    for k in cmdsplit:
+        if k[0] in ('{', '!', '^', '+'):
+            codes.append(k) # preserve whole key-combos
+        else:
+            codes.extend(k) # separate individual keystrokes
+
+    return codes
+
+
 def parse_interface_txt(path):
+    """
+    Parse DF-syntax interface.txt.
+    Returns a dictionary with keycodes as keys, whose values are lists of
+        DF macro commands bound to said keycode.
+    """
     with open(path) as f:
         data = f.read()
 

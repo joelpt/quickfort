@@ -1,6 +1,6 @@
 """Handles discovery of areas to be plotted by someone else."""
 
-from geometry import Point, Direction, Area
+from geometry import Point, Direction, Area, Grid
 import util
 import re
 
@@ -44,7 +44,7 @@ class AreaPlotter:
                         cornercell.area = area
 
         if self.debug:
-            print self.grid.str_area_labels() + '\n'
+            print Grid.str_area_labels(self.grid) + '\n'
             print "<<<< END AREA EXPANSION"
         self.label = label
         return
@@ -63,7 +63,7 @@ class AreaPlotter:
 
         while True:
             if self.debug:
-                print self.grid.str_area_labels() + '\n'
+                print Grid.str_area_labels(self.grid) + '\n'
                 print '#### Marking largest plottable areas starting ' + \
                     'with label %s' % label
 
@@ -81,7 +81,7 @@ class AreaPlotter:
 
             if not self.grid.is_area_plottable(testarea, True):
                 if self.debug:
-                    print self.grid.str_area_labels() + '\n'
+                    print Grid.str_area_labels(self.grid) + '\n'
                     print "#### Grid is completely plotted"
                 self.label = label
                 return plotted_something
@@ -108,7 +108,7 @@ class AreaPlotter:
         # a previously placed area, do not place it.
         for area in areas:
             # not overlapping any already-plotted area?
-            if self.grid.is_area_plottable(area):
+            if self.grid.is_area_plottable(area, False):
 
                 # mark this area as plotted
                 self.grid.set_area_cells(area, False, label)
@@ -132,7 +132,7 @@ class AreaPlotter:
             for xpos in range(0, self.grid.width):
                 pos = Point(xpos, ypos)
                 if self.grid.get_cell(pos).plottable \
-                    and len(self.grid.get_command(pos)) > 0 \
+                    and len(self.grid.get_cell(pos).command) > 0 \
                     and self.grid.is_corner(pos):
                     areas.append(self.find_largest_area_from(pos))
 
@@ -190,8 +190,8 @@ class AreaPlotter:
         # the secondary.
         # width and height are conceptually aligned to an
         # east(primary) x south(secondary) quad below.
-        maxwidth = self.grid.count_repeating_cells(pos, primary)
-        maxheight = self.grid.count_repeating_cells(pos, secondary)
+        maxwidth = self.grid.count_contiguous_cells(pos, primary)
+        maxheight = self.grid.count_contiguous_cells(pos, secondary)
 
         if maxwidth < sizebounds[0]:
             # constructions narrower than the minimum width for this
@@ -217,14 +217,13 @@ class AreaPlotter:
             return Area(pos, pos)
 
         # (width x 1) sized area
-        bestarea = Area(
-            pos, pos + primary.delta().magnify(maxwidth - 1) )
+        bestarea = Area( pos, pos + (primary.delta() * (maxwidth - 1)) )
 
         for ydelta in range(1, maxheight):
-            check_point = pos + secondary.delta().magnify(ydelta)
+            check_point = pos + (secondary.delta() * ydelta)
 
             height = ydelta + 1
-            width = self.grid.count_repeating_cells(check_point, primary)
+            width = self.grid.count_contiguous_cells(check_point, primary)
 
             if width > maxwidth:
                 # this row can't be wider than previous rows
@@ -235,7 +234,7 @@ class AreaPlotter:
 
             if width * height > bestarea.size():
                 bestarea = Area(
-                    pos, check_point + primary.delta().magnify(width - 1))
+                    pos, check_point + ( primary.delta() * (width - 1)) )
             else:
                 continue
 

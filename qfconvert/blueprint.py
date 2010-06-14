@@ -1,17 +1,18 @@
 """Blueprint class and associated processing functions."""
 
+import re
 import textwrap
 
-from util import flatten
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
-from geometry import Point, Direction, GridLayer
-from keystroker import Keystroker, convert_keys
-from router import Router
 from filereader import FileLayer
+from geometry import Point, Direction, GridLayer, Grid
+from keystroker import Keystroker, convert_keys
+from router import plan_route
+from util import flatten
 import filereader
+import router
 import transformer
-import re
 
 def get_blueprint_info(path):
     """Returns information about the blueprint at path."""
@@ -20,11 +21,10 @@ def get_blueprint_info(path):
     s = ''
     for sheet in sheets:
         try:
-            (layers, build_type, start, start_comment, comment) = \
+            (layers, details) = \
                 filereader.parse_file(path, sheet[1])
             layers = filereader.FileLayers_to_GridLayers(layers)
-            bp = Blueprint(sheet[0], layers, build_type, start, start_comment,
-                comment)
+            bp = Blueprint(sheet[0], layers, details)
             s += '---- Sheet id %d\n' % sheet[1]
             s += bp.get_info() + '\n'
         except:
@@ -47,8 +47,7 @@ def process_blueprint_file(path, options):
 
     sheetid = options.sheetid
 
-    (layers, build_type, start, start_comment, comment) = \
-        filereader.parse_file(path, sheetid)
+    layers, details = filereader.parse_file(path, sheetid)
 
     if options.debugfile:
         print '#### Parsed %s' % path
@@ -60,7 +59,7 @@ def process_blueprint_file(path, options):
 
         start, layers = transformer.transform(
             transformer.parse_transform_str(options.transform),
-            start, layers)
+            details.start, layers)
 
         if options.debugfile:
             FileLayer.str_layers(layers)
@@ -74,10 +73,10 @@ def process_blueprint_file(path, options):
             layers[0].grid.height)
 
     # convert layers and other data to Blueprint
-    bp = Blueprint('', layers, build_type, start, start_comment, comment)
+    bp = Blueprint('', layers, details)
 
     if options.debugfile:
-        print ">>>> END INPUT FILE PARSING"
+        print "<<<< END INPUT FILE PARSING"
 
     # get keys/macrocode to outline or plot the blueprint
     keys = bp.outline(options) if options.visualize else bp.plot(options)
@@ -86,17 +85,18 @@ def process_blueprint_file(path, options):
     if options.debugsummary:
         print ">>>> BEGIN SUMMARY"
         print "---- Layers:"
-        for layer in bp.layers:
-            print "#### Commands:"
-            print layer.grid.str_commands() + '\n'
+        for i, layer in enumerate(bp.layers):
+            print "=" * 20 + ' Layer %d ' % i + '=' * 20
+            print "Entering cursor position: %s" % layer.start
+            print "\n#### Commands:"
+            print str(layer.grid) + '\n'
             print "#### Area labels:"
-            print layer.grid.str_area_labels() + '\n'
-            print "Initial cursor position: %s" % layer.start
+            print Grid.str_area_labels(layer.grid) + '\n'
             print "Route order: %s" % ''.join(
                 [layer.grid.get_cell(plot).label
                 for plot in layer.plots]
                 )
-            print "Layer onexit keys: %s" % layer.onexit
+            print "Layer onexit keys: %s\n" % layer.onexit
         print "---- Overall:"
         print "Total key cost: %d" % len(keys)
         print "<<<< END SUMMARY"
@@ -118,7 +118,7 @@ def parse_startpos(start, width, height):
             new.y = max(0, new.y) * (height - 1)
         else:
             raise Exception, "Invalid --position parameter '%s'" % start
-    return start
+    return new
 
 
 class Blueprint:
@@ -128,12 +128,13 @@ class Blueprint:
     information about the blueprint.
     """
 
-    def __init__(self, name, layers, build_type, start, start_comment,
-        comment):
-
-        (self.name, self.layers, self.build_type, self.start,
-            self.start_comment, self.comment) = \
-            (name, layers, build_type, start, start_comment, comment)
+    def __init__(self, name, layers, details):
+        self.name = name
+        self.layers = layers
+        self.build_type = details.build_type
+        self.start = details.start
+        self.start_comment = details.start_comment
+        self.comment = details.comment
 
     def plot(self, options):
         """Plots a route through the provided blueprint."""
@@ -143,16 +144,14 @@ class Blueprint:
         ks = None
         for layer in self.layers:
             grid = layer.grid
-            layer.start = start
+            layer.start = start # first layer's start or last layer's exit pos
 
             plotter = AreaPlotter(grid, buildconfig, options.debugarea)
             plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
             plotter.discover_areas() # find contiguous areas
 
-            grid = plotter.grid
-            router = Router(grid, options.debugrouter)
-            plots, end = router.plan_route(start)
-            layer.plots = plots
+            grid, plots, end = plan_route(
+                plotter.grid, options.debugarea, start)
 
             # generate key sequence to render this series of plots in game
             ks = Keystroker(grid, buildconfig)

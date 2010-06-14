@@ -1,45 +1,39 @@
+"""General utility stuff."""
+
 def flatten(l):
-  out = []
-  for item in l:
-    if isinstance(item, (list, tuple)):
-      out.extend(flatten(item))
-    else:
-      out.append(item)
-  return out
+    """Flatten a list of elements and/or lists recursively."""
+    out = []
+    for item in l:
+        if isinstance(item, (list, tuple)):
+            out.extend(flatten(item))
+        else:
+            out.append(item)
+    return out
 
 
 def uniquify(seq, idfun=None):
+    """Deduplicate elements of list based on value of id function idfun."""
     # order preserving
     if idfun is None:
-        def idfun(x): return x
+        idfun = lambda x: x
     seen = {}
     result = []
     for item in seq:
         marker = idfun(item)
-        # in old Python versions:
-        # if seen.has_key(marker)
-        # but in new ones:
-        if marker in seen: continue
+        if marker in seen:
+            continue
         seen[marker] = 1
         result.append(item)
     return result
 
-def sign(n):
-    if n > 0:
-        return 1
-    elif n == 0:
-        return 0
-    else:
-        return -1
 
-# Abstract struct class
-class Struct:
-    def __init__ (self, *argv, **argd):
-        if len(argd):
-            # Update by dictionary
-            self.__dict__.update (argd)
-        else:
-            # Update by position
-            attrs = filter (lambda x: x[0:2] != "__", dir(self))
-            for n in range(len(argv)):
-                setattr(self, attrs[n], argv[n])
+class Bunch:
+    """
+    Like a dynamic struct. Usage:
+    >>> point = Bunch(datum=y, squared=y*y, coord=x)
+    >>> if point.squared > threshold:
+    >>>     point.isok =
+    """
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+

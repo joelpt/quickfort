@@ -1,9 +1,20 @@
-from itertools import takewhile
-from util import *
+"""
+Various forms of geometry and geometry related classes used throughout
+qfconvert.
+"""
+
 from math import sqrt
 
-class Point:
 
+class Point:
+    """
+    Simple representation of an (x, y) Cartesian coordinate.
+
+    In QF, the coordinate plane has an origin of (0, 0) at the top-left or
+    northwest corner. All coordinates are positive integers. This
+    arrangement corresponds with how cells are addressed in DF's user
+    interface.
+    """
     def __init__(self, x, y):
         self.x, self.y = x, y
 
@@ -19,9 +30,9 @@ class Point:
         return Point(self.x + other.x, self.y + other.y)
 
     def __mul__(self, other):
-        if isinstance(other, Point):
+        if isinstance(other, Point): # multiply two Points' coords together
             return Point(self.x * other.x, self.y * other.y)
-        elif isinstance(other, int):
+        elif isinstance(other, int): # multiply self coords by other int
             return Point(self.x * other, self.y * other)
         else:
             raise
@@ -29,20 +40,29 @@ class Point:
     def __str__(self):
         return "(%d, %d)" % (self.x, self.y)
 
-    def get_coord_crossing_axis(self, direction):
-        return self.y if direction.compass in ('n', 's') else self.x
-
     def get_coord_of_axis(self, direction):
+        """
+        Treating the line traced along direction as an axis,
+        return that axis's coordinate from our coords.
+        """
         return self.x if direction.compass in ('n', 's') else self.y
 
-
-    def magnify(self, magnitude):
-        return Point(self.x * magnitude, self.y * magnitude)
+    def get_coord_crossing_axis(self, direction):
+        """
+        Treating the line traced along direction as an axis,
+        return the perpendicular axis's coordinate from our coords.
+        """
+        return self.y if direction.compass in ('n', 's') else self.x
 
     def distance_to(self, other):
+        """Returns straight-line distance between self and other."""
         return sqrt( (other.x - self.x)**2 + (other.y - self.y)**2  )
 
     def midpoint(self, other):
+        """
+        Returns integer midpoint of straight line connecting self and
+        other (rounds down to work well with how DF does it).
+        """
         return Point(
             self.x + (other.x - self.x + 1) // 2,
             self.y + (other.y - self.y + 1) // 2
@@ -63,6 +83,7 @@ DIRECTIONS = {
 DIRECTIONS_ORDERED = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 
 class Direction:
+    """Direction represents one of the 8 compass directions: n, ne, .."""
 
     def __init__(self, compass_dir):
         self.compass = compass_dir
@@ -71,9 +92,17 @@ class Direction:
         return "{compass:%s}" % self.compass
 
     def index(self):
+        """
+        Return index of given direction from DIRECTIONS.
+        Kinda hacky but Python dicts are unordered :(
+        """
         return DIRECTIONS[self.compass]['index']
 
     def axis(self):
+        """
+        Returns 'x' for e|w directions and 'y' for n|s directions.
+        Returns 'xy' for other directions.
+        """
         if self.compass in ('n', 's'):
             return 'y'
         if self.compass in ('e', 'w'):
@@ -81,24 +110,38 @@ class Direction:
         return 'xy'
 
     def delta(self):
+        """
+        Get the x/y coordinate offset needed to move one unit on the
+        cartesian grid towards self.compass.
+        Returns offset as a Point.
+        """
         return DIRECTIONS[self.compass]['delta']
 
     def opposite(self):
+        """Returns the direction opposite this one (e -> w; ne -> sw)"""
         return self.clockwise(4)
 
     def right_turn(self):
+        """Returns the direction 90 degrees right of this one (n -> e)"""
         return self.clockwise(2)
 
     def left_turn(self):
+        """Returns the direction 90 degrees left of this one (n -> w)"""
         return self.clockwise(6)
 
     def clockwise(self, steps):
+        """
+        Returns the direction which is `steps` away from self in in a
+        clockwise order around the compass rose.
+        """
         return Direction(DIRECTIONS_ORDERED[(self.index() + steps) % 8])
 
     @staticmethod
     def get_direction(frompos, topos):
-        # get the compass direction point from frompos to topos
-        # with nw/ne/sw/se taking priority over n/s/e/w
+        """
+        Returns the compass direction point from frompos to topos with
+        nw/ne/sw/se taking priority over n/s/e/w
+        """
         d = ""
         if frompos.y < topos.y:
             d += "s"
@@ -117,14 +160,14 @@ class Direction:
 
 
 class Area:
+    """Represents a rectangular area defined on the cartesian grid."""
 
     def __init__(self, corner, opposite_corner):
         # Get lists of the 2 x coords and 2 y coords
         xs = [corner.x, opposite_corner.x]
         ys = [corner.y, opposite_corner.y]
 
-        # Sort the coords lists so the northernmost
-        # and westernmost coordinate is first
+        # Sort coords so the northernmost and westernmost coordinate is first
         xs.sort()
         ys.sort()
 
@@ -145,18 +188,23 @@ class Area:
             '] size:' + str(self.size())
 
     def width(self):
+        """Returns width of area, min 1."""
         return self.corners[1].x - self.corners[0].x + 1
 
     def height(self):
+        """Returns height of area, min 1."""
         return self.corners[2].y - self.corners[0].y + 1
 
     def size(self):
+        """Returns size (geometric area) of area, min 1."""
         return self.width() * self.height()
 
     def diagonal_length(self):
+        """Returns corner-to-opposite-corner distance of area."""
         return sqrt(self.width()**2 + self.height()**2)
 
     def opposite_corner(self, corner):
+        """Returns the opposite corner of area given param `corner`."""
         for i in xrange(0, 4):
             if corner == self.corners[i]:
                 return self.corners[(i + 2) % 4]
@@ -164,17 +212,17 @@ class Area:
 
 
 class CommandCell:
+    """CommandCell is the container used for cell info in Grid."""
 
-    def __init__(self, command, parentgrid):
+    def __init__(self, command, label = None):
         self.command = command
         self.area = None
-        self.plottable = True if command not in (None, '') else False
-        self.label = ''
-        # self.parentgrid = parentgrid
+        self.plottable = True if command else False
+        self.label = label or ''
 
 
 class GridLayer:
-
+    """GridLayer is the container used for a Grid z-layer and its info."""
     def __init__(self, onexit, grid=None, plots=None, start=None):
         self.onexit = onexit
         self.grid = grid or Grid()
@@ -183,7 +231,7 @@ class GridLayer:
 
     @staticmethod
     def zoffset(layers):
-        """determine sum z-level offset of some GridLayers"""
+        """Returns the sum z-level offset of layers' onexit values"""
         return sum(
             sum(1 if x == '>' else -1 if x == '<' else 0
                 for x in layer.onexit
@@ -193,56 +241,34 @@ class GridLayer:
 
 
 class Grid:
+    """
+    Represents a cartesian grid of cells corresponding to positions in
+    a Dwarf Fortress map or QF blueprint.
+    """
 
-    def __init__(self):
-        self.cells = []
-        self.width = 0
-        self.height = 0
+    def __init__(self, rows=None):
+        """If rows is given, expects a 2d list of strings."""
+
+        if rows is None:
+            self.cells = []
+            self.width, self.height = 0, 0
+        else:
+            self.cells = [[CommandCell(c) for c in row] for row in rows]
+            self.width = len(rows[0])
+            self.height = len(rows)
 
     def __str__(self):
-        return self.str_commands()
-
-    def add_cell(self, point, contents):
-        """
-        This method should be used for adding new cells to the grid.
-        Once added to the grid, .get_cell(..) can be used to reference
-        and modify it.
-        """
-        cell = CommandCell(contents, point)
-
-        if len(contents) == 0:
-            cell.label = '.' # visual identification of empty cells
-
-        if point.y + 1 > self.height:
-            self.cells.append([]) # new row
-            self.height = point.y + 1
-        row = self.cells[point.y]
-
-        if point.x + 1 > len(row):
-            row.append(cell)
-        else:
-            raise Exception, \
-                "Grid.add_cell() can't add to the left of an existing cell"
-
-        if point.x + 1 > self.width:
-            self.width = point.x + 1
-
-    def fixup(self):
-        """Add missing cells to rows which ended prematurely"""
-        for row in self.cells:
-            if len(row) < self.width:
-                row.extend(
-                    [CommandCell('', self)] * (self.width - len(row))
-                    )
-        return
+        return Grid.str_commands(self.cells, '')
 
     def get_cell(self, pos):
+        """Returns the CommandCell at pos or an empty one if out of bounds."""
         if self.is_out_of_bounds(pos):
             return CommandCell('', self)
         else:
             return self.cells[pos.y][pos.x]
 
     def get_command(self, pos):
+        """Returns .command at pos or '' if out of bounds/empty."""
         cell = self.get_cell(pos)
         if cell is None:
             return ''
@@ -250,10 +276,12 @@ class Grid:
             return cell.command
 
     def is_plottable(self, pos):
+        """Returns .plottable at pos or None if out of bounds/empty."""
         cell = self.get_cell(pos)
         return False if cell is None else cell.plottable
 
     def is_out_of_bounds(self, point):
+        """Returns True if point is outside the bounds of grid, else False."""
         if point.x < 0 or \
             point.y < 0 or \
             point.x >= self.width or \
@@ -263,38 +291,62 @@ class Grid:
             return False
 
     def get_row(self, y):
+        """Returns the row with index y from the grid."""
         return self.cells[y]
 
     def get_col(self, x):
+        """Returns the column with index x from the grid."""
         return [row[x] for row in self.cells]
 
     def get_axis(self, index, direction):
-        return self.get_col(index) if direction.axis() == 'y' else self.get_row(index)
+        """
+        Returns the row with specified index for e/w direction.
+        Returns the column with specified index for n/s direction.
+        """
+
+        if direction.axis() == 'y':
+            return self.get_col(index)
+        else:
+            return self.get_row(index)
 
     def get_length_of_axis(self, direction):
+        """
+        Returns the length of the grid edge which is parallel to the
+        axis formed by tracing along direction.
+        """
         return self.height if direction.axis() == 'y' else self.width
 
     def set_area_cells(self, area, plottable=None, label=None, command=None):
+        """
+        Set plottable, label and/or command values for all cells that are
+        within the bounds of given area.
+        """
         for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
             for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
                 cell = self.get_cell(Point(x, y))
-                if plottable is not None: cell.plottable = plottable
-                if label is not None: cell.label = label
-                if command is not None: cell.command = command
+                if plottable is not None:
+                    cell.plottable = plottable
+                if label is not None:
+                    cell.label = label
+                if command is not None:
+                    cell.command = command
         return
 
     def set_entire_grid_plottable(self, plottable):
+        """Set the plottable flag for all cells in the grid."""
         for x in range(0, self.width):
             for y in range(0, self.height):
                 self.get_cell(Point(x, y)).plottable = plottable
         return
 
-    def is_area_plottable(self, area, any_plottable=False):
+    def is_area_plottable(self, area, any_plottable):
         """
         Test the given area against the grid cells to see if it is
-        plottable. If any_plottable is False, we return False if any
-        cell is unplottable, True otherwise. If any_plottable is True,
-        we return True if any cell is plottable, False otherwise.
+        plottable. any_plottable determines the boolean behavior:
+            if any_plottable:
+                returns True if *any* cell is plottable in area
+            else:
+                returns True only if *every* cell is plottable in area
         """
         for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
             for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
@@ -326,36 +378,41 @@ class Grid:
         if command == '':
             return False # empty cell; not a part of any area
 
-        dirs = (Direction(d) for d in ['n', 's', 'e', 'w'])
+        dirs = (Direction(d) for d in ('n', 's', 'e', 'w'))
 
         # if cell can not extend in any of NSEW directions, it's a corner cell
         matches4 = sum(
-            self.is_plottable(pos + d.delta())
-            and command == self.get_command(pos + d.delta())
-            for d in dirs
+            c.plottable and command == c.command
+            for c in (self.get_cell(pos + d.delta()) for d in dirs)
             )
         if matches4 == 0:
-            # solo corner
+            # solo corner (no similar cell at nsew)
             return True
         elif matches4 == 4:
-            # at intersection or interior point
+            # at intersection or interior point (all similar cells at nsew)
             return False
 
         # see if this cell is an edge of an area
         dirs = (Direction(d) for d in ['n', 'e'])
         for d in dirs:
-            if command == self.get_command(pos + d.delta()) \
-                and self.is_plottable(pos + d.delta()) \
-                and command == self.get_command(pos + d.opposite().delta()) \
-                and self.is_plottable(pos + d.opposite().delta()):
+            corner = self.get_cell(pos + d.delta())
+            opp = self.get_cell(pos + d.opposite().delta())
+            if command == corner.command and corner.plottable \
+                and command == opp.command and opp.plottable:
                 return False
 
         # it's not an intersection, interior point, edge, or empty cell, so
         # it must be a corner
         return True
 
-    def count_repeating_cells(self, pos, direction):
-        command = self.get_command(pos)
+    def count_contiguous_cells(self, pos, direction):
+        """
+        Starting from pos, counts the number of cells whose commands match
+        pos's cell command.
+        Returns count of contiguous cells.
+        """
+
+        command = self.get_cell(pos).command
         start = pos.get_coord_crossing_axis(direction)
 
         # determine sign of direction to move in for testing
@@ -375,52 +432,49 @@ class Grid:
         # doesn't. Operates on just those cells in axis which start
         # at pos and continue to the grid edge in the given
         # direction.
-        count = len(
-            list(
-                takewhile(
-                    lambda cell: cell.plottable and cell.command == command,
-                    axis
-                    )
-                )
-            )
+        count = 0
+        for cell in axis:
+            if cell.plottable and cell.command == command:
+                count += 1
+            else:
+                break
 
         return count
 
-    def str_commands(self, colsep = ''):
-        return Grid.print_cells(self.cells, colsep)
-
-    def str_plottable(self):
+    @staticmethod
+    def str_plottable(grid):
+        """Returns grid's plottable flags as a string for display."""
         rowstrings = [
             ''.join(['.' if c.plottable == True else 'x' for c in row])
-            + '|' for row in self.cells
+            + '|' for row in grid.cells
             ]
-        return '\n'.join(rowstrings)
-
-    def str_area_corners(self):
-        rowstrings = [
-            ''.join(['x' if c.area else '.' for c in row])
-            + '|' for row in self.cells
-            ]
-        return '\n'.join(rowstrings)
-
-    def str_area_labels(self):
-        rowstrings = [
-            ''.join(['.' if c.label == '' else c.label for c in row])
-            + '|' for row in self.cells]
         return '\n'.join(rowstrings)
 
     @staticmethod
-    def print_cells(cells, colsep = ''):
+    def str_area_corners(grid):
+        """Returns grid's area corner markers as a string for display."""
+        rowstrings = [
+            ''.join(['x' if c.area else '.' for c in row])
+            + '|' for row in grid.cells
+            ]
+        return '\n'.join(rowstrings)
+
+    @staticmethod
+    def str_area_labels(grid):
+        """Returns grid's area labels as a string for display."""
+        rowstrings = [
+            ''.join(['.' if c.label == '' else c.label for c in row])
+            + '|' for row in grid.cells]
+        return '\n'.join(rowstrings)
+
+    @staticmethod
+    def str_commands(rows, colsep = ''):
+        """Returns grid's commands as a string for display."""
+
         rowstrings = [
             colsep.join(
                 ['.' if c.command == '' else c.command[0] for c in row]
                 )
-            + '|' for row in cells
+            + '|' for row in rows
             ]
         return '\n'.join(rowstrings)
-
-    @staticmethod
-    def print_layers(grid_layers):
-        for layer in grid_layers:
-            print (Grid.print_cells(layer) + '\n') + (
-                ''.join(layer.onexit) + '\n')

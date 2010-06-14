@@ -1,5 +1,7 @@
 #! /usr/bin/python
 
+"""Main entry point for qfconvert."""
+
 from optparse import OptionParser
 import traceback
 import cProfile
@@ -59,11 +61,11 @@ def parse_options():
                 options.mode
 
     if options.sheetid is not None:
-      try:
-          options.sheetid = int(options.sheetid)
-      except:
-          raise Exception, "sheetid must be numeric, not '%s'" % \
-              options.sheetid
+        try:
+            options.sheetid = int(options.sheetid)
+        except:
+            raise Exception, "sheetid must be numeric, not '%s'" % \
+                options.sheetid
 
     return options, args
 
@@ -76,9 +78,9 @@ def run():
 
     try:
         if options.info:
-          output = blueprint.get_blueprint_info(infile)
+            output = blueprint.get_blueprint_info(infile)
         else:
-          output = blueprint.process_blueprint_file(infile, options)
+            output = blueprint.process_blueprint_file(infile, options)
 
         if outfile:
             with open(outfile, 'w') as outf:
@@ -94,18 +96,18 @@ def run():
 
 
 def main():
-    """Parse options file, then read/convert file and output result."""
+    """Parse options file, parse and convert blueprint, and output result."""
     global options, args
 
     try:
-      options, args = parse_options()
-      if args is not None:
-          if options.profile:
-              cProfile.run('run()')
-          else:
-              run()
+        options, args = parse_options()
+        if args is not None:
+            if options.profile:
+                cProfile.run('run()')
+            else:
+                run()
     except Exception as ex:
-      print 'Error: ' + str(ex)
+        print 'Error: ' + str(ex)
 
 
 if __name__ == "__main__":
