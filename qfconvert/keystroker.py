@@ -76,7 +76,6 @@ class Keystroker:
     def __init__(self, grid, buildconfig):
         self.grid = grid
         self.buildconfig = buildconfig
-        self.current_menu = None
 
     def plot(self, plots, cursor):
         """
