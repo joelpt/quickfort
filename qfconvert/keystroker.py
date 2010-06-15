@@ -33,6 +33,7 @@ KEY_LIST = {
         '[widen]': 'k',
         '[heighten]': 'u',
         '[menudown]': '{NumpadAdd}', # move to next menu item
+        '[menuup]': '{NumpadSub}',
         '!': '{Enter}', # select
         '#': '+{Enter}', # shift-select (select all)
         '%': '{wait}', # pause
@@ -60,6 +61,7 @@ KEY_LIST = {
         '[widen]': 'k',
         '[heighten]': 'u',
         '[menudown]': '+',
+        '[menuup]': '-',
         '!': '0:Enter',
         '#': '1:Enter',
         '%': ''
