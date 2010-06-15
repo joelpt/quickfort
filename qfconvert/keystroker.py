@@ -73,6 +73,7 @@ class Keystroker:
     """
     Computes keycodes needed to go through route and transforms those keycodes
     into keystrokes or DF macro commands.
+    Returns list keystrokes or DF macro lines.
     """
 
     def __init__(self, grid, buildconfig):
