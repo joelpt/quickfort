@@ -234,4 +234,10 @@ class Blueprint:
                 self.layers[0].grid.height,
                 len(self.layers),
                 ', '.join("%s:%d" % c for c in counts)
+                ) + \
+            "\nBlueprint preview:\n" + \
+                '\n'.join(
+                    Grid.str_commands(layer.grid.rows) + \
+                        '\n#' + ''.join(layer.onexit)
+                    for layer in self.layers
                 )
