@@ -250,22 +250,22 @@ class Grid:
         """If rows is given, expects a 2d list of strings."""
 
         if rows is None:
-            self.cells = []
+            self.rows = []
             self.width, self.height = 0, 0
         else:
-            self.cells = [[CommandCell(c) for c in row] for row in rows]
+            self.rows = [[CommandCell(c) for c in row] for row in rows]
             self.width = len(rows[0])
             self.height = len(rows)
 
     def __str__(self):
-        return Grid.str_commands(self.cells, '')
+        return Grid.str_commands(self.rows, '')
 
     def get_cell(self, pos):
         """Returns the CommandCell at pos or an empty one if out of bounds."""
         if self.is_out_of_bounds(pos):
             return CommandCell('', self)
         else:
-            return self.cells[pos.y][pos.x]
+            return self.rows[pos.y][pos.x]
 
     def get_command(self, pos):
         """Returns .command at pos or '' if out of bounds/empty."""
@@ -292,11 +292,11 @@ class Grid:
 
     def get_row(self, y):
         """Returns the row with index y from the grid."""
-        return self.cells[y]
+        return self.rows[y]
 
     def get_col(self, x):
         """Returns the column with index x from the grid."""
-        return [row[x] for row in self.cells]
+        return [row[x] for row in self.rows]
 
     def get_axis(self, index, direction):
         """
@@ -446,7 +446,7 @@ class Grid:
         """Returns grid's plottable flags as a string for display."""
         rowstrings = [
             ''.join(['.' if c.plottable == True else 'x' for c in row])
-            + '|' for row in grid.cells
+            + '|' for row in grid.rows
             ]
         return '\n'.join(rowstrings)
 
@@ -455,7 +455,7 @@ class Grid:
         """Returns grid's area corner markers as a string for display."""
         rowstrings = [
             ''.join(['x' if c.area else '.' for c in row])
-            + '|' for row in grid.cells
+            + '|' for row in grid.rows
             ]
         return '\n'.join(rowstrings)
 
@@ -464,7 +464,7 @@ class Grid:
         """Returns grid's area labels as a string for display."""
         rowstrings = [
             ''.join(['.' if c.label == '' else c.label for c in row])
-            + '|' for row in grid.cells]
+            + '|' for row in grid.rows]
         return '\n'.join(rowstrings)
 
     @staticmethod

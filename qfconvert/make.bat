@@ -1,4 +1,4 @@
-set qfpath=D:\code\quickfort\trunk
+set qfpath=D:\code\qf\trunk
 set pythonexe=c:\lang\Python26_32bit\python.exe
 
 cd %qfpath%\qfconvert

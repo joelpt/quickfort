@@ -45,7 +45,13 @@ def process_blueprint_file(path, options):
     if options.debugfile:
         print ">>>> BEGIN INPUT FILE PARSING"
 
-    sheetid = options.sheetid
+    # parse sheetid
+    if options.sheetid is None:
+        sheetid = 0
+    elif re.match('^\d+$', options.sheetid):
+        sheetid = options.sheetid
+    else:
+        sheetid = filereader.get_sheets(path)
 
     layers, details = filereader.parse_file(path, sheetid)
 
@@ -59,7 +65,8 @@ def process_blueprint_file(path, options):
 
         start, layers = transformer.transform(
             transformer.parse_transform_str(options.transform),
-            details.start, layers)
+            details.start,
+            layers)
 
         if options.debugfile:
             FileLayer.str_layers(layers)
@@ -150,12 +157,12 @@ class Blueprint:
             plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
             plotter.discover_areas() # find contiguous areas
 
-            grid, plots, end = plan_route(
+            layer.grid, layer.plots, end = plan_route(
                 plotter.grid, options.debugrouter, start)
 
             # generate key sequence to render this series of plots in game
             ks = Keystroker(grid, buildconfig)
-            keys += ks.plot(plots, start) + layer.onexit
+            keys += ks.plot(layer.plots, start) + layer.onexit
             start = end
 
         # move cursor back to start pos x, y, z
@@ -197,7 +204,7 @@ class Blueprint:
 
     def get_info(self):
         """Retrieve various bits of info about the blueprint."""
-        cells = flatten(layer.grid.cells for layer in self.layers)
+        cells = flatten(layer.grid.rows for layer in self.layers)
         commands = [c.command for c in cells]
         cmdset = set(commands) # uniques
         if '' in cmdset:

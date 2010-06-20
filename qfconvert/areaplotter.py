@@ -14,6 +14,13 @@ class AreaPlotter:
         self.buildconfig = buildconfig
         self.label = '0'
 
+        # init this for reuse later
+        self.dir_pairs = []
+        for d in ('e', 's', 'w', 'n'):
+            direction = Direction(d)
+            self.dir_pairs.append([direction, direction.right_turn()])
+            self.dir_pairs.append([direction, direction.left_turn()])
+
     def expand_fixed_size_areas(self):
         """
         Expand cells like d(20x20) to their corresponding areas,
@@ -23,7 +30,7 @@ class AreaPlotter:
             print ">>>> BEGIN AREA EXPANSION"
 
         label = self.label
-        for y, row in enumerate(self.grid.cells):
+        for y, row in enumerate(self.grid.rows):
             for x, cell in enumerate(row):
                 # act on d(5x5) format cells which haven't been plotted over
                 m = re.match(r'(.+)\((\d+)x(\d+)\)', cell.command)
@@ -56,11 +63,14 @@ class AreaPlotter:
         there are no more areas left to plot.
         Returns True when we plotted at least one area.
         """
-        label = self.label
-        plotted_something = False
 
         if self.debug:
             print ">>>> BEGIN AREA DISCOVERY"
+
+        testarea = Area(
+            Point(0,0),
+            Point(self.grid.width-1, self.grid.height-1)
+            )
 
         while True:
             if self.debug:
@@ -68,32 +78,16 @@ class AreaPlotter:
                 print '#### Marking largest plottable areas starting ' + \
                     'with label %s' % label
 
-            new_label = self.mark_largest_plottable_areas(label)
-
-            if label != new_label:
-                # 1+ areas marked this pass
-                plotted_something = True
-                label = new_label
-
-            testarea = Area(
-                Point(0,0),
-                Point(self.grid.width-1, self.grid.height-1)
-                )
+            self.label = self.mark_largest_plottable_areas(self.label)
 
             if not self.grid.is_area_plottable(testarea, True):
                 if self.debug:
                     print Grid.str_area_labels(self.grid) + '\n'
                     print "#### Grid is completely plotted"
-                self.label = label
-                return plotted_something
+                    print "<<<< END AREA DISCOVERY"
+                return
 
-        if self.debug:
-            print "<<<< END AREA DISCOVERY"
-
-        # should throw an error here, we should always stop before
-        # this because of plottability test above
-        return plotted_something
-
+        raise Exception, "Unable to plot all areas for unknown reason"
 
     def mark_largest_plottable_areas(self, label):
         """
@@ -133,9 +127,9 @@ class AreaPlotter:
         for ypos in range(0, self.grid.height):
             for xpos in range(0, self.grid.width):
                 pos = Point(xpos, ypos)
-                if self.grid.get_cell(pos).plottable \
-                    and len(self.grid.get_cell(pos).command) > 0 \
-                    and self.grid.is_corner(pos):
+                cell = self.grid.get_cell(pos)
+                if cell.plottable and cell.command and \
+                    self.grid.is_corner(pos):
                     areas.append(self.find_largest_area_from(pos))
 
         areas = util.uniquify(areas,
@@ -161,16 +155,11 @@ class AreaPlotter:
         SE & ES is one such quad pair. Each quad overlaps at pos;
         similarly, each quad shares two of its edges with adjacent quads.
         """
-        dir_pairs = []
-        for d in ('e', 's', 'w', 'n'):
-            direction = Direction(d)
-            dir_pairs.append([direction, direction.right_turn()])
-            dir_pairs.append([direction, direction.left_turn()])
 
         bestarea = Area(pos, pos)
 
         # find the biggest area(s) formable from each dir_pair quad
-        for dirs in dir_pairs:
+        for dirs in self.dir_pairs:
             area = self.find_largest_area_in_quad(
                 pos, dirs[0], dirs[1], bestarea)
             if area is not None:
