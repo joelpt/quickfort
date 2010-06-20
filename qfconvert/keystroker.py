@@ -64,7 +64,8 @@ KEY_LIST = {
         '[menuup]': '-',
         '!': '0:Enter',
         '#': '1:Enter',
-        '%': ''
+        '%': '',
+        '^': '^' # just here for completeness
     }
 }
 

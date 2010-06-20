@@ -76,7 +76,7 @@ class AreaPlotter:
             if self.debug:
                 print Grid.str_area_labels(self.grid) + '\n'
                 print '#### Marking largest plottable areas starting ' + \
-                    'with label %s' % label
+                    'with label %s' % self.label
 
             self.label = self.mark_largest_plottable_areas(self.label)
 
@@ -144,17 +144,15 @@ class AreaPlotter:
         Returns the Area found, which will be at least 1x1 in size.
         """
 
-        """
-        To start we build a list of direction pairs we'll want to test.
-        We need to check each compass direction paired with both
-        90-degree rotations from each compass direction: NE, NW, EN,
-        ES, ...
+        # To start we build a list of direction pairs we'll want to test.
+        # We need to check each compass direction paired with both
+        # 90-degree rotations from each compass direction: NE, NW, EN,
+        # ES, ...
 
-        These represent the 4 quadrants created by partitioning the grid
-        through the axes which pos sits on, and the inversions of each quad;
-        SE & ES is one such quad pair. Each quad overlaps at pos;
-        similarly, each quad shares two of its edges with adjacent quads.
-        """
+        # These represent the 4 quadrants created by partitioning the grid
+        # through the axes which pos sits on, and the inversions of each quad;
+        # SE & ES is one such quad pair. Each quad overlaps at pos;
+        # similarly, each quad shares two of its edges with adjacent quads.
 
         bestarea = Area(pos, pos)
 

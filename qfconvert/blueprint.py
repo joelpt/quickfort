@@ -11,7 +11,6 @@ from keystroker import Keystroker, convert_keys
 from router import plan_route
 from util import flatten
 import filereader
-import router
 import transformer
 
 def get_blueprint_info(path):
