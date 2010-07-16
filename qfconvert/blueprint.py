@@ -174,7 +174,7 @@ class Blueprint:
         Moves the cursor to the northwest corner, then clockwise to each
         other corner, before returning to the starting position.
         """
-        buildconfig = BuildConfig('dig', options)
+        buildconfig = BuildConfig('dig')
         grid = self.layers[0].grid
         ks = Keystroker(grid, buildconfig)
         keys = []
