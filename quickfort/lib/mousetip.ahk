@@ -140,7 +140,7 @@ UpdateTip()
       }
       else
       {
-        body := "TYPE " . UserInitKey . " (" . UserInitText . ").`nAlt+M shows full tip."
+        body := "TYPE " . UserInitKey . " (" . UserInitText . "), then Alt+D/V.`nAlt+F/E: new file/sheet. Alt+M: full tip."
       }
     }
     else

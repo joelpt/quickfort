@@ -22,10 +22,10 @@ InitGui(listViewEnabled)
   Gui, Add, Text, x+5 ym+5 w400 vSheetName, sheetname
   Gui, Font, norm
   Gui, Add, Text, y+10 w400 h300 vSheetInfo, sometext
-  Gui, Add, Button, Default y+5 xm+%offset% w75, OK
+  Gui, Add, Button, y+5 w75 gButtonCopyText, &Copy text
+  Gui, Add, Button, x+5 w100 gButtonEditBlueprint, &Edit blueprint
+  Gui, Add, Button, x+65 w75 Default, OK
   Gui, Add, Button, x+5 w75, Cancel
-  Gui, Add, Button, x+5 w75 gButtonCopyText, Copy text
-  ;Send, {Down 5} ; work around for having to press down twice to initially change selection
 }
 
 
@@ -67,10 +67,16 @@ ShowSheetInfoGui()
   Gui, Show
   WinWaitActive, ahk_class AutoHotkeyGUI
 
-  ; Set the current selection of the ListView
+  ; Set keyboard focus properly
   if (listViewEnabled)
   {
+    GuiControl, Focus, SysListView321
+    ; Set the current selection of the ListView
     LV_Modify(SelectedSheetIndex + 1, "Select Focus")
+  }
+  else
+  {
+    GuiControl, Focus, Button3
   }
 
   SheetGuiSelectedFile := SelectedFile
@@ -135,6 +141,15 @@ GuiEscape:
 ButtonCopyText:
 {
   clipboard := GuiText
+}
+
+;; ---------------------------------------------------------------------------
+;; Handle the Edit Blueprint button
+ButtonEditBlueprint:
+{
+  editing := SelectedFile
+  Gosub ButtonCancel
+  Run, %editing%
 }
 
 
