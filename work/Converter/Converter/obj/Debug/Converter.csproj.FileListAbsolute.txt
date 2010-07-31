@@ -1,0 +1,7 @@
+d:\code\Quickfort\Converter\Converter\bin\Debug\Converter.exe
+d:\code\Quickfort\Converter\Converter\bin\Debug\Converter.pdb
+d:\code\Quickfort\Converter\Converter\obj\Debug\ResolveAssemblyReference.cache
+d:\code\Quickfort\Converter\Converter\obj\Debug\Converter.exe
+d:\code\Quickfort\Converter\Converter\obj\Debug\Converter.pdb
+d:\code\Quickfort\Converter\Converter\bin\Debug\Sun2Base.dll
+d:\code\Quickfort\Converter\Converter\bin\Debug\Sun2Base.pdb

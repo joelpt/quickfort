@@ -1,0 +1,21 @@
+#build Surface level walls and bridges. Needs lots of stone (consider temporarily forbidding materials you don't want to wall with),,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,ga(2x3),,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,Cw,Cw,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,Cr,Cr,Cr,Cr,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,Cr,Cr,Cr,Cr,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,gw(4x2),,,,Cw,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,,,,,Cw,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,,,,,Cw,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,,,,,Cw,,,,,Cw,,,,,,,,Cw,#
+Cw,,,,,,,,,,,,Cw,gw(4x2),,,,Cw,,,,,ga(2x1),,,,,,,,Cw,#
+Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,,,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#

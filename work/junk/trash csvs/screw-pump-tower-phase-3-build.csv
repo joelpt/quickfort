@@ -1,0 +1,13 @@
+"#build We can now build screw pumps. Start repeating THIS blueprint at the LOWEST Z-level of the screw pump shaft: it builds upwards because the bottom pump must be placed first. 2 enormous corkscrews, 2 blocks, 2 pipes/tubes, and a door are required for each iteration of Alt+R. Place screw pumps in QF templates carefully; the piece is anchored from its bottom tile (when pumping from N or S) and from its right tile (when pumping from E or W). ",,,,,
+`,`,~,`,#,
+,,,`,#,Msu
+,`,~,`,#,
+`,`,,`,#,
+`,`,`,`,#,
+#>,#,#,#,#,
+`,`,,`,#,
+,,~,`,#,
+,`,,`,#,
+`,`,~,`,#,
+`,`,`,`,#,
+#,#,#,#,#,

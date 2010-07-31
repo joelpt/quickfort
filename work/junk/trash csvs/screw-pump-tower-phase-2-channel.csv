@@ -1,0 +1,13 @@
+"#dig Next we channel out the holes for the water to come up to each Z-level from below, and another hole so that the pumps have an interrupted point of contact vertically (allowing power to automatically transfer to all pumps). IMPORTANT: After running this, manually go to the bottom Z-level of the shaft and remove the channel designation in the 2nd tile from the north (the northernmost channel). The BOTTOM pump in the tower requires two floor tiles underneath it; this edit gives us those tiles; pumps above it will be ""on top"" of lower pumps and thus meet their two-tile requirement.",,,,
+`,`,h,`,#
+,,,`,#
+,`,h,`,#
+`,`,,`,#
+`,`,`,`,#
+#>,#,#,#,#
+`,`,,`,#
+,,h,`,#
+,`,,`,#
+`,`,h,`,#
+`,`,`,`,#
+#,#,#,#,#

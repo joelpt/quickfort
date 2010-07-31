@@ -1,0 +1,6 @@
+*Index dig:BedroomExample.1.Dig.csv build:BedroomExample2.Build.csv rooms:BedRoomExample3.MakeRooms.csv
+*Intro This is an example QuickFort template. It requires 44 beds, 44 containers, 44 cabinets, 44 doors, 4 chairs and 4 tables.
+*Intro The commands for this example are dig, build, and rooms. Type dig first to dig out an area for the bedroom complex.
+*Intro After smoothing/engraving the room (you can do this yourself), hit Alb-B and run this .qfort file again, then type build.
+*Intro Once everything is in place (you had enough right?) hit Alt-B once again, run this file, and type rooms. This last step
+*Intro will make all the beds in the new complex into rooms.

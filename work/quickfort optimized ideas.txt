@@ -1,0 +1,111 @@
+
+def find_optimal_areas
+# object that stores a grid of values
+commands = [[]]
+
+
+starting from pos=(0,0):
+    if cell:
+        max_width = get_contiguous_segment_length(pos, 'e')
+
+class Grid:
+    """Implementation of a simple 2d scalar grid."""
+
+    width = None
+    height = None
+
+    # We keep our cells in a single dimensional array and interpolate
+    # an (x,y) cartesian position as cells[x+y*width]. Thus in this
+    # implemention, east and south are the positive directions and
+    # (0,0) is the top left corner.
+    cells = []
+
+
+    def cell(self, coordinates):
+        """Returns the requested cell at the given coordinates."""
+        return self.cells[coordinates[0] + width * coordinates[1]]
+
+
+    def find_largest_area(self, start):
+        """Find the largest contiguous area starting at the given coords."""
+
+    def search_for_largest_area(self, start, direction1, direction2):
+        """Search for the largest contiguous area.
+
+        Arguments:
+        start -- Starting coordinates; all cells in area must match this cell
+        direction1 -- Initial direction to draw potential areas along
+        direction2 -- Secondary direction to draw potential areas along
+
+        Returns the area with the largest contiguous rectangular geometric area
+        that can be formed by traveling first along direction1, then along
+        direction2 for each position in direction1's path.
+
+        Example grid (# marks drawable areas):
+        #####
+        ### #
+        ##
+        #
+        ##
+
+        Starting from the top left corner (0, 0):
+
+            if (direction1='e', direction2='s'),
+                we return (0,0)-(0,4) which has a 5 cell area.
+
+            if (direction1='s', direction2='e'),
+                we return (0,0)-(1,1) which has a 4 cell area.
+
+        Both directions must be tested (transposed) to find the best solution.
+
+        """
+
+    def get_contiguous_segment_length(self, start, direction):
+        """Returns the longest contiguous series of a given cell's value
+        in a given direction.
+
+        Arguments:
+        start -- Coordinates of starting cell
+        direction -- Compass direction to move in
+
+        """
+        match = self.cell(start)
+        pos = start
+        distance = 1
+
+        while True:
+            # adjust our position by 1 cell in the right direction
+            pos = add_coords(pos, direction_deltas[direction])
+
+            # different cell contents here?
+            if self.cell(pos) != match:
+                break
+
+            # cell matched so add 1 and continue
+            distance += 1
+
+        return distance
+
+
+
+
+
+
+
+"""Relative compoass-point directional deltas on a cartesian graph."""
+direction_deltas = {
+    "n": (0, -1),
+    "s": (0, 1),
+    "e": (1, 0),
+    "w": (-1, 0)
+}
+
+def add_coords(coord1, coord2):
+    """Add two pairs of coordinates together (x1+x2, y1+y2)"""
+    return (coord1[0] + coord2[0], coord1[1] + coord2[1])
+
+starting from pos=(0,0):
+
+compute the cost of moving to and drawing out each remaining undrawn area
+    (total number of keystrokes required including build orders)
+select the one which has the lowest keystroke cost
