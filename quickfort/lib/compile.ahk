@@ -20,26 +20,27 @@ CompileToExeFunc()
   FileDelete, Quickfort.exe
   RunWait, "c:\Program Files (x86)\AutoHotkey\Compiler\Ahk2Exe.exe" /in "%A_ScriptFullPath%" /icon "%icon%"
 
-  FileDelete, releases\Quickfort.zip
-  FileDelete, releases\Quickfort_%Version%.zip
+  FileCopy, Quickfort.exe, release
   Sleep 1000
 
-  RunWait, zip -9 -r releases\Quickfort.zip aliases.txt Blueprints options.txt Quickfort.ahk Quickfort.exe readme.txt
-  Sleep 1000
+  FileCopy, releases\*.*, ..\release
 
-  FileCopy, releases\Quickfort.zip, releases\Quickfort_%Version%.zip
-  Sleep 1000
+  ;RunWait, zip -9 -r releases\Quickfort.zip aliases.txt Blueprints options.txt Quickfort.ahk Quickfort.exe readme.txt
+  ;Sleep 1000
 
-  Run, releases\Quickfort_%Version%.zip
+  ;FileCopy, releases\Quickfort.zip, releases\Quickfort_%Version%.zip
+  ;Sleep 1000
 
-  MsgBox, 4, , Upload?
+  ;Run, releases\Quickfort_%Version%.zip
 
-  IfMsgBox Yes
-  {
-    to := "m:\sun2design.com\quickfort\"
-    FileCopy, releases\Quickfort_%Version%.zip, %to%, 1
-    FileCopy, releases\Quickfort.zip, %to%, 1
-    FileCopy, readme.txt, %to%, 1
-    Run, http://sun2design.com/quickfort
-  }
+  ;MsgBox, 4, , Upload?
+
+  ;IfMsgBox Yes
+  ;{
+  ;  to := "m:\sun2design.com\quickfort\"
+  ;  FileCopy, releases\Quickfort_%Version%.zip, %to%, 1
+  ;  FileCopy, releases\Quickfort.zip, %to%, 1
+  ;  FileCopy, readme.txt, %to%, 1
+  ;  Run, http://sun2design.com/quickfort
+  ;}
 }

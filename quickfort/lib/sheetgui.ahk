@@ -95,7 +95,7 @@ SheetListView:
     index := A_EventInfo - 1
     UpdateGuiSheetInfo(index)
     SelectedSheetIndex := index
-    if (GuiEvent == "DoubleClick")
+    if (A_GuiEvent == "DoubleClick")
       Goto ButtonOK
   }
   return

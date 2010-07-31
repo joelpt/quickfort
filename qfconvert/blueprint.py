@@ -68,13 +68,14 @@ def process_blueprint_file(path, options):
             layers)
 
         if options.debugfile:
-            FileLayer.str_layers(layers)
+            print "#### Results of transform:"
+            print FileLayer.str_layers(layers)
 
     layers = filereader.FileLayers_to_GridLayers(layers)
 
     # set startpos
     if options.startpos is not None:
-        start = parse_startpos(options.startpos,
+        details.start = parse_startpos(options.startpos,
             layers[0].grid.width,
             layers[0].grid.height)
 

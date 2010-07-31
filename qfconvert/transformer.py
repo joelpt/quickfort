@@ -97,22 +97,17 @@ def apply_transform(trans, a, b):
 
     elif action in ('rotcw', 'rotccw'):
         # rotate a clockwise or counterclockwise 90 degrees
-        rot = [list(x) for x in zip(*b)]
+        rot = [list(x) for x in zip(*b)] # pivot the grid (cols become rows)
         if action == 'rotcw':
-            return apply_transform((1, 'fliph'), rot, rot)
+            return apply_transform((1, 'fliph'), a, rot)
         if action == 'rotccw':
-            return apply_transform((1, 'flipv'), rot, rot)
+            return apply_transform((1, 'flipv'), a, rot)
 
     elif action in ('n', 's', 'e', 'w'):
-        # repeat (a+b) in given direction the requested number
-        # of times:
-        #   with only a, action 3e would produce aaa
-        #   with both a and b, action 3e would produce aba
-        if not b:
-            series = [a] * count
-        else:
-            series = ([a, b] * (count // 2)) + \
-                ([a] if count % 2 == 1 else [])
+        # repeat (a+b) in given direction the requested number of times
+        #   4e yields ABAB pattern; 3e yields ABA
+        series = ([a, b] * (count // 2)) + \
+            ([a] if count % 2 == 1 else [])
 
         # reverse series for negative directions
         if action in ('n', 'w'):

@@ -6,9 +6,17 @@ ExecQfconvert(infile, outfile, params)
 {
   FileDelete, %outfile%
 
-  cmd = "c:\lang\Python26\python" "d:\code\qf\trunk\qfconvert\qfconvert.py" "%infile%" "%outfile%" %params%
+  if (A_IsCompiled) {
+    basedir := A_ScriptDir
+    cmd = "%A_ScriptDir%\qfconvert.exe" "%infile%" "%outfile%" %params%
+  }
+  else {
+    basedir := RegExReplace(A_ScriptDir, "(.+)[/\\].*", "$1") "\qfconvert"
+    cmd = "python.exe" "%basedir%\qfconvert.py" "%infile%" "%outfile%" %params%
+  }
+
   ;MsgBox %cmd%
-  RunWait %cmd%, d:\code\qf\trunk\qfconvert, Hide
+  RunWait %cmd%, %basedir%, Hide
 
   ready := False
   Loop 10
@@ -58,6 +66,6 @@ GetNewMacroName()
   ; macro always be sorted to the top item in DF's macro list. It allows QF to just
   ; use Ctrl+L, Enter to select our just-created macro.
   inverseticks := 4294967296 - A_TickCount
-  title = @@@qf%inverseticks%
+  title = @qf%inverseticks%
   return title
 }

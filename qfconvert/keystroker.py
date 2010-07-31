@@ -65,7 +65,18 @@ KEY_LIST = {
         '!': '0:Enter',
         '#': '1:Enter',
         '%': '',
-        '^': '^' # just here for completeness
+        '^': '^', # just here for completeness
+        '{down}': '0:2', # autohotkey equivalents to DF interface.txt binds
+        '{up}': '0:8',
+        '{left}': '0:4',
+        '{right}': '0:6',
+        '+{down}': '1:2',
+        '+{up}': '1:8',
+        '+{left}': '1:4',
+        '+{right}': '1:6',
+        '{enter}': '0:Enter',
+        '+{enter}': '1:Enter',
+        '{wait}': ''
     }
 }
 
@@ -353,7 +364,7 @@ def translate_keycode(keycode, mode):
     Translate a given keycode against KEY_LIST and specified mode.
     Returns translation if one exists, or original keycode otherwise.
     """
-    return KEY_LIST[mode].get(keycode) or keycode
+    return KEY_LIST[mode].get(keycode.lower()) or keycode
 
 
 def convert_to_macro(keycodes, title):
@@ -361,8 +372,8 @@ def convert_to_macro(keycodes, title):
     keybinds = parse_interface_txt(
         os.path.join(exetest.get_main_dir(), 'interface.txt') )
 
-    if not title:
-        title = '@@@qf' + str(random.randrange(0, 999999999))
+    if not title: # make up a macro title if one is not provided to us
+        title = '@qf' + str(random.randrange(0, 999999999))
 
     output = [title] # first line of macro is macro title
 
