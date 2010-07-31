@@ -47,7 +47,7 @@ def process_blueprint_file(path, options):
     # parse sheetid
     if options.sheetid is None:
         sheetid = 0
-    elif re.match('^\d+$', options.sheetid):
+    elif re.match('^\d+$', str(options.sheetid)):
         sheetid = options.sheetid
     else:
         sheetid = filereader.get_sheets(path)

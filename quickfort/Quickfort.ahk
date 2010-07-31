@@ -4,7 +4,7 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 
 ; Quickfort version number.
-Version := "2.00"
+Version := "2.00pre2"
 
 ; Initialize Quickfort.
 Init()

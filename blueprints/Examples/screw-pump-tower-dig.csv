@@ -1,0 +1,13 @@
+"#dig Example of repeatable screw pump tower.\n\nOn the bottom level, water is taken up from the south channeled tile. On the top level, water will exit the pump onto the tile directly south of the pump. See the DF wiki for a detailed explanation of screw pump technology.\n\nEvery repetition of this blueprint completes 2 z-levels of tower.\n\nIMPORTANT: Start from the top z-level and repeat (Alt+R) down. Then on the bottommost level, change the upper channel designation to mine. This will let us place the bottommost screw pump here.",,,,
+`,`,h,`,#
+`,`,d,`,#
+d,d,h,`,#
+i,`,d,`,#
+`,`,`,`,#
+#>,#,#,#,#
+`,`,d,`,#
+d,d,h,`,#
+d,`,d,`,#
+i,`,h,`,#
+`,`,`,`,#
+#,#,#,#,#
