@@ -24,3 +24,4 @@ echo ----- COPYING TO RELEASE FOLDER
 echo ---------------------------------------------------------------------------------
 
 call copyrelease.bat
+pause

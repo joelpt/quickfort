@@ -101,6 +101,7 @@ LoadOptions()
 LoadAppState()
 {
   global SelectedFolder, LastRepeatPattern, ShowFullTip
+  IniRead, PlaybackMode, state.ini, GUI, PlaybackMode
   IniRead, SelectedFolder, state.ini, GUI, LastFolder
   IniRead, LastRepeatPattern, state.ini, GUI, LastRepeatPattern
   IniRead, ShowFullTip, state.ini, GUI, ShowFullTip
@@ -123,6 +124,7 @@ LoadAppState()
 SaveAppState()
 {
   global SelectedFolder, LastRepeatPattern, ShowFullTip
+  IniWrite, %PlaybackMode%, state.ini, GUI, PlaybackMode
   IniWrite, %SelectedFolder%, state.ini, GUI, LastFolder
   IniWrite, %ShowFullTip%, state.ini, GUI, ShowFullTip
 

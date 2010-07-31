@@ -76,7 +76,8 @@ KEY_LIST = {
         '+{right}': '1:6',
         '{enter}': '0:Enter',
         '+{enter}': '1:Enter',
-        '{wait}': ''
+        '{wait}': '',
+        '{esc}': '^'
     }
 }
 
@@ -102,6 +103,7 @@ class Keystroker:
         last_command = ''
         last_submenu = ''
         keys = self.buildconfig.get('init') or []
+        completed = self.buildconfig.get('completed') or []
 
         # construct the list of keystrokes required to move to each
         # successive area and build it
@@ -201,6 +203,14 @@ class Keystroker:
 
             # move cursor pos to end corner of built area
             cursor = newpos
+
+        # if we're in a submenu, exit it
+        if last_submenu:
+            keys.append('^')
+
+        # append on-completed keys, if any
+        keys.extend(completed)
+
         return keys
 
     def move(self, start, end, zoffset=0, allowjumps=True):
@@ -408,7 +418,7 @@ def split_keystring_into_keycodes(keystring):
     # break into individual keycodes
     codes = []
     for k in cmdsplit:
-        if k[0] in ('{', '!', '^', '+'):
+        if k and k[0] in ('{', '!', '^', '+'):
             codes.append(k) # preserve whole key-combos
         else:
             codes.extend(k) # separate individual keystrokes

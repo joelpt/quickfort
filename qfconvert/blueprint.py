@@ -144,7 +144,7 @@ class Blueprint:
         self.comment = details.comment
 
     def plot(self, options):
-        """Plots a route through the provided blueprint."""
+        """Plots a route through the blueprint."""
         buildconfig = BuildConfig(self.build_type)
         keys = []
         start = self.start

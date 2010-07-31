@@ -4,6 +4,7 @@ BUILD_TYPE_CFG = {
 
     'dig': {
         'init': None,
+        'completed': None,
         'designate': 'moveto cmd ! setsize !'.split(),
         'samecmd': None,
         'diffcmd': ['cmd'],
@@ -15,6 +16,7 @@ BUILD_TYPE_CFG = {
 
     'build': {
         'init': ['^'],
+        'completed': ['O'], # build dirt road to allow cursor repositioning
         'designate': 'exitmenu menu cmd moveto setsize ! % # %'.split(),
         'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
@@ -70,6 +72,7 @@ BUILD_TYPE_CFG = {
 
     'place': { # place stockpiles
         'init': None,
+        'completed': None,
         'designate': 'moveto cmd ! setsize !'.split(),
         'samecmd': None,
         'diffcmd': ['cmd'],
@@ -81,8 +84,9 @@ BUILD_TYPE_CFG = {
 
     'query': { # set building/task prefs
         'init': None,
-        'designate': 'moveto cmd ! setsize !'.split(),
-        'samecmd': None,
+        'completed': None,
+        'designate': 'moveto cmd setsize !'.split(),
+        'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
         'submenukeys': '',
         'sizebounds': None,

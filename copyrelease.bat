@@ -10,4 +10,7 @@ copy /s blueprints release\blueprints
 robocopy /s quickfort release\src\quickfort\ Quickfort.ahk options.txt aliases.txt readme.txt Quickfort.ico lib /xd release
 robocopy /s qfconvert release\src\qfconvert\ *.py interface.txt /xd release
 
+rmdir /s /q ..\release
+move release ..
+
 :cd release

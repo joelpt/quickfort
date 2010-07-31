@@ -133,14 +133,13 @@ UpdateTip()
             . (StartPos ? "Alt+Z resets starting corner.`n" : "")
             . "Alt+R transforms blueprint.`n"
             . "`n"
-            . "Alt+F picks a new file.`n"
-            . (SheetCount > 1 ? "Alt+E changes sheets.`n" : "Alt+E shows blueprint info.`n")
-            . "Alt+H toggles tooltip.`n"
-            . "Alt+M switches to minitip."
+            . "Alt+F/E picks a new file/sheet.`n"
+            . "Alt+K sets mode [now: " PlaybackMode "]`n"
+            . "Alt+M for minitip, Alt+H to hide tip."
       }
       else
       {
-        body := "TYPE " . UserInitKey . " (" . UserInitText . "), then Alt+D/V.`nAlt+F/E: new file/sheet. Alt+M for more."
+        body := "TYPE " . UserInitKey . " (" . UserInitText . "), then Alt+D/V.`nAlt+F/E: new file/sheet. Alt+M: full tip."
       }
     }
     else

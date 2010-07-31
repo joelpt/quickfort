@@ -21,7 +21,7 @@ InitGui(listViewEnabled)
   Gui, Font, bold
   Gui, Add, Text, x+5 ym+5 w400 vSheetName, sheetname
   Gui, Font, norm
-  Gui, Add, Text, y+10 w400 h300 vSheetInfo, sometext
+  Gui, Add, Edit, y+10 w400 h300 vSheetInfo VScroll, sometext
   Gui, Add, Button, y+5 w75 gButtonCopyText, &Copy text
   Gui, Add, Button, x+5 w100 gButtonEditBlueprint, &Edit blueprint
   Gui, Add, Button, x+65 w75 Default, OK
@@ -36,11 +36,11 @@ ShowSheetInfoGui()
   global
   local listViewEnabled, selectorChanged, needRefresh
 
-  needRefresh := (SheetGuiSelectedFile != SelectedFile)
+  needRefresh := (GuiSelectedFile != SelectedFile)
   listViewEnabled := (SheetCount > 1)
 
-  if (needRefresh)
-    SelectedSheetIndex := 0 ; default to selecting first row
+  ;if (needRefresh)
+  GuiSelectedSheetIndex := 0 ; default to selecting first row
 
   if (needRefresh) ; need to update the GUI layout/listview?
   {
@@ -61,7 +61,7 @@ ShowSheetInfoGui()
   }
 
   ; Update gui to our current sheet
-  UpdateGuiSheetInfo(SelectedSheetIndex)
+  UpdateGuiSheetInfo(GuiSelectedSheetIndex)
 
   ; Show the GUI now
   Gui, Show
@@ -72,14 +72,14 @@ ShowSheetInfoGui()
   {
     GuiControl, Focus, SysListView321
     ; Set the current selection of the ListView
-    LV_Modify(SelectedSheetIndex + 1, "Select Focus")
+    LV_Modify(GuiSelectedSheetIndex + 1, "Select Focus")
   }
   else
   {
     GuiControl, Focus, Button3
   }
 
-  SheetGuiSelectedFile := SelectedFile
+  GuiSelectedFile := SelectedFile
   return
 }
 
@@ -94,7 +94,7 @@ SheetListView:
     ;MsgBox, You selected row number %A_EventInfo%. Text: "%RowText%"
     index := A_EventInfo - 1
     UpdateGuiSheetInfo(index)
-    SelectedSheetIndex := index
+    GuiSelectedSheetIndex := index
     if (A_GuiEvent == "DoubleClick")
       Goto ButtonOK
   }
@@ -106,6 +106,7 @@ SheetListView:
 ;; Handle clicking on the OK button
 ButtonOK:
 {
+  SelectedSheetIndex := GuiSelectedSheetIndex
   Gui, Submit
   ShowTip()
   ReadyToBuild := True

@@ -108,6 +108,20 @@ $!C::
   }
   return
 
+;; ---------------------------------------------------------------------------
+;; Switch playback mode (Alt+K)
+!K::
+  if (!Building)
+  {
+    if (PlaybackMode = "macro")
+      PlaybackMode := "key"
+    else
+      PlaybackMode := "macro"
+    SaveAppState()
+    UpdateTip()
+  }
+  return
+
 
 ;; ---------------------------------------------------------------------------
 ;; Repeat/transform (Alt+R)
