@@ -24,4 +24,17 @@ echo ----- COPYING TO RELEASE FOLDER
 echo ---------------------------------------------------------------------------------
 
 call copyrelease.bat
+
+echo ---------------------------------------------------------------------------------
+echo ----- ZIPPING RELEASE
+echo ---------------------------------------------------------------------------------
+
+cd ..
+ren release quickfort
+del release.zip
+zip -9 -r release.zip quickfort\*
+ren quickfort release
+dir
+cd trunk
+
 pause

@@ -49,8 +49,8 @@ BUILD_TYPE_CFG = {
                           'setsize': 'setsize_fixed'
                         },
 
-            # 3x3 workshops other than those already accounted for
-            r'w[^sfv]': { 'sizebounds': (3, 3, 3, 3),
+            # 3x3 workshops & furnaces other than those already accounted for
+            r'w[^sfv]|e.': { 'sizebounds': (3, 3, 3, 3),
                           'setsize': 'setsize_fixed'
                         },
 
