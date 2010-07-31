@@ -1,0 +1,3 @@
+"#build Start this so that the 2 left-edge tiles in the leftmost column are above 7/7 running water (river or channeled-out brook) -- represented by ~ in CSV. Uses an enormous corkscrew, a pipe, a block, and 3 wood.\n\nUse wisely.",,
+~,`,Msh
+~,Mws,`
