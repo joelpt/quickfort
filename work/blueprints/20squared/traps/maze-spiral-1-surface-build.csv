@@ -1,0 +1,22 @@
+#build Aboveground maze spiral. Victims enter and exit from the midpoints of this block's east and west edges.,,,,,,,,,,,,,,,,,,,,
+Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,Cw,#
+Cw,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,Cw,#
+Cw,,Cw,,,,,,,,,,,,,,,Cw,,Cw,#
+Cw,,Cw,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,Cw,,Cw,#
+Cw,,Cw,,Cw,,,,,,,,,,,Cw,,Cw,,Cw,#
+Cw,,Cw,,Cw,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,Cw,Cw,,Cw,,Cw,#
+Cw,,Cw,,Cw,,Cw,,,,,Cw,,Cw,Cw,,Cw,Cw,,Cw,#
+Cw,,Cw,,Cw,,Cw,,Cw,,,Cw,,Cw,,Cw,Cw,,Cw,Cw,#
+,,Cw,,Cw,,Cw,,Cw,Cw,,Cw,,Cw,,Cw,,Cw,Cw,,#
+,Cw,Cw,,Cw,,Cw,,Cw,,,Cw,,Cw,,Cw,,Cw,,,#
+Cw,Cw,,Cw,Cw,,Cw,,Cw,,Cw,Cw,,Cw,,Cw,,Cw,,Cw,#
+Cw,,Cw,Cw,,Cw,Cw,,Cw,,,,,Cw,,Cw,,Cw,,Cw,#
+Cw,,Cw,,Cw,Cw,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,Cw,,Cw,,Cw,#
+Cw,,Cw,,Cw,,,,,,,,,,,Cw,,Cw,,Cw,#
+Cw,,Cw,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,Cw,,Cw,#
+Cw,,Cw,,,,,,,,,,,,,,,Cw,,Cw,#
+Cw,,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,,Cw,#
+Cw,,,,,,,,,,,,,,,,,,,Cw,#
+Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,Cw,#
+#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#,#
