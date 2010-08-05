@@ -435,6 +435,7 @@ def parse_interface_txt(path):
     with open(path) as f:
         data = f.read()
 
+    data = util.convert_line_endings(data)
     groups = [re.split('\n', kb) for kb in re.split(r'\[BIND:', data)]
 
     keybinds = KEY_LIST

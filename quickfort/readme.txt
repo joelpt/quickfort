@@ -1,12 +1,12 @@
-Quickfort 2.00pre2
-==============
+Quickfort 2.00pre3
+==================
 
 *******************************************************************************************
 ***
 *** NOTICE: The main documentation in this file has not been updated since Quickfort 1.11
 *** and is out of date. It will be updated before 2.00 'release' version.
 ***
-*** Quick use guide for 2.00pre2:
+*** Quick use guide for 2.00pre3:
 ***
 *** All users:     I highly recommend setting [MACRO_MS:0] in your data/init/init.txt
 ***                for best DF macro playback performance.
