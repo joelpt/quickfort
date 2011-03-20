@@ -6,7 +6,7 @@ import re
 
 
 class AreaPlotter:
-    """Handles discovery of areas to be plotted by someone else."""
+    """Handles discovery of largest plottable areas."""
 
     def __init__(self, grid, buildconfig, debug):
         self.grid = grid
@@ -21,10 +21,15 @@ class AreaPlotter:
             self.dir_pairs.append([direction, direction.right_turn()])
             self.dir_pairs.append([direction, direction.left_turn()])
 
+        # Trivially replacing the above with the below improves performance by
+        # 25%+ while increasing final keystroke count by ~10-45%
+        #self.dir_pairs = [ [Direction('s'), Direction('e')] ]
+
     def expand_fixed_size_areas(self):
         """
-        Expand cells like d(20x20) to their corresponding areas,
-        and mark those areas as plotted.
+        Expand cell commands of the form 'd(20x20)' to their corresponding
+        areas (in this example a 20x20 designation of d's) and mark those
+        areas as plotted.
         """
         if self.debug:
             print ">>>> BEGIN AREA EXPANSION"
@@ -32,7 +37,7 @@ class AreaPlotter:
         label = self.label
         for y, row in enumerate(self.grid.rows):
             for x, cell in enumerate(row):
-                # act on d(5x5) format cells which haven't been plotted over
+                # act on d(5x5) styles cells which haven't been plotted over
                 m = re.match(r'(.+)\((\d+)x(\d+)\)', cell.command)
                 if cell.plottable and m:
                     command = m.group(1)
@@ -128,8 +133,10 @@ class AreaPlotter:
             for xpos in range(0, self.grid.width):
                 pos = Point(xpos, ypos)
                 cell = self.grid.get_cell(pos)
-                if cell.plottable and cell.command and \
-                    self.grid.is_corner(pos):
+                # Removing the is_corner() check below reduces final
+                # keystroke count by ~3% but makes the routine ~12x slower
+                if cell.plottable \
+                    and self.grid.is_corner(pos):
                     areas.append(self.find_largest_area_from(pos))
 
         areas = util.uniquify(areas,

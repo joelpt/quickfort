@@ -10,8 +10,8 @@ from geometry import Point, Direction, GridLayer, Grid
 from keystroker import Keystroker, convert_keys
 from router import plan_route
 from util import flatten
+from transformer import Transformer, parse_transform_str
 import filereader
-import transformer
 
 def get_blueprint_info(path):
     """Returns information about the blueprint at path."""
@@ -59,13 +59,13 @@ def process_blueprint_file(path, options):
         print FileLayer.str_layers(layers)
 
     if options.transform:
-        if options.debugfile:
+        if options.debugtransform:
             print "#### Transforming with: %s" % options.transform
 
-        start, layers = transformer.transform(
-            transformer.parse_transform_str(options.transform),
-            details.start,
-            layers)
+        transforms = parse_transform_str(options.transform)
+        trans = Transformer(layers, details.start, options.debugtransform)
+        trans.transform(transforms)
+        start, layers = trans.start, trans.layers
 
         if options.debugfile:
             print "#### Results of transform:"

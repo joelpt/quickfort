@@ -37,6 +37,9 @@ def parse_options():
     parser.add_option("-C", "--show-csv-parse",
                       action="store_true", dest="debugfile", default=False,
                       help="show blueprint parsing steps on stdout")
+    parser.add_option("-X", "--show-transforms",
+                      action="store_true", dest="debugtransform", default=False,
+                      help="show transform steps on stdout")
     parser.add_option("-A", "--show-area",
                       action="store_true", dest="debugarea", default=False,
                       help="show area-discovery steps on stdout")

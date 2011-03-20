@@ -375,24 +375,45 @@ class Grid:
 
         command = cell.command
 
+        """
+        The below code is commented out after determining it makes essentially
+        no difference to final keystroke count while hurting performance
+        a bit. It is preserved here for a conceptual understanding of the
+        intent behind is_corner().
+
         if command == '':
             return False # empty cell; not a part of any area
 
-        dirs = (Direction(d) for d in ('n', 's', 'e', 'w'))
+        pridirs = (Direction(d) for d in ('n', 's', 'e', 'w'))
+        secdirs = (Direction(d) for d in ('ne', 'nw', 'se', 'sw'))
 
-        # if cell can not extend in any of NSEW directions, it's a corner cell
-        matches4 = sum(
+        primatches = sum(
             c.plottable and command == c.command
-            for c in (self.get_cell(pos + d.delta()) for d in dirs)
+            for c in (self.get_cell(pos + d.delta()) for d in pridirs)
             )
-        if matches4 == 0:
-            # solo corner (no similar cell at nsew)
-            return True
-        elif matches4 == 4:
-            # at intersection or interior point (all similar cells at nsew)
-            return False
 
-        # see if this cell is an edge of an area
+        secmatches = sum(
+            c.plottable and command == c.command
+            for c in (self.get_cell(pos + d.delta()) for d in secdirs)
+            )
+
+        if primatches == 0:
+            # cell can't extend from any of nsew so it's an independent
+            # 1 x 1 area and thus constitutes a 'corner' cell
+            return True
+        elif primatches == 4 and secmatches == 0:
+             # at intersection, will necessarily be a part of some other
+             # rectangle
+             return False
+        elif primatches == 4 and secmatches == 4:
+            # interior point, will necessarily be a part of some other
+            # rectangle
+            return False
+        """
+
+        # See if this cell can be extended along either axis in both
+        # directions. If so we assume this will be a non-corner cell
+        # of a larger area.
         dirs = (Direction(d) for d in ['n', 'e'])
         for d in dirs:
             corner = self.get_cell(pos + d.delta())
