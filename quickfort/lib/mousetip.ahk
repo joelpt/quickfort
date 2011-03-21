@@ -63,34 +63,45 @@ UpdateTip()
 {
   global
   local mode, header, body
-
+  
   ; Determine tip mode.
-  if (!SelectedFile)
+  if (Building)
+    mode := "build"
+  else if (CommandLineMode)
+    mode := "prebuild"
+  else if (!SelectedFile)
     mode := "pickfile"
   else if SelectedSheetIndex =
     mode := "pickfile"
-  else if (Building)
-    mode := "build"
   else
     mode := "prebuild"
 
   ; Determine contents of mouse tooltip based on mode.
   if (mode == "pickfile")
   {
-    header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F."
+    header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F.`nAlt+T for command line."
   }
   else {
-    header := SelectedFilename
-    if (Name%SelectedSheetIndex% != SelectedFilename)
+    if (CommandLineMode)
     {
-      header := header ": " Name%SelectedSheetIndex%
+      header := "Alt+T: #" EvalMode " " EvalCommands
+    }
+    else
+    {
+      header := SelectedFilename
+    
+      if (Name%SelectedSheetIndex% != SelectedFilename)
+      {
+        header := header ": " Name%SelectedSheetIndex%
+      }
+
+      header := header " (" BuildType%SelectedSheetIndex% " mode)"
+      header := header ", " Width%SelectedSheetIndex% "x" Height%SelectedSheetIndex%
+
+      if (LayerCount%SelectedSheetIndex% > 1)
+        header := header "x" LayerCount%SelectedSheetIndex%
     }
 
-    header := header " (" BuildType%SelectedSheetIndex% " mode)"
-    header := header ", " Width%SelectedSheetIndex% "x" Height%SelectedSheetIndex%
-
-    if (LayerCount%SelectedSheetIndex% > 1)
-      header := header "x" LayerCount%SelectedSheetIndex%
 
     if (RepeatPattern)
       header := header "`n>> TRANSFORM: " RepeatPattern
@@ -134,12 +145,13 @@ UpdateTip()
             . "Alt+R transforms blueprint.`n"
             . "`n"
             . "Alt+F/E picks a new file/sheet.`n"
+            . "Alt+T for command line.`n"
             . "Alt+K sets mode [now: " PlaybackMode "]`n"
             . "Alt+M for minitip, Alt+H to hide tip."
       }
       else
       {
-        body := "TYPE " . UserInitKey . " (" . UserInitText . "), then Alt+D/V.`nAlt+F/E: new file/sheet. Alt+M: full tip."
+        body := "TYPE " . UserInitKey . " (" . UserInitText . ") then Alt+D/V.`nAlt+F/E/T: new file/sheet/cmd. Alt+M: full tip."
       }
     }
     else

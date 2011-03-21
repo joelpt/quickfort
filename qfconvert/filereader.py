@@ -72,10 +72,10 @@ class FileLayer:
         return
 
     @staticmethod
-    def str_rows(layer, colsep = ''):
-        """Returns a pretty-formatted string showing the layer's rows."""
+    def str_rows(rows, colsep = ''):
+        """Returns a pretty-formatted string showing the given rows."""
         rowstrings = [colsep.join(['.' if c == '' else c[0] for c in row]) + \
-            '|' for row in layer.rows]
+            '|' for row in rows]
         return '\n'.join(rowstrings)
 
     @staticmethod
@@ -83,7 +83,7 @@ class FileLayer:
         """Returns a pretty-formatted string of the given file_layers."""
         s = ''
         for layer in file_layers:
-            s += (FileLayer.str_rows(layer) + '\n') + \
+            s += (FileLayer.str_rows(layer.rows) + '\n') + \
                 (''.join(['On Exit: '] + layer.onexit) + '\n')
         return s
 
@@ -179,7 +179,7 @@ def parse_sheet_details(top_line):
     top_line = re.sub(r',+$', '', top_line)
 
     # extract build type, start() command if any, and comment if any
-    m = re.match(r'^#(build|dig|query|place)\w*( +start\(.+?\))?( .+)?$',
+    m = re.match(r'^#(build|dig|query|place)( +start\(.+?\))?( .+)?$',
         top_line)
 
     (build_type, start_command, comment) = m.group(1, 2, 3)

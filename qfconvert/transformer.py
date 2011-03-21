@@ -6,6 +6,7 @@ commands.
 from copy import deepcopy
 import re
 from geometry import Grid, GridLayer, Point
+from filereader import FileLayer
 
 def parse_transform_str(transform_str):
     """
@@ -151,11 +152,9 @@ class Transformer:
     def print_buckets(self, a, b):
         """Print bucket contents A and B."""
         print '---------------- BUCKET A ----------------'
-        for r in a:
-            print ''.join(r) + '|'
+        print FileLayer.str_rows(a)
         print '---------------- BUCKET B ----------------'
-        for r in b:
-            print ''.join(r) + '|'
+        print FileLayer.str_rows(b)
         print '------------------------------------------'
 
 
@@ -247,7 +246,7 @@ class Transformer:
             raise Exception, "Unrecognized horizontal alignment code %s" % alignment
 
         for i, r in enumerate(rows):
-            r = ['.'] * left + r + ['.'] * right
+            r = [''] * left + r + [''] * right
             rows[i] = r
         return rows
 
@@ -268,6 +267,6 @@ class Transformer:
             raise Exception, "Unrecognized vertical alignment code %s" % alignment
 
         width = len(rows[0])
-        rows = [['.'] * width] * top + rows + [['.'] * width] * bottom
+        rows = [[''] * width] * top + rows + [[''] * width] * bottom
 
         return rows        

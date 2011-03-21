@@ -58,7 +58,7 @@ ExecQfconvert(infile, outfile, params)
 
 
 ;; ---------------------------------------------------------------------------
-GetNewMacroName()
+GetRandomFileName()
 {
   ; We use macro names that should always go in decreasing sort order in DF's UI
   ; (between reboots); and we always delete our macros after use. However DF doesn't

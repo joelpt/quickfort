@@ -168,9 +168,9 @@ Examples:
       ActivateGameWin()
     }
 
-    pattern = %pattern% ; whitespace trim
+    pattern = %pattern% ; magic AHK whitespace trim
 
-    if (RegExMatch(pattern, "^(\d*([dunsew]|flip[vh]|rotc?cw|\!)\s*)+$"))
+    if (RegExMatch(pattern, "^((\d*([dunsew]|flip[vh]|rotc?cw|\!)|halign=([lmr]|left|middle|right)|valign=([tmb]|top|middle|bottom))\s*)+$"))
     {
       RepeatPattern := LastRepeatPattern := pattern
       SaveAppState()
@@ -199,12 +199,9 @@ ShowFilePicker:
     newfile := SelectFile()
     if (newfile)
     {
-      SelectedFile := newfile
-      SelectedSheetIndex =
       RepeatPattern =
-
-      ; split filename up into parts we use elsewhere
-      SplitPath, SelectedFile, SelectedFilename, SelectedFolder
+      CommandLineMode := False
+      SetSelectedFile(newfile)
 
       ; save change to app state (SelectedFolder)
       SaveAppState()
@@ -218,7 +215,6 @@ ShowFilePicker:
   }
   return
 }
-
 
 ;; ---------------------------------------------------------------------------
 ;; Build starter (Alt+D)
@@ -259,3 +255,74 @@ $!V::
   return
 }
 
+
+;; ---------------------------------------------------------------------------
+;; One-off command line (Alt+T)
+$!T::
+   if (!Building)
+   {
+    command := ""
+    msg =
+    (
+Syntax: mode cmd1(,cmd2,cmd3,...)(#cmd1,....)
+  - mode should be one of (dig build place query) or (d b p q)
+  - cmds can be DF key-commands or QF aliases
+  - separate multiple rows with #
+
+Examples:
+  build b,b,b,b,b      # build a row of 5 beds
+  dig i,h                  # then use Alt+R, 10d for a mineshaft
+  query booze         # make a food stockpile only carry booze
+  q growlastcropall  # set a plot to grow plumps (usually)
+  d d,d#d,d           # dig a 2x2 square
+    )
+    InputBox, command, Quickfort Command Line, %msg%, , 400, 300 , , , , , %LastCommandLine%
+    ActivateGameWin()
+
+    if (command != "")
+    {
+      evalOK := RegExMatch(command, "S)^([bdpq])\w*\s+(.+)", evalMatch)
+      if (!evalOK)
+      {
+        MsgBox, Error: Invalid command syntax`nExpected: [b|d|p|q] cmd(,cmd2,..,cmdN)(#cmd,...)`n`n%command%
+        ActivateGameWin()
+        Exit
+      }
+      else
+      {
+        StartPosAbsX := 0
+        StartPosAbsY := 0
+        StartPosComment =
+        SetStartPos(0, "Top left")
+
+        if (evalMatch1 == "b")
+          EvalMode := "build"
+        else if (evalMatch1 == "d")
+          EvalMode := "dig"
+        else if (evalMatch1 == "p")
+          EvalMode := "place"
+        else if (evalMatch1 == "q")
+          EvalMode := "query"
+
+        EvalCommands := evalMatch2
+
+        outfile := A_ScriptDir "\" GetRandomFileName() ".csv"
+        WriteCommandLineToCSVFile(EvalMode, EvalCommands, outfile)
+        SetSelectedFile(outfile)
+        SetVarsByBuildType(EvalMode)
+
+        CommandLineMode := True
+        ReadyToBuild := True
+        
+        ; persistently remember last command entered here
+        LastCommandLine := command
+        SaveAppState()
+
+        ShowCSVIntro := False
+        RepeatPattern =
+
+        UpdateTip()
+      }
+    }
+  }
+  return

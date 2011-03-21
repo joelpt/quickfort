@@ -4,14 +4,13 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 
 ; Quickfort version number.
-Version := "2.00pre3"
+Version := "2.00pre4"
 
 ; Initialize Quickfort.
 Init()
 
 ; Done with startup stuff.
 return
-
 
 ; Includes are best put at the end of AHK scripts because they are added and executed inline
 ; wherever the #include appears
@@ -27,4 +26,5 @@ return
 #include lib/mousetip.ahk
 #include lib/qfconvert.ahk
 #include lib/sheetgui.ahk
+#include lib/state.ahk
 #include lib/win32.ahk

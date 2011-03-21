@@ -195,9 +195,9 @@ class Blueprint:
         keys += ks.move(lastpos, self.start, allowjumps=False)
 
         # trim any pauses off the ends
-        while keys[0] == '%':
+        while keys and keys[0] == '%':
             keys = keys[1:]
-        while keys[-1] == '%':
+        while keys and keys[-1] == '%':
             keys = keys[:-1]
 
         return keys

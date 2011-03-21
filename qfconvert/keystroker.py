@@ -1,6 +1,8 @@
 """Handles conversion from QF keycode lists to keystrokes or DF macros."""
 
+from copy import copy
 from math import sqrt
+import json
 import os
 import re
 import random
@@ -9,78 +11,9 @@ from geometry import Area, Direction
 import exetest
 import util
 
-# Keycode translation definitions for each output mode.
-KEY_LIST = {
-    'key': {
-        '>': '^5',
-        '<': '+5',
-        '[n]': '8',
-        '[ne]': '9',
-        '[e]': '6',
-        '[se]': '3',
-        '[s]': '2',
-        '[sw]': '1',
-        '[w]': '4',
-        '[nw]': '7',
-        '[+n]': '+8',
-        '[+ne]': '+9',
-        '[+e]': '+6',
-        '[+se]': '+3',
-        '[+s]': '+2',
-        '[+sw]': '+1',
-        '[+w]': '+4',
-        '[+nw]': '+7',
-        '[widen]': 'k',
-        '[heighten]': 'u',
-        '[menudown]': '{NumpadAdd}', # move to next menu item
-        '[menuup]': '{NumpadSub}',
-        '!': '{Enter}', # select
-        '#': '+{Enter}', # shift-select (select all)
-        '%': '{wait}', # pause
-        '^': '{Esc}' # exit current menu
-        },
-    'macro': {
-        '>': '>',
-        '<': '<',
-        '[n]': '0:8',
-        '[ne]': '0:9',
-        '[e]': '0:6',
-        '[se]': '0:3',
-        '[s]': '0:2',
-        '[sw]': '0:1',
-        '[w]': '0:4',
-        '[nw]': '0:7',
-        '[+n]': '1:8',
-        '[+ne]': '1:9',
-        '[+e]': '1:6',
-        '[+se]': '1:3',
-        '[+s]': '1:2',
-        '[+sw]': '1:1',
-        '[+w]': '1:4',
-        '[+nw]': '1:7',
-        '[widen]': 'k',
-        '[heighten]': 'u',
-        '[menudown]': '+',
-        '[menuup]': '-',
-        '!': '0:Enter',
-        '#': '1:Enter',
-        '%': '',
-        '^': '^', # just here for completeness
-        '{down}': '0:2', # autohotkey equivalents to DF interface.txt binds
-        '{up}': '0:8',
-        '{left}': '0:4',
-        '{right}': '0:6',
-        '+{down}': '1:2',
-        '+{up}': '1:8',
-        '+{left}': '1:4',
-        '+{right}': '1:6',
-        '{enter}': '0:Enter',
-        '+{enter}': '1:Enter',
-        '{wait}': '',
-        '{esc}': '^'
-    }
-}
-
+# load global KEY_LIST which is used liberally below and would be inefficient to constantly reload
+with open("keys.json") as f:
+    KEY_LIST = json.load(f)
 
 class Keystroker:
     """
@@ -371,7 +304,7 @@ def translate_keycodes(keycodes, mode):
 
 def translate_keycode(keycode, mode):
     """
-    Translate a given keycode against KEY_LIST and specified mode.
+    Translate a given keycode against keylist and specified mode.
     Returns translation if one exists, or original keycode otherwise.
     """
     return KEY_LIST[mode].get(keycode.lower()) or keycode
@@ -438,7 +371,7 @@ def parse_interface_txt(path):
     data = util.convert_line_endings(data)
     groups = [re.split('\n', kb) for kb in re.split(r'\[BIND:', data)]
 
-    keybinds = KEY_LIST
+    keybinds = copy(KEY_LIST)
     for kb in groups:
         if kb == ['']:
             continue

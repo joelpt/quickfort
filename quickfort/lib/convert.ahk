@@ -9,7 +9,7 @@ ConvertAndPlayMacro()
   global
   local title, outfile, dfpath, destfile, starttime
 
-  title := GetNewMacroName()
+  title := GetRandomFileName()
   outfile := A_ScriptDir "\" title ".mak"
   ActivateGameWin()
   dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
@@ -20,11 +20,11 @@ ConvertAndPlayMacro()
   starttime := A_TickCount
   if (ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "macro", title, StartPos, RepeatPattern, false))
   {
-    ; Copy to DF dir
-    FileCopy, %outfile%, %destfile%, 1
+    ; Move to DF dir
+    FileMove, %outfile%, %destfile%, 1
     if (ErrorLevel > 0)
     {
-      MsgBox, Error: Could not copy macro file`nFrom: %outfile%`nTo: %destfile%
+      MsgBox, Error: Could not move macro file`nFrom: %outfile%`nTo: %destfile%
       return false
     }
     else
@@ -69,4 +69,17 @@ ConvertAndSendKeys(visualizing)
   ; clean up
   FileDelete, %outfile%
   return true
+}
+
+;; ---------------------------------------------------------------------------
+;; convert command line given by mode, commands into a qfconvert-compatible
+;; CSV file and write it to filepath
+WriteCommandLineToCSVFile(mode, commands, filepath)
+{
+  StringReplace, commands, commands, #, `n, All   ;  # -> newline
+
+  output := "#" . mode . "`n" . commands
+
+  FileDelete, %filepath%
+  FileAppend, %output%, %filepath%
 }

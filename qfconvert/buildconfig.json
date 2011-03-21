@@ -1,0 +1,234 @@
+{
+    "query": {
+        "diffcmd": [
+            "cmd"
+        ],
+        "init": null,
+        "submenukeys": "",
+        "sizebounds": null,
+        "completed": null,
+        "custom": null,
+        "setsize": "setsize_standard",
+        "samecmd": [
+            "cmd"
+        ],
+        "designate": [
+            "moveto",
+            "cmd",
+            "setsize",
+            "!"
+        ]
+    },
+    "dig": {
+        "diffcmd": [
+            "cmd"
+        ],
+        "init": null,
+        "submenukeys": "",
+        "sizebounds": null,
+        "completed": null,
+        "custom": null,
+        "setsize": "setsize_standard",
+        "samecmd": null,
+        "designate": [
+            "moveto",
+            "cmd",
+            "!",
+            "setsize",
+            "!"
+        ]
+    },
+    "place": {
+        "diffcmd": [
+            "cmd"
+        ],
+        "init": null,
+        "submenukeys": "",
+        "sizebounds": null,
+        "completed": null,
+        "custom": null,
+        "setsize": "setsize_standard",
+        "samecmd": null,
+        "designate": [
+            "moveto",
+            "cmd",
+            "!",
+            "setsize",
+            "!"
+        ]
+    },
+    "build": {
+        "diffcmd": [
+            "cmd"
+        ],
+        "init": [
+            "^"
+        ],
+        "submenukeys": [
+            "i",
+            "w",
+            "e",
+            "C",
+            "T",
+            "M"
+        ],
+        "sizebounds": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "completed": [
+            "O"
+        ],
+        "custom": {
+            "D": {
+                "setsize": "setsize_fixed",
+                "sizebounds": [
+                    5,
+                    5,
+                    5,
+                    5
+                ],
+                "designate": [
+                    "exitmenu",
+                    "cmd",
+                    "moveto",
+                    "setsize",
+                    "!",
+                    "%",
+                    "!",
+                    "%",
+                    "#",
+                    "%"
+                ]
+            },
+            "p": {
+                "sizebounds": [
+                    1,
+                    10,
+                    1,
+                    10
+                ],
+                "designate": [
+                    "exitmenu",
+                    "cmd",
+                    "moveto",
+                    "setsize",
+                    "!"
+                ]
+            },
+            "Mv": {
+                "sizebounds": [
+                    1,
+                    1,
+                    1,
+                    10
+                ]
+            },
+            "ws": {
+                "setsize": "setsize_fixed",
+                "sizebounds": [
+                    5,
+                    5,
+                    5,
+                    5
+                ]
+            },
+            "C.": {
+                "setmats": "setmats",
+                "sizebounds": [
+                    1,
+                    10,
+                    1,
+                    10
+                ],
+                "designate": [
+                    "exitmenu",
+                    "menu",
+                    "cmd",
+                    "moveto",
+                    "setsize",
+                    "!",
+                    "%",
+                    "setmats"
+                ]
+            },
+            "Ms": {
+                "designate": [
+                    "exitmenu",
+                    "menu",
+                    "cmd",
+                    "moveto",
+                    "!",
+                    "!",
+                    "!",
+                    "!",
+                    "%"
+                ]
+            },
+            "o|O|g": {
+                "sizebounds": [
+                    1,
+                    10,
+                    1,
+                    10
+                ]
+            },
+            "Mh": {
+                "sizebounds": [
+                    1,
+                    10,
+                    1,
+                    1
+                ]
+            },
+            "w[fv]": {
+                "setsize": "setsize_fixed",
+                "sizebounds": [
+                    3,
+                    3,
+                    3,
+                    3
+                ],
+                "designate": [
+                    "exitmenu",
+                    "menu",
+                    "cmd",
+                    "moveto",
+                    "setsize",
+                    "!",
+                    "%",
+                    "!",
+                    "%",
+                    "#",
+                    "%"
+                ]
+            },
+            "w[^sfv]|e.": {
+                "setsize": "setsize_fixed",
+                "sizebounds": [
+                    3,
+                    3,
+                    3,
+                    3
+                ]
+            }
+        },
+        "setsize": "setsize_build",
+        "samecmd": [
+            "cmd"
+        ],
+        "designate": [
+            "exitmenu",
+            "menu",
+            "cmd",
+            "moveto",
+            "setsize",
+            "!",
+            "%",
+            "#",
+            "%"
+        ]
+    }
+}

@@ -43,7 +43,13 @@ Init()
   ; Show mousetip
   ShowTip()
 
+  ; Clean up possible leftover temp files
+  CleanUpTempFiles()
 
+  ; Set onexit handler
+  OnExit, ExitSub
+
+  ; Show tray tip unless we're already in DF
   if (ShowStartupTrayTip && !WinActive("Dwarf Fortress"))
   {
     TrayTip, Quickfort, Version %Version%, , 1
@@ -52,6 +58,11 @@ Init()
   return
 }
 
+;; ---------------------------------------------------------------------------
+;; Called when AHK exits.
+ExitSub:
+  CleanUpTempFiles()
+  ExitApp
 
 ;; ---------------------------------------------------------------------------
 ;; Set default options so players don't necessarily have to overwrite
@@ -100,10 +111,11 @@ LoadOptions()
 ;; Load app state from state.ini
 LoadAppState()
 {
-  global SelectedFolder, LastRepeatPattern, ShowFullTip
+  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip
   IniRead, PlaybackMode, state.ini, GUI, PlaybackMode
   IniRead, SelectedFolder, state.ini, GUI, LastFolder
   IniRead, LastRepeatPattern, state.ini, GUI, LastRepeatPattern
+  IniRead, LastCommandLine, state.ini, GUI, LastCommandLine
   IniRead, ShowFullTip, state.ini, GUI, ShowFullTip
 
   if (SelectedFolder == "ERROR")
@@ -111,6 +123,9 @@ LoadAppState()
 
   if (LastRepeatPattern == "ERROR")
     LastRepeatPattern := ""
+
+  if (LastCommandLine == "ERROR")
+    LastCommandLine := ""
 
   if (ShowFullTip == "ERROR")
     ShowFullTip := 1
@@ -123,13 +138,24 @@ LoadAppState()
 ;; Save app state to state.ini
 SaveAppState()
 {
-  global SelectedFolder, LastRepeatPattern, ShowFullTip
+  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip
   IniWrite, %PlaybackMode%, state.ini, GUI, PlaybackMode
   IniWrite, %SelectedFolder%, state.ini, GUI, LastFolder
   IniWrite, %ShowFullTip%, state.ini, GUI, ShowFullTip
+
+  if (LastCommandLine)
+    IniWrite, %LastCommandLine%, state.ini, GUI, LastCommandLine
 
   if (LastRepeatPattern)
     IniWrite, %LastRepeatPattern%, state.ini, GUI, LastRepeatPattern
 
   return
+}
+
+
+;; ---------------------------------------------------------------------------
+;; Clean up old temp files
+CleanUpTempFiles()
+{
+  FileDelete, %A_ScriptDir%\@qf*.*
 }
