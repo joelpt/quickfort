@@ -1,3 +1,0 @@
-#dig Digs a single exploratory mineshaft; works starting either on surface or underground (will build correct stair type). Use Alt+R to repeat for as many z-levels as desired.,
-j{Enter}{Enter}i,#
-#,#

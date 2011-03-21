@@ -1,6 +1,0 @@
-"#dig Example of how to build a screw pump tower (alternating the channel each Z-level). First we'll dig, then channel, then build. This design will pump liquid up from the north on the top level, and from the south on the bottom level. Modify to your needs. Use Alt+R to repeat; this template repeated 2 times yields 4 Z-levels of pump slots.",,
-,,
-,,h
-d,d,d
-d,,h
-,,d
