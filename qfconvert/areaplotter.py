@@ -66,7 +66,6 @@ class AreaPlotter:
         """
         Repeatedly plot the largest contiguous areas possible until
         there are no more areas left to plot.
-        Returns True when we plotted at least one area.
         """
 
         if self.debug:

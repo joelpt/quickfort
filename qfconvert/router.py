@@ -6,8 +6,8 @@ from geometry import Direction, Point, Grid
 def plan_route(grid, debug, cursor):
     """
     We assume the areas to be plotted are already loaded into grid.
-    Starting from cursor, we locate the nearest/smallest area
-    we can plot, and we plot it. Repeat until all areas are plotted.
+    Starting from cursor, we locate the nearest area we can plot, 
+    and we plot it. Repeat until all areas are plotted.
     """
 
     plots = []
