@@ -61,7 +61,7 @@ GetBlueprintInfo(filename)
   if (result)
   {
     ; prepare data for Loop Parse
-    StringReplace, result, result, ----, ¢, All
+    StringReplace, result, result, >>>>, ¢, All
     ; parse contents out
     cnt := 0
     Loop, Parse, result, ¢
@@ -69,7 +69,7 @@ GetBlueprintInfo(filename)
       info = %A_LoopField% ; whitespace trim
       if (StrLen(info) > 3)
       {
-        needle := "Sheet id (\d+)\RBlueprint name: (.+)\RBuild type: (.+)\RComment: (.*)\RStart position: (.+)\RStart comment: (.*)\RFirst layer width: (.+)\RFirst layer height: (.+)\RLayer count: (.+)\RCommand use counts: (.*)\R*"
+        needle := "Sheet id (\d+)\RBlueprint name: (.+)\RBuild type: (.+)\RComment: (.*)\RStart position: (.+)\RStart comment: (.*)\RFirst layer width: (.+)\RFirst layer height: (.+)\RLayer count: (.+)\RCommand use counts: (.*)\RBlueprint preview:\R((.+\R)+)#"
         if (!RegExMatch(info, needle, matches))
         {
           MsgBox, Error reading blueprint information from qfconvert.py output file %outfile%
@@ -84,7 +84,7 @@ GetBlueprintInfo(filename)
         Height%cnt% := matches8
         LayerCount%cnt% := matches9
         CommandUseCounts%cnt% := matches10
-
+        BlueprintPreview%cnt% := matches11
         cnt += 1
       }
       SheetCount := cnt

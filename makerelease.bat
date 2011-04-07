@@ -1,5 +1,6 @@
 @echo off
-:This .bat file may only work if you use TCC/LE instead of default Windows cmd prompt.
+:This .bat file will probably only work if you use TCC/LE instead of default Windows cmd prompt.
+:Also depends on robocopy.exe being on the PATH.
 
 echo ---------------------------------------------------------------------------------
 echo ----- BUILDING QFCONVERT
@@ -29,12 +30,6 @@ echo ---------------------------------------------------------------------------
 echo ----- ZIPPING RELEASE
 echo ---------------------------------------------------------------------------------
 
-cd ..
-ren release quickfort
-del release.zip
-zip -9 -r release.zip quickfort\*
-ren quickfort release
-dir
-cd trunk
+call makezip.bat
 
 pause

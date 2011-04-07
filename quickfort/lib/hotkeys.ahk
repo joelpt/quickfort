@@ -142,6 +142,14 @@ Enter ? for more help.
 
     InputBox, pattern, Transform blueprint, %msg%, , 440, 260, , , , , %LastRepeatPattern%
     ActivateGameWin()
+    
+    if ErrorLevel ; user clicked cancel button
+    {
+      RepeatPattern = ; clear out any existing repeat pattern
+      UpdateTip()
+      return
+    }
+
     if (RegExMatch(pattern, "^(help|\?)"))
     {
       msg =
@@ -278,6 +286,16 @@ Examples:
     )
     InputBox, command, Quickfort Command Line, %msg%, , 400, 300 , , , , , %LastCommandLine%
     ActivateGameWin()
+
+    if ErrorLevel ; user clicked cancel button
+    {
+      EvalCommands =
+      EvalMode =
+      CommandLineMode := False
+      ReadyToBuild := False
+      UpdateTip()
+      return
+    }
 
     if (command != "")
     {

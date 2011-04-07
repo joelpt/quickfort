@@ -80,7 +80,6 @@ SetDefaultOptions()
   ShowMouseTooltip := 1
   EnableSafetyAbort := 1
   MouseTooltipUpdateMs := 15
-  AliasesPath := "aliases.txt"
   return
 }
 
@@ -88,13 +87,13 @@ SetDefaultOptions()
 ;; Load options from options.txt
 LoadOptions()
 {
-  if (!FileExist("options.txt"))
+  if (!FileExist("config/options.txt"))
   {
-    MsgBox, Error: Quickfort missing options.txt. Make sure options.txt exists and you are launching Quickfort from its own directory.`n`nExiting.
+    MsgBox, Error: Quickfort missing config/options.txt. Make sure options.txt exists and you are launching Quickfort from its own directory.`n`nExiting.
     ExitApp
   }
 
-  Loop, Read, options.txt
+  Loop, Read, config/options.txt
   {
     if (SubStr(A_LoopReadLine, 1, 1) != "#" && StrLen(A_LoopReadLine) > 3) ; skip comments and empty lines
     {
@@ -111,7 +110,7 @@ LoadOptions()
 ;; Load app state from state.ini
 LoadAppState()
 {
-  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip
+  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
   IniRead, PlaybackMode, state.ini, GUI, PlaybackMode
   IniRead, SelectedFolder, state.ini, GUI, LastFolder
   IniRead, LastRepeatPattern, state.ini, GUI, LastRepeatPattern
@@ -138,7 +137,7 @@ LoadAppState()
 ;; Save app state to state.ini
 SaveAppState()
 {
-  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip
+  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
   IniWrite, %PlaybackMode%, state.ini, GUI, PlaybackMode
   IniWrite, %SelectedFolder%, state.ini, GUI, LastFolder
   IniWrite, %ShowFullTip%, state.ini, GUI, ShowFullTip

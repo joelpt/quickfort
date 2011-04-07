@@ -1,0 +1,79 @@
+# Various aliases to simplify repetitive tasks, such as adjusting a food stockpile to accept seeds only.
+# Making new aliases like this is just a matter of mimicking the keys to navigate through the menus, etc.
+# Aliases also work with the Alt+T interface.
+#
+# Syntax:
+#   aliasname: keystrokes
+#
+# Special keys:
+#   {Right}, {Left}, {Up}, {Down}, >, < move the DF cursor
+#   {/}, {*}, {+}, {-} can be used to navigate some DF menus
+#   {Enter}, +{Enter}, {ExitMenu} send Enter, Shift+Enter, Escape
+#   {Wait} pauses playback briefly (ignored in DF macros)
+#
+# Some shorthand:
+#   !   expands to {Enter}
+#   @   expands to +{Enter}
+#   ^   expands to {ExitMenu}
+#   %   expands to {Wait}
+#
+# The below aliases were created and tested in DF 0.31.25 on 2011 Apr 5.
+
+##################################
+# food stockpile adjustments
+##################################
+
+seeds: s{Down}deb{Right}{Down 9}p^
+noseeds: s{Down}dea{Right}{Down 9}f^
+booze: s{Down}deb{Right}{Down 5}p{Down}p^
+food: s{Down}dea{Right}{Down 5}f{Down}f{Down 3}f^
+plants: s{Down}deb{Right}{Down 4}p^
+
+##################################
+# refuse stockpile adjustments
+##################################
+
+corpses: s{Down 4}deb{Right 2}!{Down 2}!{Left}{Down}p{Down}p^
+bones: s{Down 4}deb{Right}{Down 3}p{Down}p^
+rawhides: s{Down 4}deb{Right 2}{Down}!^
+tannedhides: s{Down 4}deb{Right 2}{Down 53}!^
+
+##################################
+# stone stockpile adjustments
+##################################
+
+metal: s{Down 5}deb{Right}p^
+nometal: s{Down 5}dea{Right}f^
+bauxite: s{Down 5}deb{Right}{Down 2}{Right}{Down 42}!^
+
+# Only use nobauxite on stone piles that you want to accept all "Other Stone" on.
+# This alias works by permitting all "Other Stone",then forbidding just bauxite.
+# Thus you wouldn't want to use this on a metal-only pile, for example.
+nobauxite: s{Down 5}{Right}{Down 2}p{Right}{Down 42}!^
+
+##################################
+# misc stockpile adjustments
+##################################
+
+# Artifacts-only stockpile, usable on any type of existing pile.
+artifacts: sd{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down}d{Down 4}deu{Right}{Up}f{Right}{Up}!{Left 2}{Down 4}e{Right}{Up}f{Right}{Up}!{Left 2}{Down 4}e{Right}{Up}f{Right}{Up}!{Left 2}{Down 4}e{Right}{Up}f{Right}{Up}!{Left 2}{Down}e{Right}{Up}f{Right}{Up}!{Left 2}^
+
+# Bans artifacts on any pile (or rather, allows items of any quality except Artifact quality).
+# This should be safe to run on any type of pile.
+noartifacts: sd{Down 2}{Right}{Up}fp{Right}{Up}!{Down 2}{Left 2}{Down 4}{Right}{Up}fp{Right}{Up}!{Down 2}{Left 2}{Down 4}{Right}{Up}fp{Right}{Up}!{Down 2}{Left 2}{Down 4}{Right}{Up}fp{Right}{Up}!{Down 2}{Left 2}{Down}{Right}{Up}fp{Right}{Up}!{Down 2}{Left 2}^
+
+# Set a finished goods stockpile to crappy low-quality trade goods only.
+# Position such a stockpile near fort entrances to (hopefully) let thieves steal low quality junk.
+junkgoods: s{Down 10}de{Right 2}!{Down 5}!{Down}!{Down}!{Down}!{Down 8}!{Down 2}!{Down}!{Down}!{Down}!{Down}!{Down}!{Left}{Down}f{Right}{Down}!{Down}!{Left}{Down}f{Down 2}f{Right}!{Down}!^
+
+##################################
+# farm plots
+##################################
+
+# Sets a farm plot to grow the LAST type of seed in the list of available seeds, for all 4 seasons.
+# The last seed is used because it's usually Plump helmet spawn, suitable for post-embark. If you
+# only have 1 seed type, that'll be grown.
+growlastcropall: a{-}!b{/}{-}!c{/}{-}!d{/}{-}!
+
+# Like growlastcropall but grows the first one in the list instead.
+growfirstcropall: a!b!c!d!

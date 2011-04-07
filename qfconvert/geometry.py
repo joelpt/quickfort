@@ -466,7 +466,7 @@ class Grid:
     def str_plottable(grid):
         """Returns grid's plottable flags as a string for display."""
         rowstrings = [
-            ''.join(['.' if c.plottable == True else 'x' for c in row])
+            ''.join(['.' if c.plottable else 'x' for c in row])
             + '|' for row in grid.rows
             ]
         return '\n'.join(rowstrings)
@@ -489,13 +489,31 @@ class Grid:
         return '\n'.join(rowstrings)
 
     @staticmethod
-    def str_commands(rows, colsep = ''):
-        """Returns grid's commands as a string for display."""
+    def str_commands(rows, colsep = '', annotate = False):
+        """
+        Returns grid's commands as a string for display.
+            colsep: if provided, will be placed between cells on each row
+            annotate: if True, simple numbering 'rulers' will be added 
+        """
+        rowstrings = []
+        print annotate
+        if annotate:
+            # draw numbering ruler along the top
+            width = len(rows[0])
+            rowstrings += ['  ' + ('1234567890' * (1 + width // 10))[0:width]]
+            edgebar = [' +' + ('-' * width) + '+']
+            rowstrings += edgebar
+                
 
-        rowstrings = [
+        rowstrings += [
             colsep.join(
-                ['.' if c.command == '' else c.command[0] for c in row]
-                )
-            + '|' for row in rows
-            ]
+                ['' if not annotate else str(int(str(n + 1)[-1]) % 10) + '|'] +
+                ['.' if c.command == '' else c.command[0] for c in row]) + '|' 
+            for n, row in enumerate(rows)
+        ]
+
+        if annotate:
+            rowstrings += edgebar
+
         return '\n'.join(rowstrings)
+

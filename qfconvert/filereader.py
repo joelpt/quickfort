@@ -1,5 +1,6 @@
 """Blueprint file reading/parsing operations."""
 
+import json
 import re
 import os.path
 
@@ -10,6 +11,13 @@ from xlsx import read_xlsx_file, read_xlsx_sheets
 from geometry import Point, Grid, GridLayer
 from util import Bunch
 
+
+def load_json(filename):
+    """Loads a JSON document at filename and returns the decoded result."""
+    decoded = ""
+    with open(filename) as f:
+         decoded = json.load(f)
+    return decoded
 
 class FileLayer:
     """
@@ -234,3 +242,4 @@ def split_zlayers(lines):
         filelayers.append( FileLayer( [], zlayer ) )
 
     return filelayers
+

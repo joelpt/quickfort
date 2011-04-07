@@ -84,7 +84,7 @@ BUILD_TYPE_CFG = {
     'query': { # set building/task prefs
         'init': None,
         'completed': None,
-        'designate': 'moveto cmd setsize !'.split(),
+        'designate': 'moveto cmd setsize'.split(),
         'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
         'submenukeys': '',

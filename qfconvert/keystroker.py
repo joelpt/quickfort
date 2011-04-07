@@ -2,18 +2,17 @@
 
 from copy import copy
 from math import sqrt
-import json
 import os
 import re
 import random
 
+from filereader import load_json
 from geometry import Area, Direction
 import exetest
 import util
 
 # load global KEY_LIST which is used liberally below and would be inefficient to constantly reload
-with open("keys.json") as f:
-    KEY_LIST = json.load(f)
+KEY_LIST = load_json("config/keys.json")
 
 class Keystroker:
     """
@@ -46,7 +45,8 @@ class Keystroker:
             endpos = cell.area.opposite_corner(pos)
             subs = {}
 
-            # get samecmd or diffcmd depending on if command changed
+            # get samecmd or diffcmd depending on if the command is
+            # different from the previous iteration's command
             if command == last_command:
                 nextcmd = self.buildconfig.get('samecmd', command) or []
             else:
@@ -62,7 +62,7 @@ class Keystroker:
             setsize, newpos = setsizefun(pos, endpos)
             subs['setsize'] = setsize
 
-            # setmats - keys to select mats for an area
+            # setmats = keys to select mats for an area
             setmatscfg = self.buildconfig.get('setmats', command)
             if setmatscfg:
                 setmatsfun = getattr(self, setmatscfg)
@@ -110,7 +110,7 @@ class Keystroker:
             # break command into keycodes
             codes = split_keystring_into_keycodes(justcommand)
 
-            # substitute codes into nextcmd where we find string 'cmd'
+            # substitute keycodes into nextcmd where we find the string 'cmd'
             nextcodes = []
             for c in nextcmd:
                 if c == 'cmd':
@@ -245,8 +245,8 @@ class Keystroker:
 
         # resize construction
         area = Area(start, end)
-        keys += ['[widen]'] * (area.width() - 1)
-        keys += ['[heighten]'] * (area.height() - 1)
+        keys += ['{widen}'] * (area.width() - 1)
+        keys += ['{heighten}'] * (area.height() - 1)
 
         return keys, midpoint
 
@@ -274,11 +274,11 @@ class Keystroker:
         be good enough most of the time.
         """
         if areasize == 1:
-            return ['#']
+            return ['@'] # shift-enter
 
         reps = 2 * int(sqrt(areasize))
-        keys = ['#', '[menudown]'] * (reps - 1)
-        keys.append('#')
+        keys = ['@', '{menudown}'] * (reps - 1)
+        keys.append('@')
         return keys
 
 
@@ -307,13 +307,18 @@ def translate_keycode(keycode, mode):
     Translate a given keycode against keylist and specified mode.
     Returns translation if one exists, or original keycode otherwise.
     """
-    return KEY_LIST[mode].get(keycode.lower()) or keycode
+
+    translated = KEY_LIST[mode].get(keycode.lower())
+    if translated is None:
+        return keycode # no translation available, so pass it through as is
+    else:
+        return translated # translation made
 
 
 def convert_to_macro(keycodes, title):
     """Convert keycodes to DF macro syntax (complete macro file contents)."""
     keybinds = parse_interface_txt(
-        os.path.join(exetest.get_main_dir(), 'interface.txt') )
+        os.path.join(exetest.get_main_dir(), 'config/interface.txt') )
 
     if not title: # make up a macro title if one is not provided to us
         title = '@qf' + str(random.randrange(0, 999999999))
@@ -321,16 +326,17 @@ def convert_to_macro(keycodes, title):
     output = [title] # first line of macro is macro title
 
     for key in keycodes:
-        if keybinds.get(key) is None:
+        if key == '':
+            continue # empty keycode, output nothing
+        elif keybinds.get(key) is None:
             raise Exception, \
-                "Key '%s' not bound in interface.txt" % key
+                "Key '%s' not bound in config/interface.txt" % key
         if key == '^':
             output.append('\t\tLEAVESCREEN') # escape menu key
         else:
             output.extend(keybinds[key])
         output.append('\tEnd of group')
     output.append('End of macro')
-
     return output
 
 
@@ -341,17 +347,29 @@ def split_keystring_into_keycodes(keystring):
     """
 
     # prepare to break keystring into keycodes
-    cmdedit = re.sub(r'\{', '|{', keystring)
+    cmdedit = keystring
+    # separate tokens with | chars...
+    cmdedit = re.sub(r'\+\{Enter\}', '|@|', cmdedit)
+    cmdedit = re.sub(r'\{', '|{', cmdedit) 
     cmdedit = re.sub(r'\}', '}|', cmdedit)
     cmdedit = re.sub(r'\+\!', '|+!|', cmdedit)
     cmdedit = re.sub(r'\!', '|!|', cmdedit)
     cmdedit = re.sub(r'\^', '|^|', cmdedit)
-    cmdsplit = re.split(r'\|+', cmdedit)
+    cmdedit = re.sub(r'\%wait\%', '|{wait}|', cmdedit) # support old %wait% code
+    cmdsplit = re.split(r'\|+', cmdedit) # ...and split tokens at | chars.
 
     # break into individual keycodes
     codes = []
     for k in cmdsplit:
-        if k and k[0] in ('{', '!', '^', '+'):
+        if k and k[0] == '{':
+            # check for keycodes like {Right 5}
+            match = re.match(r'\{(\w+) (\d+)\}', k)
+            if match is None:
+                codes.append(k) # preserve whole key-combos
+            else:
+                # repeat the specified keycode the specified number of times
+                codes.extend(['{' + match.group(1) + '}'] * int(match.group(2)))
+        elif k and k[0] in ('!', '^', '+'):
             codes.append(k) # preserve whole key-combos
         else:
             codes.extend(k) # separate individual keystrokes

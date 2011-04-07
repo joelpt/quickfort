@@ -5,26 +5,26 @@ import textwrap
 
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
-from filereader import FileLayer
+from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_file
 from geometry import Point, Direction, GridLayer, Grid
 from keystroker import Keystroker, convert_keys
 from router import plan_route
 from util import flatten
 from transformer import Transformer, parse_transform_str
-import filereader
+from aliases import load_aliases, apply_aliases
 
 def get_blueprint_info(path):
     """Returns information about the blueprint at path."""
-    sheets = filereader.get_sheets(path)
+    sheets = get_sheets(path)
 
     s = ''
     for sheet in sheets:
         try:
             (layers, details) = \
-                filereader.parse_file(path, sheet[1])
-            layers = filereader.FileLayers_to_GridLayers(layers)
+                parse_file(path, sheet[1])
+            layers = FileLayers_to_GridLayers(layers)
             bp = Blueprint(sheet[0], layers, details)
-            s += '---- Sheet id %d\n' % sheet[1]
+            s += '>>>> Sheet id %d\n' % sheet[1]
             s += bp.get_info() + '\n'
         except:
             continue # ignore blank/missing sheets
@@ -50,14 +50,20 @@ def process_blueprint_file(path, options):
     elif re.match('^\d+$', str(options.sheetid)):
         sheetid = options.sheetid
     else:
-        sheetid = filereader.get_sheets(path)
+        sheetid = get_sheets(path)
 
-    layers, details = filereader.parse_file(path, sheetid)
+    # read in the blueprint
+    layers, details = parse_file(path, sheetid)
 
     if options.debugfile:
         print '#### Parsed %s' % path
         print FileLayer.str_layers(layers)
 
+    # apply aliases.txt to blueprint contents
+    aliases = load_aliases('config/aliases.txt')
+    layers = apply_aliases(layers, aliases)
+
+    # transform the blueprint
     if options.transform:
         if options.debugtransform:
             print "#### Transforming with: %s" % options.transform
@@ -65,15 +71,16 @@ def process_blueprint_file(path, options):
         transforms = parse_transform_str(options.transform)
         trans = Transformer(layers, details.start, options.debugtransform)
         trans.transform(transforms)
-        start, layers = trans.start, trans.layers
+        details.start = trans.start
+        layers = trans.layers
 
         if options.debugfile:
             print "#### Results of transform:"
             print FileLayer.str_layers(layers)
 
-    layers = filereader.FileLayers_to_GridLayers(layers)
+    layers = FileLayers_to_GridLayers(layers)
 
-    # set startpos
+    # override starting position if startpos command line option was given
     if options.startpos is not None:
         details.start = parse_startpos(options.startpos,
             layers[0].grid.width,
@@ -86,7 +93,7 @@ def process_blueprint_file(path, options):
         print "<<<< END INPUT FILE PARSING"
 
     # get keys/macrocode to outline or plot the blueprint
-    keys = bp.outline(options) if options.visualize else bp.plot(options)
+    keys = bp.trace_outline() if options.visualize else bp.plot(options)
     output = convert_keys(keys, options.mode, options.title)
 
     if options.debugsummary:
@@ -170,7 +177,7 @@ class Blueprint:
 
         return keys
 
-    def outline(self, options):
+    def trace_outline(self):
         """
         Moves the cursor to the northwest corner, then clockwise to each
         other corner, before returning to the starting position.
@@ -213,7 +220,13 @@ class Blueprint:
         # count the number of occurrences of each command in the blueprint
         counts = [(c, commands.count(c)) for c in cmdset]
         counts.sort(key=lambda x: x[1], reverse=True)
+        
+        # make a row of repeating numbers to annotate the blueprint with
+        width = self.layers[0].grid.width
+        numbering_row = '  ' + ('1234567890' * (width // 10))[0:width]
 
+        # build the blueprint preview
+        preview = numbering_row
         return textwrap.dedent("""
             Blueprint name: %s
             Build type: %s
@@ -230,14 +243,14 @@ class Blueprint:
                 self.comment or '',
                 Point(self.start.x + 1, self.start.y + 1),
                 self.start_comment or '',
-                self.layers[0].grid.width,
+                width,
                 self.layers[0].grid.height,
                 len(self.layers),
                 ', '.join("%s:%d" % c for c in counts)
                 ) + \
             "\nBlueprint preview:\n" + \
                 '\n'.join(
-                    Grid.str_commands(layer.grid.rows) + \
+                    Grid.str_commands(layer.grid.rows, annotate=True) + \
                         '\n#' + ''.join(layer.onexit)
                     for layer in self.layers
                 )

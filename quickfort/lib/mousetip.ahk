@@ -84,7 +84,9 @@ UpdateTip()
   else {
     if (CommandLineMode)
     {
-      header := "Alt+T: #" EvalMode " " EvalCommands
+      header := "Alt+T: #" EvalMode " " SubStr(EvalCommands, 1, 30)
+      if (StrLen(EvalCommands) > 30)
+        header := header . "..."
     }
     else
     {
@@ -151,7 +153,7 @@ UpdateTip()
       }
       else
       {
-        body := "TYPE " . UserInitKey . " (" . UserInitText . ") then Alt+D/V.`nAlt+F/E/T: new file/sheet/cmd. Alt+M: full tip."
+        body := "TYPE " . UserInitKey . " (" . UserInitText . ") then Alt+D/V.`nAlt+F/E/T: new file/sheet/cmd.`nAlt+R: transform. Alt+M: full tip."
       }
     }
     else

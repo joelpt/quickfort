@@ -1,19 +1,13 @@
-set qfpath=D:\code\qf\trunk
 set pythonexe=c:\lang\Python26_32bit\python.exe
 
-cd %qfpath%\qfconvert
-rmdir /s /q release
+rmdir /s /q release 2> nul:
 mkdir release
-copy interface.txt release
+mkdir release\config
+
+copy config\*.* release\config
 
 %pythonexe% -OO setup.py py2exe
 
 copy dist\*.* release
 rmdir /s /q dist
 rmdir /s /q build
-cd release
-dir
-.\qfconvert.exe  %qfpath%\Blueprints\Tests\dig-5x5.csv -i
-.\qfconvert.exe  %qfpath%\Blueprints\Tests\dig-5x5.csv -Cmkey
-cd ..
-

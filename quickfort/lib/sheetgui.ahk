@@ -7,24 +7,26 @@
 InitGui(listViewEnabled)
 {
   global
-  local offset =
 
   Gui, Destroy
   Gui, Font, S9, Verdana
 
-  offset := 175
   if (listViewEnabled) {
-    Gui, Add, ListView, r20 w220 h360 gSheetListView vSelectedSheetIndex AltSubmit -Hdr -Multi, Blueprint
-    offset += 220
+    ;Gui, Add, Text, r20 w220 h20, Worksheets
+    Gui, Add, ListView, r20 w160 h460 gSheetListView vSelectedSheetIndex AltSubmit -Hdr -Multi, Blueprint
   }
 
   Gui, Font, bold
-  Gui, Add, Text, x+5 ym+5 w400 vSheetName, sheetname
+  Gui, Add, Text, x+5 ym+5 w600 vSheetName, sheetname
   Gui, Font, norm
-  Gui, Add, Edit, y+10 w400 h300 vSheetInfo VScroll, sometext
+  Gui, Font, S9, Courier
+  Gui, Font, S9, Courier New
+  Gui, Font, S9, Lucida Console
+  Gui, Add, Edit, y+10 w600 h400 vSheetInfo VScroll, sometext
+  Gui, Font, S9, Verdana
   Gui, Add, Button, y+5 w75 gButtonCopyText, &Copy text
   Gui, Add, Button, x+5 w100 gButtonEditBlueprint, &Edit blueprint
-  Gui, Add, Button, x+65 w75 Default, OK
+  Gui, Add, Button, x+265 w75 Default, OK
   Gui, Add, Button, x+5 w75, Cancel
 }
 
@@ -62,12 +64,24 @@ ShowSheetInfoGui()
 
   ; Update gui to our current sheet
   UpdateGuiSheetInfo(GuiSelectedSheetIndex)
+  
+  ; Set keyboard focus properly
+  if (listViewEnabled)
+  {
+    GuiControl, Focus, SysListView321
+    ; Set the current selection of the ListView
+    LV_Modify(GuiSelectedSheetIndex + 1, "Select Focus")
+  }
+  else
+  {
+    GuiControl, Focus, Button3
+  }
 
   ; Show the GUI now
   Gui, Show
   WinWaitActive, ahk_class AutoHotkeyGUI
 
-  ; Set keyboard focus properly
+  ; Set keyboard focus properly (again)
   if (listViewEnabled)
   {
     GuiControl, Focus, SysListView321
@@ -142,6 +156,8 @@ GuiEscape:
 ButtonCopyText:
 {
   clipboard := GuiText
+  MsgBox, Text copied to clipboard.
+  return
 }
 
 ;; ---------------------------------------------------------------------------
@@ -163,22 +179,26 @@ UpdateGuiSheetInfo(index)
 
   newtitle := SelectedFilename
   if (SelectedFilename != Name%index%)
-    newtitle := newtitle ": " Name%index%
+    newtitle := newtitle " [" Name%index% "]"
 
   newtext =
-  if (StartPosition%index% != "(1, 1)" && !StartComment%index%)
+  newtext := newtext "#" BuildType%index%
+
+  if (StartPosition%index% != "(1, 1)")
   {
-    newtext := "Starts at " StartPosition%index%
+    newtext := newtext " - starts at " StartPosition%index%
 
     if (StartComment%index%)
     {
       newtext := newtext " (" StartComment%index% ")"
     }
-    newtext := newtext "`n`n"
   }
 
+  newtext := newtext "`n`n"
   newtext := newtext Comment%index%
   newtext := newtext "`n`nCommand usage frequencies:`n" CommandUseCounts%index%
+  newtext := newtext "`n`nDimensions: " Width%index% "w x " Height%index% "h"
+  newtext := newtext "`n`n" BlueprintPreview%index%
   GuiControl,, SheetName, %newtitle%
   GuiControl,, SheetInfo, %newtext%
   GuiText := newtitle "`n`n" newtext

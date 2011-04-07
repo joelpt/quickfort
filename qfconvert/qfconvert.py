@@ -8,11 +8,12 @@ import cProfile
 
 import blueprint
 
+version = '2.00pre4'
 
 def parse_options():
     """Read options and args from command line."""
     usage = "usage: %prog [options] input_file [output_file]"
-    parser = OptionParser(usage=usage, version="%prog 1.0")
+    parser = OptionParser(usage=usage, version="%prog " + version)
     parser.add_option("-s", "--sheetid",
                       dest="sheetid", default=None,
                       help="worksheet index for xls/xlsx files [default: 1]")

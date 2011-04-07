@@ -1,12 +1,12 @@
-Quickfort 2.00pre3
+Quickfort 2.00pre4
 ==================
 
 *******************************************************************************************
-***
-*** NOTICE: The main documentation in this file has not been updated since Quickfort 1.11
+*** NOTICE: The documentation in this file has not been updated since Quickfort 1.11
 *** and is out of date. It will be updated before 2.00 'release' version.
+*******************************************************************************************
 ***
-*** Quick use guide for 2.00pre3:
+*** Quick use guide for Quickfort 2.x:
 ***
 *** All users:     I highly recommend setting [MACRO_MS:0] in your data/init/init.txt
 ***                for best DF macro playback performance.
@@ -16,7 +16,7 @@ Quickfort 2.00pre3
 ***                > cd src/qfconvert
 ***                > python ./qfconvert.py
 ***                or chmod +x qfconvert.py and run it like a shell script.
-*** Example qfconvert command line (Linux):
+*** Linux example:
 ***   > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/myblueprint.mak
 ***   ... then play your macro in DF with Ctrl+L, <select macro>, Ctrl+P.
 ***
