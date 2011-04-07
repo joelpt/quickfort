@@ -13,3 +13,8 @@ glob:out.*
 glob:*.pyc
 glob:*.mak
 glob:quickfort/state.ini
+glob:qfconvert/release/*
+glob:quickfort/release/*
+glob:qfconvert/test.csv
+glob:qfconvert/trash
+glob:quickfort_stx.sublime-project
