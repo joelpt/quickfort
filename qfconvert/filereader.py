@@ -3,14 +3,18 @@
 import json
 import re
 import os.path
+import csv
 
-from csv import read_csv_file
 from xls import read_xls_file, read_xls_sheets
 from xlsx import read_xlsx_file, read_xlsx_sheets
 
 from geometry import Point, Grid, GridLayer
 from util import Bunch
 
+
+def read_csv_file(filename):
+	with open(filename) as f:
+		return [line.strip() for line in csv.reader(f)]
 
 def load_json(filename):
     """Loads a JSON document at filename and returns the decoded result."""
