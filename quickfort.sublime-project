@@ -1,7 +1,0 @@
-<!-- Documentation is available at http://www.sublimetext.com/docs/projects -->
-<project>
-    <mount dir="." exclude="*.png,*.jpg,*.exe,*.dll,*.obj,*.pyc,*.pyo,*.csv,*.zip,debug.txt" direxclude="blueprints,.svn,.git,.hg,CVS,bin,nbproject,release,work" />
-    <options>
-        <![CDATA[buildFile Packages/Python/Python.sublime-build]]>
-</options>
-</project>
