@@ -10,7 +10,7 @@ from xlsx import read_xlsx_file, read_xlsx_sheets
 
 from geometry import Point
 from grid import Grid, GridLayer
-from util import Bunch
+from util import Struct
 
 
 def read_csv_file(filename):
@@ -184,11 +184,18 @@ def read_sheet(filename, sheetid):
 
     return lines
 
+class SheetDetails(Struct):
+    """ Struct to store top line details returned from parse_sheet_details(). """
+    build_type = None
+    start = None
+    start_comment = None
+    comment = None
 
 def parse_sheet_details(top_line):
     """
     Parses out build type, start pos/comment, and general comment
-    from top line of blueprint.
+    from top line of blueprint. Returns an object with keyword
+    properties .build_type, .start, .start_comment, .comment
     """
     # remove trailing commas from top_line
     top_line = re.sub(r',+$', '', top_line)
@@ -223,7 +230,7 @@ def parse_sheet_details(top_line):
     else:
         comment = ''
 
-    return Bunch(build_type=build_type, start=start,
+    return SheetDetails(build_type=build_type, start=start,
         start_comment=start_comment, comment=comment)
 
 

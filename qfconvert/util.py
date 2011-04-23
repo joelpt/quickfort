@@ -47,13 +47,14 @@ def uniquify(seq, idfun=None):
     return result
 
 
-class Bunch:
-    """
-    Like a dynamic struct. Usage:
-    >>> point = Bunch(datum=y, squared=y*y, coord=x)
-    >>> if point.squared > threshold:
-    >>>     point.isok =
-    """
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-
+# Abstract struct class       
+class Struct:
+    def __init__ (self, *argv, **argd):
+        if len(argd):
+            # Update by dictionary
+            self.__dict__.update (argd)
+        else:
+            # Update by position
+            attrs = filter (lambda x: x[0:2] != "__", dir(self))
+            for n in range(len(argv)):
+                setattr(self, attrs[n], argv[n])

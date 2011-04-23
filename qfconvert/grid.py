@@ -313,7 +313,7 @@ class Grid:
             annotate: if True, simple numbering 'rulers' will be added 
         """
         rowstrings = []
-        print annotate
+
         if annotate:
             # draw numbering ruler along the top
             width = len(rows[0])
