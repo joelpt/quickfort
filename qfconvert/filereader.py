@@ -14,15 +14,17 @@ from util import Bunch
 
 
 def read_csv_file(filename):
-	with open(filename) as f:
-		return [line.strip() for line in csv.reader(f)]
+    """
+    Reads a CSV document at filename, strips the cells of leading/trailing
+    whitespace, and returns [['a', 'b', ...], ...]
+    """
+    with open(filename) as f:
+        return [[cell.strip() for cell in line] for line in csv.reader(f)]
 
 def load_json(filename):
     """Loads a JSON document at filename and returns the decoded result."""
-    decoded = ""
     with open(filename) as f:
-         decoded = json.load(f)
-    return decoded
+        return json.load(f)
 
 class FileLayer:
     """
