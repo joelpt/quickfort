@@ -128,7 +128,7 @@ class Grid:
             self.rows = [
                 row + [CommandCell('') for x in range(width - self.width)]
                 for row in self.rows
-                ]
+            ]
             self.width = width
 
         return
