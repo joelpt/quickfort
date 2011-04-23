@@ -6,7 +6,8 @@ import textwrap
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
 from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_file
-from geometry import Point, Direction, GridLayer, Grid
+from geometry import Point, Direction
+from grid import GridLayer, Grid
 from keystroker import Keystroker, convert_keys
 from router import plan_route
 from util import flatten
@@ -93,7 +94,11 @@ def process_blueprint_file(path, options):
         print "<<<< END INPUT FILE PARSING"
 
     # get keys/macrocode to outline or plot the blueprint
-    keys = bp.trace_outline() if options.visualize else bp.plot(options)
+    if options.visualize:
+        keys = bp.trace_outline(options)
+    else:
+        keys = bp.plot(options)
+
     output = convert_keys(keys, options.mode, options.title)
 
     if options.debugsummary:
@@ -108,7 +113,7 @@ def process_blueprint_file(path, options):
             print Grid.str_area_labels(layer.grid) + '\n'
             print "Route order: %s" % ''.join(
                 [layer.grid.get_cell(plot).label
-                for plot in layer.plots]
+                    for plot in layer.plots]
                 )
             print "Layer onexit keys: %s\n" % layer.onexit
         print "---- Overall:"
@@ -177,13 +182,17 @@ class Blueprint:
 
         return keys
 
-    def trace_outline(self):
+    def trace_outline(self, options):
         """
         Moves the cursor to the northwest corner, then clockwise to each
         other corner, before returning to the starting position.
         """
         buildconfig = BuildConfig('dig')
         grid = self.layers[0].grid
+
+        plotter = AreaPlotter(grid, buildconfig, options.debugarea)
+        plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
+
         ks = Keystroker(grid, buildconfig)
         keys = []
 

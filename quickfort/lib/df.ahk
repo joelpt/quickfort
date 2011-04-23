@@ -105,7 +105,6 @@ SendKeys(keys)
     else if (SendMode = "ControlSend") {
       ReleaseModifierKeys()
       ControlSend,, %keys% ,Dwarf Fortress
-      BlockInput, Off
     }
     else {
       MsgBox, Unsupported SendMode '%SendMode%'.
@@ -132,7 +131,6 @@ ReleaseModifierKeys()
       KeyWait, Shift
       KeyWait, LWin
       KeyWait, RWin
-      BlockInput, On
       Sleep 250
       ControlSend,, {Alt up}{Ctrl up}{Shift up}{LWin up}{RWin up},Dwarf Fortress
       Sleep 250

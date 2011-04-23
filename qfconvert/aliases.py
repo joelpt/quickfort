@@ -1,6 +1,7 @@
 """aliases.txt support."""
 
 import re
+import util
 
 def load_aliases(filename):
     """
@@ -11,22 +12,34 @@ def load_aliases(filename):
         aliasname:keystrokes    (QF2.x style)
     """
     aliases = {}
-    with open(filename) as f:
-        lines = f.readlines()
-    
-    # strip out comment lines
-    lines = [line for line in lines if line[0] != '#']
 
-    # break into alias,keystroke pairs
+    # load the file contents
+    with open(filename) as f:
+        data = f.read()
+    
+    data = util.convert_line_endings(data)
+    lines = data.split('\n')
+
+    # strip out comment and empty lines
+    lines = [line for line in lines if line != '' and line[0] != '#']
+
+    # break into {aliasname:keystrokes} pairs
     for line in lines:
-        match = re.match(r'([\w\d]+)(,|:) *(.+)', line)
+        match = re.match(r'([\w\d]+)(,|:) *(.+)\s*\n*', line)
         if match is not None:
             aliases[match.group(1)] = match.group(3)
 
     return aliases
 
 def apply_aliases(layers, aliases):
-    """Applies aliases (dict) to layers ([FileLayer])."""
+    """
+    Applies aliases:dict(aliasname, keystrokes) to layers:[FileLayer].
+
+    Every cell in every layer will be replaced with 'keystrokes' if
+    it exactly matches 'aliasname'. Currently there is no support
+    for having multiple aliases in a single cell or mixing aliases
+    with regular keystrokes in a cell.
+    """
 
     for layer in layers:
         for r, row in enumerate(layer.rows):

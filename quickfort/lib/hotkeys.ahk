@@ -156,11 +156,15 @@ Enter ? for more help.
       (
 Enter transformation pattern below.
 
-Syntax: [#]D [[#]D [#]D...]
+Base syntax: [#]D [[#]D [#]D...]
   # = times to repeat action, defaults to 1 if omitted
   D = one of: n s e w u d flipv fliph rotcw rotccw !
   Any number of transformations can be chained together.
   #d/#u transforms (multi z-level) are always performed last.
+
+Alignment codes can be used to specify chaining alignments.
+  halign=left|middle|right|l|m|r
+  valign=top|middle|bottom|t|m|b
 
 Examples:
   4e -- make a row of the blueprint repeated 4 times going east
@@ -170,7 +174,8 @@ Examples:
   rotcw -- rotate the blueprint clockwise 90 degrees
   fliph 2e flipv 2s -- 2x2 symmetrical pattern of blueprint
   rotcw 2e flipv fliph 2s -- 2x2 rotated around a center point
-  rotcw ! 2e -- rotate original blueprint then repeat that 2x east
+  rotcw valign=t 2e -- after rotating, blueprints are top-aligned and repeated 2e
+  rotcw ! 2e -- rotate original blueprint, then repeat that 2x east
       )
       InputBox, pattern, Transform blueprint, %msg%, , 440, 400, , , , , %LastRepeatPattern%
       ActivateGameWin()
@@ -282,7 +287,7 @@ Examples:
   dig i,h                  # then use Alt+R, 10d for a mineshaft
   query booze         # make a food stockpile only carry booze
   q growlastcropall  # set a plot to grow plumps (usually)
-  d d,d#d,d           # dig a 2x2 square
+  dig d,d#d,d          # dig a 2x2 square
     )
     InputBox, command, Quickfort Command Line, %msg%, , 400, 300 , , , , , %LastCommandLine%
     ActivateGameWin()

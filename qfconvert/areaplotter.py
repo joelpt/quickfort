@@ -1,6 +1,7 @@
 """Handles discovery of areas to be plotted by someone else."""
 
-from geometry import Point, Direction, Area, Grid
+from geometry import Point, Direction, Area
+from grid import Grid
 import util
 import re
 
@@ -45,6 +46,9 @@ class AreaPlotter:
 
                     area = Area(Point(x, y),
                         Point(x + width - 1, y + height - 1))
+
+                    # ensure the grid is large enough to accept the expansion
+                    self.grid.expand_dimensions(x + width, y + height)
 
                     # mark this area as plotted
                     self.grid.set_area_cells(area, False, label, command)

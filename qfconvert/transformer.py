@@ -5,7 +5,8 @@ commands.
 
 from copy import deepcopy
 import re
-from geometry import Grid, GridLayer, Point
+from geometry import Point
+from grid import Grid, GridLayer
 from filereader import FileLayer
 
 def parse_transform_str(transform_str):
@@ -186,9 +187,9 @@ class Transformer:
                 return self.apply_transform((1, 'flipv'), a, rot)
 
         elif action in ('n', 's', 'e', 'w'):
-            # handle alignment issues when a and b have differing dimensions
             ha, hb, wa, wb = len(a), len(b), len(a[0]), len(b[0]) # heights and widths
 
+            # handle alignment issues when a and b have differing dimensions
             if action in ('e', 'w'):
                 if ha < hb:
                     a = self.expand_height(a, hb, self.valign)

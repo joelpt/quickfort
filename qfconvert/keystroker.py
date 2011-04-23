@@ -352,10 +352,10 @@ def split_keystring_into_keycodes(keystring):
     cmdedit = re.sub(r'\+\{Enter\}', '|@|', cmdedit)
     cmdedit = re.sub(r'\{', '|{', cmdedit) 
     cmdedit = re.sub(r'\}', '}|', cmdedit)
-    cmdedit = re.sub(r'\+\!', '|+!|', cmdedit)
-    cmdedit = re.sub(r'\!', '|!|', cmdedit)
+    cmdedit = re.sub(r'\+\&', '|+&|', cmdedit)
+    cmdedit = re.sub(r'\&', '|&|', cmdedit)
     cmdedit = re.sub(r'\^', '|^|', cmdedit)
-    cmdedit = re.sub(r'\%wait\%', '|{wait}|', cmdedit) # support old %wait% code
+    cmdedit = re.sub(r'\%wait\%', '|{wait}|', cmdedit) # support QF1.x's %wait%
     cmdsplit = re.split(r'\|+', cmdedit) # ...and split tokens at | chars.
 
     # break into individual keycodes
@@ -369,10 +369,10 @@ def split_keystring_into_keycodes(keystring):
             else:
                 # repeat the specified keycode the specified number of times
                 codes.extend(['{' + match.group(1) + '}'] * int(match.group(2)))
-        elif k and k[0] in ('!', '^', '+'):
-            codes.append(k) # preserve whole key-combos
+        elif k and k[0] in ('&', '^', '+', '%'):
+            codes.append(k) # preserve these as individual keystrokes
         else:
-            codes.extend(k) # separate individual keystrokes
+            codes.extend(k) # separate a series of individual keystrokes
 
     return codes
 
@@ -381,7 +381,7 @@ def parse_interface_txt(path):
     """
     Parse DF-syntax interface.txt.
     Returns a dictionary with keycodes as keys, whose values are lists of
-        DF macro commands bound to said keycode.
+    DF macro commands bound to each keycode in interface.txt.
     """
     with open(path) as f:
         data = f.read()

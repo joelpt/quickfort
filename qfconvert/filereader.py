@@ -8,7 +8,8 @@ from csv import read_csv_file
 from xls import read_xls_file, read_xls_sheets
 from xlsx import read_xlsx_file, read_xlsx_sheets
 
-from geometry import Point, Grid, GridLayer
+from geometry import Point
+from grid import Grid, GridLayer
 from util import Bunch
 
 
@@ -75,7 +76,7 @@ class FileLayer:
         # Conform all rows to the same width
         for row in self.rows:
             if len(row) < maxwidth:
-                row.extend( [''] * (maxwidth - len(row)) )
+                row.extend( ['' for x in range(maxwidth - len(row))] )
 
         return
 

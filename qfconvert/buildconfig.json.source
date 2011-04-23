@@ -4,7 +4,7 @@ BUILD_TYPE_CFG = {
     'dig': {
         'init': None,
         'completed': None,
-        'designate': 'moveto cmd ! setsize !'.split(),
+        'designate': 'moveto cmd & setsize &'.split(),
         'samecmd': None,
         'diffcmd': ['cmd'],
         'submenukeys': '',
@@ -16,7 +16,7 @@ BUILD_TYPE_CFG = {
     'build': {
         'init': ['^'],
         'completed': ['O'], # build dirt road to allow cursor repositioning
-        'designate': 'exitmenu menu cmd moveto setsize ! % # %'.split(),
+        'designate': 'exitmenu menu cmd moveto setsize & % # %'.split(),
         'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
         'submenukeys': ['i', 'w', 'e', 'C', 'T', 'M'],
@@ -26,11 +26,11 @@ BUILD_TYPE_CFG = {
 
             # farm plot
             r'p':       { 'sizebounds': (1, 10, 1, 10),
-                          'designate': 'exitmenu cmd moveto setsize !'.split() },
+                          'designate': 'exitmenu cmd moveto setsize &'.split() },
 
             # all constructions
             r'C.':      { 'sizebounds': (1, 10, 1, 10),
-                          'designate': 'exitmenu menu cmd moveto setsize ! % setmats'.split(),
+                          'designate': 'exitmenu menu cmd moveto setsize & % setmats'.split(),
                           'setmats': 'setmats'
                         },
 
@@ -43,7 +43,7 @@ BUILD_TYPE_CFG = {
                         },
 
             # metalsmith forge, magma forge
-            r'w[fv]':   { 'designate': 'exitmenu menu cmd moveto setsize ! % ! % # %'.split(),
+            r'w[fv]':   { 'designate': 'exitmenu menu cmd moveto setsize & % & % # %'.split(),
                           'sizebounds': (3, 3, 3, 3),
                           'setsize': 'setsize_fixed'
                         },
@@ -54,13 +54,13 @@ BUILD_TYPE_CFG = {
                         },
 
             # trade depot
-            r'D':       { 'designate': 'exitmenu cmd moveto setsize ! % ! % # %'.split(),
+            r'D':       { 'designate': 'exitmenu cmd moveto setsize & % & % # %'.split(),
                           'sizebounds': (5, 5, 5, 5),
                           'setsize': 'setsize_fixed'
                         },
 
             # screw pump
-            r'Ms':      { 'designate': 'exitmenu menu cmd moveto ! ! ! ! %'.split() },
+            r'Ms':      { 'designate': 'exitmenu menu cmd moveto & & & & %'.split() },
 
             # horizontal and vertical axles
             r'Mh':      { 'sizebounds': (1, 10, 1, 1) },
@@ -72,7 +72,7 @@ BUILD_TYPE_CFG = {
     'place': { # place stockpiles
         'init': None,
         'completed': None,
-        'designate': 'moveto cmd ! setsize !'.split(),
+        'designate': 'moveto cmd & setsize &'.split(),
         'samecmd': None,
         'diffcmd': ['cmd'],
         'submenukeys': '',

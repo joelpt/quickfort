@@ -1,6 +1,7 @@
 """Handles route planning needed to move between areas and designate them."""
 
-from geometry import Direction, Point, Grid
+from geometry import Direction, Point
+from grid import Grid
 
 
 def plan_route(grid, debug, cursor):
