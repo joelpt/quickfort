@@ -26,12 +26,11 @@ by joelpt <quickfort@joelpt.net>, original idea by Valdemar
 
 <http://sun2design.com/quickfort>
 
-Quickfort is an AutoHotkey-based utility for Dwarf Fortress that helps you build
-fortresses from "blueprint" .CSV files (comma separated values). These files are
-easily created and edited in an app like Excel. Most building-oriented DF
-commands are supported through the use of multiple .CSV files to describe the
-different phases of DF construction (designation, building, stockpiles, and
-making adjustments).
+Quickfort 2 is a utility for Dwarf Fortress that helps you build fortresses from "blueprint" .CSV,
+.XLS, and .XLSX files. Many applications exist to edit these files, such as MS Excel and Google
+Docs. Most building-oriented DF commands are supported through the use of multiple files/worksheets
+to describe the different phases of DF construction (designation, building, stockpiles, and making
+adjustments).
 
 Original idea and initial codebase from Valdemar's designator.ahk script
 <http://www.bay12games.com/forum/index.php?topic=1428.0>.
@@ -42,15 +41,57 @@ User contributed blueprints can be found at <http://drop.io/quickfort>.
 Features
 --------
 
-* Design complete blueprints in .CSV files to handle 4 main phases of construction
-* Ability to leave author's comments in blueprints (shown to blueprint user)
+* Design complete blueprints to handle 4 main phases of DF construction
+* Single-blueprint .CSV and multi-blueprint .XLS/.XLSX files supported
 * Multi-Z-level blueprints
-* Repeating construction mode in any or all 3 dimensions
-* Simple command line entry
-* Aliases
-* Keystroke (construction speed) optimizations
-* Minimalist (and optional) GUI
+* Blueprint transformation and repetition
+* Aliases to automate frequent keystroke combos
+* Minimalist GUI with built-in command line mode (Windows only)
+* Cross-platform (command line converter only, requires Python)
+* DF macro or keystroke output methods supported
 * Assortment of sample blueprints included
+
+What's new in Quickfort 2.0
+---------------------------
+
+* Conversion engine rewritten in cross-platform Python
+* New solver plots blueprints much more efficiently; ~4x faster playback than QF 1.x
+* Use of DF macros for playback to DF; faster and more reliable than QF 1.x
+* XLS/XLSX (Excel) workbooks support makes it easy to bundle multi-phase blueprints
+* Improved Windows GUI, including enhanced blueprint info/select GUI and shrinkable mousetip
+* Alt-R repeat syntax expanded to support basic transformations, e.g. fliph flipv 2e
+* Alt-T command line supports multi-row entry, e.g. dig d,d#d,d
+* Multi-cell buildings can be plotted in multiple cells instead of using e.g. wr(3x3)
+* Build and keystroke logic configurable through config files
+
+For users of Quickfort 1.x
+--------------------------
+
+A few things have changed in Quickfort's basic operation in the move from 1.0 to 2.0:
+
+* Alt+D no longer opens a blueprint file AND plays it. Instead, Alt+F is now used to open a file,
+  and Alt+D is used to play the file. This enables Alt+D to work a bit like a "stamp" tool, but
+  may be disconcerting to experienced QF1 users at first.
+
+* QF2 now outputs DF macros by default. These are faster and more reliable than QF1's key-sending
+  approach, though that approach is still supported; use Alt+K to toggle modes. 
+  Be sure to set [MACRO_MS:0] in your DF's data/init/init.txt or macro playback will be slow.
+
+Windows Quick Start
+-------------------
+
+Linux/OSX Quick Start
+---------------------
+
+You must have Python 2.6.4 installed.
+
+*** Linux users:   Run the command line conversion tool via python:
+***                > cd src/qfconvert
+***                > python ./qfconvert.py
+***                or chmod +x qfconvert.py and run it like a shell script.
+*** Linux example:
+***   > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/myblueprint.mak
+***   ... then play your macro in DF with Ctrl+L, <select macro>, Ctrl+P.
 
 
 Basic Usage

@@ -2,6 +2,8 @@
 
 """Main entry point for qfconvert."""
 
+import sys
+
 from optparse import OptionParser
 import traceback
 import cProfile
@@ -10,8 +12,8 @@ import blueprint
 
 version = '2.00pre4'
 
-def parse_options():
-    """Read options and args from command line."""
+def parse_options(argv):
+    """Read options and args from argv (the command line parameters)."""
     usage = "usage: %prog [options] input_file [output_file]"
     parser = OptionParser(usage=usage, version="%prog " + version)
     parser.add_option("-s", "--sheetid",
@@ -53,7 +55,7 @@ def parse_options():
     parser.add_option("-P", "--profile",
                       action="store_true", dest="profile", default=False,
                       help="profile qfconvert performance")
-    options, args = parser.parse_args()
+    options, args = parser.parse_args(args=argv)
 
     if len(args) < 1:
         parser.print_help()
@@ -99,12 +101,12 @@ def run():
     return
 
 
-def main():
+def main(argv=sys.argv[1:]):
     """Parse options file, parse and convert blueprint, and output result."""
     global options, args
 
     try:
-        options, args = parse_options()
+        options, args = parse_options(argv)
         if args is not None:
             if options.profile:
                 cProfile.run('run()')

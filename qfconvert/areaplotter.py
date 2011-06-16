@@ -32,8 +32,7 @@ class AreaPlotter:
         areas (in this example a 20x20 designation of d's) and mark those
         areas as plotted.
         """
-        if self.debug:
-            print ">>>> BEGIN AREA EXPANSION"
+        if self.debug: print ">>>> BEGIN AREA EXPANSION"
 
         label = self.label
         for y, row in enumerate(self.grid.rows):

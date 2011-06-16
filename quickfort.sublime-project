@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"__",
+				"__init__"
+			],
+			[
+				"try",
+				"try: Try/Except/Else/Finally"
+			],
+			[
+				"class",
+				"class: New Class"
+			],
+			[
 				"XBu",
 				"XButton1SendsAltF4"
 			],
@@ -197,7 +209,7 @@
 			"file": "/C/code/qf/trunk/qfconvert/filereader.py",
 			"settings":
 			{
-				"buffer_size": 7726,
+				"buffer_size": 7801,
 				"line_ending": "Windows"
 			}
 		},
@@ -234,6 +246,14 @@
 			}
 		},
 		{
+			"contents": "c:\\lang\\Python26\\Scripts;C:\\Program Files\\Common Files\\Microsoft Shared\\Windows Live;C:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;\nc:\\exes;C:\\Program Files (x86)\\CollabNet\\Subversion Client;C:\\Program Files\\Common Files\\Microsoft Shared\\Windows Live;C:\\Windows\\system32;C\n:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;d:\\exes;d:\\bat;C:\\Program Files\\TortoiseSVN\\bin;C:\\Program Fi\nles (x86)\\Java\\jdk1.6.0_18\\bin;c:\\Program Files\\Microsoft SDKs\\Windows\\v6.0a\\bin;c:\\Windows\\Microsoft.NET\\Framework\\v2.0.50727;c:\\JavaDev\\jd\nk1.6.0_07\\bin;c:\\JavaDev\\devtools\\maven-2.0.7\\bin;c:\\JavaDev\\devtools\\apache-ant-1.7.0\\bin;C:\\Program Files\\Subversion\\bin;C:\\Program Files\n(x86)\\Microsoft SQL Server\\80\\Tools\\Binn\\;C:\\Program Files\\TortoiseHg;C:\\Program Files (x86)\\Mercurial\\;C:\\Program Files (x86)\\Graphviz2.26.\n3\\bin;C:\\Program Files\\Microsoft SQL Server\\90\\DTS\\Binn\\;C:\\Program Files (x86)\\Microsoft SQL Server\\90\\DTS\\Binn\\;D:\\code3\\utorrent-apps-sdk\n;C:\\Program Files (x86)\\Calibre2\\;C:\\Program Files (x86)\\QuickTime\\QTSystem\\;C:\\Program Files (x86)\\Microsoft SQL Server\\90\\Tools\\binn\\;c:\\e\nxes;c:\\lang\\Python26\\Scripts",
+			"settings":
+			{
+				"buffer_size": 1155,
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "/C/My Dropbox/code/ahk/foozykeys/foozykeys.ahk",
 			"settings":
 			{
@@ -248,11 +268,101 @@
 				"buffer_size": 113,
 				"line_ending": "Windows"
 			}
+		},
+		{
+			"file": "/C/my/Sunraw/v2/main.php",
+			"settings":
+			{
+				"buffer_size": 1043,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/my/Sunraw/v2/inc/layout.inc",
+			"settings":
+			{
+				"buffer_size": 5972,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/my/Sunraw/v2/inc/inc.inc",
+			"settings":
+			{
+				"buffer_size": 127,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/my/Sunraw/v2/inc/db.inc",
+			"settings":
+			{
+				"buffer_size": 511,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/joelt/AppData/Local/Temp/fz3temp-1/inc.inc",
+			"settings":
+			{
+				"buffer_size": 434,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/joelt/AppData/Local/Temp/fz3temp-1/layout.inc",
+			"settings":
+			{
+				"buffer_size": 14788,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/my/taskmaster ideas - scripts.txt",
+			"settings":
+			{
+				"buffer_size": 473,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/D/my/taskmaster ideas.txt",
+			"settings":
+			{
+				"buffer_size": 327,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/code/qf/trunk/quickfort/readme.txt",
+			"settings":
+			{
+				"buffer_size": 21408,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/code/qf/trunk/qfconvert/qfconvert.py",
+			"settings":
+			{
+				"buffer_size": 4326,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/C/code/qf/trunk/qfconvert/buildconfig.py",
+			"settings":
+			{
+				"buffer_size": 1216,
+				"line_ending": "Windows"
+			}
 		}
 	],
 	"build_system": "",
 	"file_history":
 	[
+		"/C/my/Sunraw/v2/index.html",
+		"/C/my/Sunraw/v2.html",
 		"/C/My Dropbox/SublimeText2/unicodedata.pyd",
 		"/C/code/qf/trunk/qfconvert/csvtest.csv",
 		"/C/code/qf/trunk/qfconvert/qfcmd.btm",
@@ -364,6 +474,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"c::",
+			"EditScript",
+			"e::",
+			";",
+			"on ",
 			"print",
 			"parse_sheet_details",
 			"Bunch",
@@ -486,17 +601,12 @@
 			"apply_",
 			"transform",
 			"count",
-			"continue",
-			"elseif",
-			"elsif",
-			"else if",
-			"None",
-			"count"
+			"continue"
 		],
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": true,
+		"regex": false,
 		"replace_history":
 		[
 			"\\n",
@@ -531,7 +641,7 @@
 	"groups":
 	[
 		{
-			"selected": 25,
+			"selected": 24,
 			"sheets":
 			[
 				{
@@ -555,8 +665,8 @@
 						"selection":
 						[
 							[
-								6009,
-								6009
+								5186,
+								5135
 							]
 						],
 						"settings":
@@ -566,7 +676,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0,
-						"translation.y": 2137,
+						"translation.y": 2353,
 						"zoom_level": 1
 					},
 					"type": "text"
@@ -2291,8 +2401,8 @@
 						"selection":
 						[
 							[
-								3147,
-								3147
+								6477,
+								6477
 							]
 						],
 						"settings":
@@ -2302,7 +2412,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0,
-						"translation.y": 3240,
+						"translation.y": 3580,
 						"zoom_level": 1
 					},
 					"type": "text"
@@ -2446,15 +2556,15 @@
 					"file": "/C/code/qf/trunk/qfconvert/filereader.py",
 					"settings":
 					{
-						"buffer_size": 7726,
+						"buffer_size": 7801,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5580,
-								5580
+								1235,
+								1235
 							]
 						],
 						"settings":
@@ -2464,7 +2574,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0,
-						"translation.y": 3078,
+						"translation.y": 0,
 						"zoom_level": 1
 					},
 					"type": "text"
@@ -2589,6 +2699,31 @@
 				},
 				{
 					"buffer": 24,
+					"settings":
+					{
+						"buffer_size": 1155,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1155,
+								1155
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 25,
 					"file": "/C/My Dropbox/code/ahk/foozykeys/foozykeys.ahk",
 					"settings":
 					{
@@ -2599,8 +2734,8 @@
 						"selection":
 						[
 							[
-								20329,
-								20329
+								8456,
+								8501
 							]
 						],
 						"settings":
@@ -2610,13 +2745,13 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0,
-						"translation.y": 13586,
+						"translation.y": 5342,
 						"zoom_level": 1
 					},
 					"type": "text"
 				},
 				{
-					"buffer": 25,
+					"buffer": 26,
 					"file": "/C/code/qf/trunk/makezip.bat",
 					"settings":
 					{
@@ -2634,6 +2769,305 @@
 						"settings":
 						{
 							"syntax": "Packages/Batch File/Batch File.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 27,
+					"file": "/C/my/Sunraw/v2/main.php",
+					"settings":
+					{
+						"buffer_size": 1043,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 28,
+					"file": "/C/my/Sunraw/v2/inc/layout.inc",
+					"settings":
+					{
+						"buffer_size": 5972,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 6372,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 29,
+					"file": "/C/my/Sunraw/v2/inc/inc.inc",
+					"settings":
+					{
+						"buffer_size": 127,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 30,
+					"file": "/C/my/Sunraw/v2/inc/db.inc",
+					"settings":
+					{
+						"buffer_size": 511,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 31,
+					"file": "/C/Users/joelt/AppData/Local/Temp/fz3temp-1/inc.inc",
+					"settings":
+					{
+						"buffer_size": 434,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 32,
+					"file": "/C/Users/joelt/AppData/Local/Temp/fz3temp-1/layout.inc",
+					"settings":
+					{
+						"buffer_size": 14788,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6578,
+								6578
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0,
+						"translation.y": 3665,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 33,
+					"file": "/D/my/taskmaster ideas - scripts.txt",
+					"settings":
+					{
+						"buffer_size": 473,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								206,
+								206
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 34,
+					"file": "/D/my/taskmaster ideas.txt",
+					"settings":
+					{
+						"buffer_size": 327,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 35,
+					"file": "/C/code/qf/trunk/quickfort/readme.txt",
+					"settings":
+					{
+						"buffer_size": 21408,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2330,
+								2330
+							]
+						],
+						"settings":
+						{
+							"rulers":
+							[
+							],
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true,
+							"wrap_width": 100
+						},
+						"translation.x": 0,
+						"translation.y": 806,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 36,
+					"file": "/C/code/qf/trunk/qfconvert/qfconvert.py",
+					"settings":
+					{
+						"buffer_size": 4326,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1695,
+								1695
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0,
+						"translation.y": 0,
+						"zoom_level": 1
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 37,
+					"file": "/C/code/qf/trunk/qfconvert/buildconfig.py",
+					"settings":
+					{
+						"buffer_size": 1216,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								177,
+								177
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0,
 						"translation.y": 0,
@@ -2674,6 +3108,10 @@
 		"selected_items":
 		[
 			[
+				"readme",
+				"trunk/quickfort/readme.txt"
+			],
+			[
 				"ali",
 				"qfconvert/config/aliases.txt"
 			],
@@ -2684,10 +3122,6 @@
 			[
 				"stx",
 				"quickfort_stx.sublime-project"
-			],
-			[
-				"readme",
-				"quickfort/readme.txt"
 			],
 			[
 				"blu",
@@ -2711,7 +3145,7 @@
 		[
 			[
 				"",
-				"/c/my/stuff.sublime-project"
+				"/C/code/qf/trunk/quickfort.sublime-project"
 			]
 		],
 		"width": 380

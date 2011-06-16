@@ -21,10 +21,12 @@ def read_csv_file(filename):
     with open(filename) as f:
         return [[cell.strip() for cell in line] for line in csv.reader(f)]
 
+
 def load_json(filename):
     """Loads a JSON document at filename and returns the decoded result."""
     with open(filename) as f:
         return json.load(f)
+
 
 class FileLayer:
     """
@@ -184,12 +186,14 @@ def read_sheet(filename, sheetid):
 
     return lines
 
+
 class SheetDetails(Struct):
     """ Struct to store top line details returned from parse_sheet_details(). """
     build_type = None
     start = None
     start_comment = None
     comment = None
+
 
 def parse_sheet_details(top_line):
     """
@@ -235,7 +239,10 @@ def parse_sheet_details(top_line):
 
 
 def split_zlayers(lines):
-    """Break up lines into z-layer subsets, separated by #> or #<"""
+    """
+    Break up lines into z-layer subsets, separated by #> or #<
+    Returns a list [FileLayer] with one FileLayer per z-layer
+    """
     filelayers = []
     zlayer = []
     for cells in lines:

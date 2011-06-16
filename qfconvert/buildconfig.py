@@ -1,7 +1,8 @@
 from filereader import load_json
 import re
 
-# load global BUILD_TYPE_CF which is used liberally below and would be inefficient to constantly reload
+# load global BUILD_TYPE_CFG which is used liberally below
+# and would be inefficient to constantly reload
 BUILD_TYPE_CFG = load_json("config/buildconfig.json")
 
 

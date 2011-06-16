@@ -228,7 +228,7 @@ class Transformer:
 
         else:
             raise Exception, 'Unknown transformation type: %d %s' % trans
-
+            
 
     def expand_width(self, rows, targetwidth, alignment):
         """Expand rows to requested targetwidth, aligning according to alignment param."""
