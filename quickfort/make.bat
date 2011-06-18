@@ -5,6 +5,6 @@ mkdir release
 mkdir release\config
 move Quickfort.exe release
 copy Quickfort.ico release
-copy config\*.* release\config
+copy config\options.txt release\config
 copy readme.txt release
 

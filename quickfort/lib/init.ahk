@@ -107,15 +107,18 @@ LoadOptions()
 
 
 ;; ---------------------------------------------------------------------------
-;; Load app state from state.ini
+;; Load app state from config/state.ini
 LoadAppState()
 {
   global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
-  IniRead, PlaybackMode, state.ini, GUI, PlaybackMode
-  IniRead, SelectedFolder, state.ini, GUI, LastFolder
-  IniRead, LastRepeatPattern, state.ini, GUI, LastRepeatPattern
-  IniRead, LastCommandLine, state.ini, GUI, LastCommandLine
-  IniRead, ShowFullTip, state.ini, GUI, ShowFullTip
+  IniRead, PlaybackMode, config/state.ini, GUI, PlaybackMode
+  IniRead, SelectedFolder, config/state.ini, GUI, LastFolder
+  IniRead, LastRepeatPattern, config/state.ini, GUI, LastRepeatPattern
+  IniRead, LastCommandLine, config/state.ini, GUI, LastCommandLine
+  IniRead, ShowFullTip, config/state.ini, GUI, ShowFullTip
+
+  if (PlaybackMode == "ERROR")
+    PlaybackMode := "macro"
 
   if (SelectedFolder == "ERROR")
     SelectedFolder := ""
@@ -134,19 +137,19 @@ LoadAppState()
 
 
 ;; ---------------------------------------------------------------------------
-;; Save app state to state.ini
+;; Save app state to config/state.ini
 SaveAppState()
 {
   global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
-  IniWrite, %PlaybackMode%, state.ini, GUI, PlaybackMode
-  IniWrite, %SelectedFolder%, state.ini, GUI, LastFolder
-  IniWrite, %ShowFullTip%, state.ini, GUI, ShowFullTip
+  IniWrite, %PlaybackMode%, config/state.ini, GUI, PlaybackMode
+  IniWrite, %SelectedFolder%, config/state.ini, GUI, LastFolder
+  IniWrite, %ShowFullTip%, config/state.ini, GUI, ShowFullTip
 
   if (LastCommandLine)
-    IniWrite, %LastCommandLine%, state.ini, GUI, LastCommandLine
+    IniWrite, %LastCommandLine%, config/state.ini, GUI, LastCommandLine
 
   if (LastRepeatPattern)
-    IniWrite, %LastRepeatPattern%, state.ini, GUI, LastRepeatPattern
+    IniWrite, %LastRepeatPattern%, config/state.ini, GUI, LastRepeatPattern
 
   return
 }
