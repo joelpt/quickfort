@@ -27,13 +27,17 @@ Init()
   SelectedFilename := ""
   SelectedSheetIndex =
   SelectedFolder := ""
+  CommandLineMode := False
+  CommandLineFile =
   StartPos := ""
   StartPosLabel := ""
   RepeatPattern =
   SheetGuiSelectedFile := ""
   SheetGuiLastListViewEnabled =
   ShowFullTip := 1
-
+  LastSendKeys =
+  LastMacroWasPlayed := false
+  
   ; Init saved gui state
   LoadAppState()
 
@@ -66,11 +70,11 @@ ExitSub:
 
 ;; ---------------------------------------------------------------------------
 ;; Set default options so players don't necessarily have to overwrite
-;; options.txt with new QF versions
+;; their options.txt with new QF versions' options.txt
 SetDefaultOptions()
 {
   global
-  PlaybackMode := "key"
+  PlaybackMode := "macro"
   DelayMultiplier := 1
   KeyPressDuration := 1
   EmbeddedDelayDuration := 250
@@ -141,9 +145,10 @@ LoadAppState()
 SaveAppState()
 {
   global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
+
   IniWrite, %PlaybackMode%, config/state.ini, GUI, PlaybackMode
-  IniWrite, %SelectedFolder%, config/state.ini, GUI, LastFolder
   IniWrite, %ShowFullTip%, config/state.ini, GUI, ShowFullTip
+  IniWrite, %SelectedFolder%, config/state.ini, GUI, LastFolder
 
   if (LastCommandLine)
     IniWrite, %LastCommandLine%, config/state.ini, GUI, LastCommandLine

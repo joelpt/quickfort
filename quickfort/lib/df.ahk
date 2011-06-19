@@ -27,12 +27,17 @@ SendKeys(keys)
 {
   global
   ActivateGameWin()
-  Sleep, 250
+  ReleaseModifierKeys()
   Sleep, 0
 
-  ; Convert {wait} statements to ¢ so we can Loop Parse in chunks
-  ; and sleep between each chunk.
-  StringReplace, keys, keys, {wait}, ¢, All
+  if (Instr(keys, "{wait}"))
+  {
+    ; Convert {wait} statements to ¢ so we can Loop Parse in chunks
+    ; and sleep between each chunk.
+    StringReplace, keys, keys, {wait}, ¢, All
+  }
+  ; TODO: seed {waits} into long key sequences which have no {wait}s
+  ; in them, to permit for catching Alt+C and safety abort
 
   ; Count total number of ¢ chars
   StringSplit, pctarray, keys, ¢
@@ -131,9 +136,9 @@ ReleaseModifierKeys()
       KeyWait, Shift
       KeyWait, LWin
       KeyWait, RWin
-      Sleep 250
+      Sleep 10
       ControlSend,, {Alt up}{Ctrl up}{Shift up}{LWin up}{RWin up},Dwarf Fortress
-      Sleep 250
+      Sleep 10
     }
     else
       break

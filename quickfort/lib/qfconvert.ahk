@@ -41,7 +41,7 @@ ExecQfconvert(infile, outfile, params)
     {
       ; Inform the user.
       FileRead, output, %outfile%
-      StringReplace, output, output, Exception:, Error:
+      StringReplace, output, output, Exception:, Error in qfconvert:
       StringReplace, output, output, \n, `n
       MsgBox % output
       ClearTip()

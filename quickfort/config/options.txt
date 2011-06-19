@@ -16,12 +16,13 @@
 PlaybackMode = macro
 
 # If PlaybackMode=key, you may need to un/comment the below setting
-# based on your version of Dwarf Fortress.
+# based on your version of Dwarf Fortress. PlaybackMode=macro will
+# only work in DF v0.31+.
 
-# DF v0.31+ uses {Esc} to exit menus.
+# DF v0.31+: use {Esc} to exit menus.
 KeyExitMenu = {Esc}
 
-# DF v0.28.181.40d- uses {Space} to exit menus.
+# DF v0.28.181.40d and earlier: use {Space} to exit menus.
 #KeyExitMenu = {Space}
 
 
@@ -35,26 +36,19 @@ ShowStartupTrayTip = 1
 # Set to 0 to disable the mouse tooltip entirely.
 ShowMouseTooltip = 1
 
-# If set to 1, QF will abort building if the Dwarf Fortress window
-# becomes inactive, avoiding sending keystrokes intended for DF to
-# another program. Setting this to 0 will disable this feature.
-EnableSafetyAbort = 1
-
 # Try increasing this value if you have trouble with a flickering
-# mouse tooltip. Increasing MouseTooltipPlaybackUpdateEveryMs may
-# also permit use of lower values for DelayMultiplier (faster
-# building) in 40d11 (40d can have a value of 10 here without
-# issue).
+# mouse tooltip.
 MouseTooltipUpdateMs = 15
 
 #----------------------------
 # Key-sending
 #----------------------------
 
-# Determines key-sending method, one of: ControlSend Send SendEvent
-# SendInput SendPlay The default of ControlSend permits QF to send
-# keystrokes to DF even when the window is not focused, but could be
-# unreliable in certain environments.
+# The following options only apply when PlaybackMode = key
+# or when using Alt+V 'visualize'.
+
+# Determines key-sending method, one of: 
+#   Send SendEvent SendInput SendPlay ControlSend
 # Details: http://www.autohotkey.com/docs/commands/Send.htm
 SendMode = Send
 
@@ -74,14 +68,7 @@ EmbeddedDelayDuration = 150
 # Details: http://www.autohotkey.com/docs/commands/SetKeyDelay.htm
 KeyPressDuration = -1
 
-
-#----------------------------
-# Paths
-#----------------------------
-
-# You can set up any number of aliases in aliases.txt. When one of
-# the below keywords is entered in a spreadsheet cell, it will be
-# replaced with the specified replacement text before execution. See
-# aliases.txt for a few examples. Path is relative to QF's starting
-# directory by default.
-AliasesPath = aliases.txt
+# If set to 1, QF will abort building if the Dwarf Fortress window
+# becomes inactive, avoiding sending keystrokes intended for DF to
+# another program. Setting this to 0 will disable this feature.
+EnableSafetyAbort = 1

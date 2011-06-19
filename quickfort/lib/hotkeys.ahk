@@ -28,8 +28,18 @@
 ;; Intercept Ctrl-P command to DF and send it ourselves. If sent manually, for large
 ;; macros it causes DF to repeat the macro twice with a single Ctrl-P press.
 ;; QF can send a single Ctrl-P that will not cause DF to repeat the macro.
-$^p:: Send ^p
+$^p:: 
+  Send ^p
+  LastMacroWasPlayed := false
+  return
 
+;; ---------------------------------------------------------------------------
+;; Detect use of Ctrl+S/L/R and reset LastMacroWasPlayed when it happens
+~^L:: 
+~^S::
+~^R::
+  LastMacroWasPlayed := false
+  return
 
 ;; ---------------------------------------------------------------------------
 ;; Exit the script (Shift-Alt-X)
@@ -73,6 +83,8 @@ $^p:: Send ^p
 ;; Cancel build (Alt+C)
 $!C::
   Critical
+  LastMacroWasPlayed := false
+  LastSendKeys =
   if (Building)
   {
     Building := 0
@@ -105,12 +117,16 @@ $!C::
   if (!Building && SelectedFile)
   {
     ShowSheetInfoGui()
+    LastMacroWasPlayed := false
+    LastSendKeys =
   }
   return
 
 ;; ---------------------------------------------------------------------------
 ;; Switch playback mode (Alt+K)
 !K::
+  LastMacroWasPlayed := false
+  LastSendKeys =
   if (!Building)
   {
     if (PlaybackMode = "macro")
@@ -132,17 +148,23 @@ $!C::
     (
 Enter transformation pattern below.
 
-  Syntax: #D #D #D ...
-    where D is one of: n s e w u d flipv fliph rotcw rotccw !
+  Syntax: #D #D #D ... where D is one of:
+    n s e w u d flipv fliph rotcw rotccw ! halign=.. valign=..
+
   Examples:
-    4e 4s;  2n 2w 2d;  fliph 2e flipv 2s
+    2e 2s
+    rotcw
+    fliph 2e flipv 2s
 
 Enter ? for more help.
     )
 
-    InputBox, pattern, Transform blueprint, %msg%, , 440, 260, , , , , %LastRepeatPattern%
+    InputBox, pattern, Transform blueprint, %msg%, , 440, 300, , , , , %LastRepeatPattern%
     ActivateGameWin()
     
+    LastMacroWasPlayed := false
+    LastSendKeys =
+
     if ErrorLevel ; user clicked cancel button
     {
       RepeatPattern = ; clear out any existing repeat pattern
@@ -154,8 +176,6 @@ Enter ? for more help.
     {
       msg =
       (
-Enter transformation pattern below.
-
 Base syntax: [#]D [[#]D [#]D...]
   # = times to repeat action, defaults to 1 if omitted
   D = one of: n s e w u d flipv fliph rotcw rotccw !
@@ -174,10 +194,13 @@ Examples:
   rotcw -- rotate the blueprint clockwise 90 degrees
   fliph 2e flipv 2s -- 2x2 symmetrical pattern of blueprint
   rotcw 2e flipv fliph 2s -- 2x2 rotated around a center point
-  rotcw valign=t 2e -- after rotating, blueprints are top-aligned and repeated 2e
+  rotcw valign=top 2e -- after rotating, top-align and repeat 2e
   rotcw ! 2e -- rotate original blueprint, then repeat that 2x east
+  valign=m halign=m rotcw 2e flipv fliph 2s 2e 2s 2d -- big example
+
+Enter transformation pattern below.
       )
-      InputBox, pattern, Transform blueprint, %msg%, , 440, 400, , , , , %LastRepeatPattern%
+      InputBox, pattern, Transform blueprint, %msg%, , 440, 480, , , , , %LastRepeatPattern%
       ActivateGameWin()
     }
 
@@ -209,6 +232,8 @@ ShowFilePicker:
 {
   if (!Building)
   {
+    LastMacroWasPlayed := false
+    LastSendKeys =
     newfile := SelectFile()
     if (newfile)
     {
@@ -237,11 +262,26 @@ $!D::
   {
     Building := True
     Tip("Building...")
-
     if (PlaybackMode == "macro")
-      ConvertAndPlayMacro()
+    {
+      if (LastMacroWasPlayed)
+      {
+        ; just play the last played macro
+        SendKeys("^p") 
+      }
+      else
+      {
+        ConvertAndPlayMacro()
+      }
+    }
+    else if (LastSendKeys)
+    {
+      SendKeys(LastSendKeys)
+    }
     else
+    {
       ConvertAndSendKeys(false)
+    }
 
     If (RepeatPattern)
       LastRepeatPattern := RepeatPattern ; remembered for transform GUI default
@@ -264,6 +304,8 @@ $!V::
     ConvertAndSendKeys(true)
     Building := False
     ClearTip()
+    LastMacroWasPlayed := false
+    LastSendKeys =
   }
   return
 }
@@ -292,12 +334,16 @@ Examples:
     InputBox, command, Quickfort Command Line, %msg%, , 400, 300 , , , , , %LastCommandLine%
     ActivateGameWin()
 
+    LastMacroWasPlayed := false
+    LastSendKeys =
+
     if ErrorLevel ; user clicked cancel button
     {
       EvalCommands =
       EvalMode =
       CommandLineMode := False
-      ReadyToBuild := False
+      CommandLineFile =
+      ;ReadyToBuild := False
       UpdateTip()
       return
     }
@@ -331,7 +377,8 @@ Examples:
 
         outfile := A_ScriptDir "\" GetRandomFileName() ".csv"
         WriteCommandLineToCSVFile(EvalMode, EvalCommands, outfile)
-        SetSelectedFile(outfile)
+        ;SetSelectedFile(outfile)
+        CommandLineFile := outfile
         SetVarsByBuildType(EvalMode)
 
         CommandLineMode := True

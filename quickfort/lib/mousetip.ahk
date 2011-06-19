@@ -106,7 +106,7 @@ UpdateTip()
 
 
     if (RepeatPattern)
-      header := header "`n>> TRANSFORM: " RepeatPattern
+      header := header "`nALT+R: " RepeatPattern
 
     if (StartPos)
       header := header "`n>> STARTS AT: " StartPosLabel

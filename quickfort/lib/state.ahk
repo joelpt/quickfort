@@ -4,11 +4,15 @@
 ;; Set StartPos/Label and update the mouse tip
 SetStartPos(position, label)
 {
-  global StartPos, StartPosLabel
+  global StartPos, StartPosLabel, LastMacroWasPlayed, LastSendKeys
 
   ; set start pos
   StartPos := position
   StartPosLabel := label
+
+  ; ensure a new conversion is performed
+  LastMacroWasPlayed := false
+  LastSendKeys =
 
   UpdateTip()
 }
