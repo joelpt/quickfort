@@ -121,6 +121,7 @@ LoadAppState()
   IniRead, LastCommandLine, config/state.ini, GUI, LastCommandLine
   IniRead, ShowFullTip, config/state.ini, GUI, ShowFullTip
 
+  ; defaults used when no such INI key exists
   if (PlaybackMode == "ERROR")
     PlaybackMode := "macro"
 
