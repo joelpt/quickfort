@@ -1394,7 +1394,8 @@ code-writing resulted in improvements to Quickfort:
     LegoLord
     shadow_slicer
     bakergo
-
+    starrrie
+    
 
 Copyright 2011 Joel Thornton
 
