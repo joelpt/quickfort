@@ -1,5 +1,5 @@
-Quickfort 2.00pre5
-==================
+Quickfort 2.00
+==============
 by joelpt <quickfort@joelpt.net>
 
 <http://sun2design.com/quickfort>
@@ -15,12 +15,48 @@ Original idea and initial codebase from Valdemar's designator.ahk script
 <http://www.bay12games.com/forum/index.php?topic=1428.0>.
 
 User contributed blueprints can be found at
-<http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/>. See the Links
-section for more.
+<http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/>. See the 
+[Links section](#links) for more.
 
-Jump to the [features section](#features)
 
-Features    {#features}
+Table of Contents
+-----------------
+
+
+* [Features](#features)
+* [For the impatient](#impatient)
+* [Quickfort 2.0: What's new](#qf2whatsnew)
+* [For users of Quickfort 1.x](#forqf1users)
+* [Windows Quick Start](#winquickstart)
+* [Linux/OSX Quick Start](#linuxquickstart)
+* [Windows Basic Usage](#winbasicusage)
+* [Editing Blueprints](#editing)
+  * [Area expansion syntax](#expansionsyntax)
+  * [Automatic area expansion](#autoexpansion)
+  * [Specifying a starting position](#startpos)
+  * [Multilevel blueprints](#multilevel)
+  * [Multiple build phases](#multiphase)
+* [Command prompt](#commandprompt)
+* [Transformations](#transforms)
+  * [Transformations: Simple repetition](#repetition)
+  * [Transformations: Simple transformation](#transformation)
+  * [Advanced transformations](#advtransforms)
+    * [Advanced transformations: alignment](#alignment)
+    * [Advanced transformations: the whirlpool pattern](#whirlpool)
+    * [Advanced transformations: multiple Z-levels](#multileveltransforms)
+    * [Advanced transformations: the ! command](#bangcommand)
+    * [Advanced transformations: debugging](#debugging)
+* [Stupid dwarf tricks](#stupiddwarftricks)
+* [Troubleshooting](#troubleshooting)
+* [Create an Excel macro to size all columns to a uniform narrow width](#excel1)
+* [Other Excel tips](#excel2)
+* [Links](#links)
+* [Todo/Future Ideas](#todo)
+* [Changelog](#changelog)
+* [Credits and License](#license)
+
+
+Features                                                             {#features}
 --------
 
 * Design complete blueprints to handle 4 main phases of DF construction
@@ -34,7 +70,7 @@ Features    {#features}
 * Assortment of sample blueprints included
 
 
-For the impatient
+For the impatient                                                   {#impatient}
 -----------------
 
 ALL USERS: Please set `[MACRO_MS:0]` in your `data/init/init.txt` for best DF
@@ -51,12 +87,12 @@ or `chmod +x qfconvert.py` and run it like a shell script.
 
 Command line example using DF:
 
-    > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/mymacro.mak
+    > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/foo.mak
 
-... then play your macro in DF with Ctrl+L, select mymacro, Ctrl+P.
+... then play your macro in DF with Ctrl+L, select foo, Ctrl+P.
 
 
-Quickfort 2.0: What's new
+Quickfort 2.0: What's new                                         {#qf2whatsnew}
 -------------------------
 
 Quickfort 2.0 is a major rewrite of Quickfort 1.11.
@@ -98,13 +134,18 @@ relying on qfconvert for all blueprint processing and manipulation.
 A list of the shiny new bits:
 
 * Conversion engine rewritten in cross-platform Python
-* Smart designation: ~400% fewer DF commands required versus QF1.x for the same tasks
+* Smart designation: ~400% fewer DF commands required versus QF1.x for the
+  same tasks
 * DF macros support: faster, more reliable, works cross-platform
-* XLS/XLSX (Excel) workbooks support makes it easy to bundle multi-phase blueprints
-* Improved Windows GUI, including enhanced blueprint info/select GUI and shrinkable mousetip
-* Alt-R repeat syntax expanded to support basic transformations, e.g. `fliph flipv 2e`
+* XLS/XLSX (Excel) workbooks support makes it easy to bundle multi-phase 
+  blueprints
+* Improved Windows GUI, including enhanced blueprint info/select GUI and
+  shrinkable mousetip
+* Alt-R repeat syntax expanded to support basic transformations, 
+  e.g. `fliph flipv 2e`
 * Alt-T command line supports multi-row entry, e.g. `dig d,d#d,d`
-* Multi-cell buildings can be plotted in multiple cells instead of from the 'center' tile
+* Multi-cell buildings can be plotted in multiple cells instead of from the 
+  'center' tile
 * Build logic and keystroke/macro mappings configurable via config files
 
 This new codebase for Quickfort 2.0 will enable lots of interesting new
@@ -113,46 +154,55 @@ blueprints, '#meta' blueprints, and an Undo mode are all on the 2.x release
 schedule.
 
 
-For users of Quickfort 1.x
+For users of Quickfort 1.x                                        {#forqf1users}
 --------------------------
 
-A few things have changed in Quickfort's basic operation in the move from 1.0 to 2.0:
+A few things have changed in Quickfort's basic operation in the move from 1.0 to
+2.0:
 
 * Alt+D no longer opens a blueprint file AND plays it. Instead, Alt+F is now
   used to open a file, and Alt+D is used to play the file. This enables Alt+D
   to work a bit like a "stamp" tool, but may be disconcerting to experienced
   QF1 users at first.
 
-* QF2 now outputs DF macros by default. This is faster and more reliable than QF1's key-sending
-  approach, though that approach is still supported; use Alt+K to toggle modes. 
-  BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro playback will be slow.
+* QF2 now outputs DF macros by default. This is faster and more reliable than 
+  QF1's key-sending approach, though that approach is still supported; use Alt+K
+  to toggle modes. 
 
-Windows Quick Start
+* BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
+  playback will be slow.
+
+Windows Quick Start                                             {#winquickstart}
 -------------------
 
-BEFORE YOU BEGIN: QF2 uses DF macros to designate your blueprints in Dwarf Fortress. To ensure your
-experience doesn't suck:
+BEFORE YOU BEGIN: QF2 uses DF macros to designate your blueprints in Dwarf
+Fortress. To ensure your experience doesn't suck:
 
 * Quit Dwarf Fortress if it is running.
-* Edit your DF's `data/init/init.txt` file and set the `MACRO_MS` option to `[MACRO_MS:0]`.
+* Edit your DF's `data/init/init.txt` file and set the `MACRO_MS` option 
+  to `[MACRO_MS:0]`.
 
 Failing to do so will result in painfully slow macro playback. 
 
-First time usage:
+### First time usage ###
 
 1. Download and extract the Quickfort2...zip file.
 2. Run Quickfort.exe.
 3. Launch Dwarf Fortress and get into a Fortress mode game.
 4. Press Alt+F to open the Quickfort file browser.
 5. Browse into the Tests folder and select `obama.csv`
-6. Some information will be shown about the blueprint in a popup window. Click OK to continue.
-7. Follow Quickfort's tooltip instructions to switch to Designate mode and select an empty underground z-level.
-8. Press Alt+V to see the outline of where the blueprint will be placed. The entire area should be clear.
-9. If you are satisfied (start at least 3 cells from the map edge), press Alt+D to designate.
+6. Some information will be shown about the blueprint in a popup window. Click
+   OK to continue.
+7. Follow Quickfort's tooltip instructions to switch to Designate mode and
+   select an empty underground z-level.
+8. Press Alt+V to see the outline of where the blueprint will be placed. The 
+   entire area should be clear.
+9. If you are satisfied (start at least 3 cells from the map edge), press Alt+D 
+   to designate.
 10. Wait a few seconds while the blueprint is designated.
 
 
-Linux/OSX Quick Start
+Linux/OSX Quick Start                                         {#linuxquickstart}
 ---------------------
 
 You must have Python 2.6.4 installed.
@@ -169,17 +219,19 @@ Examples:
     > python ./qfconvert.py --info myblueprint.xls
       (..information about myblueprint.xls..)
   
-    > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/mymacro.mak
+    > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/foo.mak
 
-... then play mymacro.mak in DF with Ctrl+L, select mymacro, Ctrl+P.
+... then play mymacro.mak in DF with Ctrl+L, select foo, Ctrl+P.
 
 
-Windows Basic Usage
+Windows Basic Usage                                             {#winbasicusage}
 -------------------
 
-BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro playback will be slow.
+BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
+playback will be slow.
 
-Please see the Troubleshooting section for solutions to common problems.
+Please see the [Troubleshooting section](#troubleshooting) for solutions to
+common problems.
 
 Quickfort's GUI consists of a mouse tooltip, hotkeys and a few popup windows.
 
@@ -197,20 +249,20 @@ Alt+Q/W/A/S can be used to change the starting corner for the blueprint (that
 is, which corner of the blueprint you'll put the starting cursor at). The
 current starting corner setting will be shown in the QF tooltip. These hotkeys
 have no effect if the blueprint specifies a starting cursor position; see
-the "Specifying a starting position" section below for more details.
+the [Specifying a starting position section](#startpos) for more details.
 
 Alt+R can be used to repeat a blueprint any number of times to the north, south,
 east, west, up, and down. This can be useful for digging multilevel
 staircases/shafts, repeating room complexes, etc. Alt+R can also be used to
-rotate, flip, and tesselate blueprints: see the "Transformations" section below
-for more details.
+rotate, flip, and tesselate blueprints: see the 
+[Transformations section](#transforms) for more details.
 
 Alt+T opens the Quickfort command line. Here you can enter a single-line
 QF-style command. Commands entered this way can be repeated with Alt+R as well.
 
-After a build completes, Alt+D can be used to designate the same blueprint again, or
-use Alt+F again to select a new blueprint. Alt+E can be used to select a
-different worksheet from a currently selected multisheet XLS/XLSX file.
+After a build completes, Alt+D can be used to designate the same blueprint
+again, or use Alt+F again to select a new blueprint. Alt+E can be used to select
+a different worksheet from a currently selected multisheet XLS/XLSX file.
 
 Alt+H can be used to hide QF's mouse tooltip; all hotkeys will continue to
 work. Alt+M toggles from QF's rather wordy mousetip to a minimal one, if you
@@ -220,14 +272,14 @@ Shift+Alt+Z suspends/resumes Quickfort, useful if you find it to interfere
 with other windows. Shift+Alt+X exits Quickfort.
 
 
-Editing Blueprints
+Editing Blueprints                                                    {#editing}
 ------------------
 
 The format of Quickfort-compatible blueprint files is straightforward.
 
 Use a spreadsheet editor such as Excel, Google Docs, or LibreOffice to edit
 these files. There are also a number of blueprint editing tools that export
-Quickfort compatible blueprint files; see the "Links" section for more.
+Quickfort compatible blueprint files; see the [Links section](#links).
 
 The first line of the spreadsheet should look like this:
 
@@ -300,7 +352,8 @@ unit, or f(2x1). QF sends the necessary keys to resize the placement region.
 This also works properly in all modes, including build mode (floors Cf(10x10),
 bridges ga(4x4), etc. that are sized with UMKH keys).
 
-Note that the f(2x1) syntax isn't actually necessary here; we could have just used:
+Note that the f(2x1) syntax isn't actually necessary here; we could have just
+used:
 
     #place Place a food stockpile
     ` ` ` ` #
@@ -324,14 +377,14 @@ only booze.
     ` ` ` ` #
     # # # # #
 
-In column 2, row 2 we have "r+". This sends r+ keys to DF when the cursor is over
-the bed, causing us to 'make room' and then increase its size to ensure the
+In column 2, row 2 we have "r+". This sends r+ keys to DF when the cursor is
+over the bed, causing us to 'make room' and then increase its size to ensure the
 'room' fills the entire area.
 
 In column 2, row 3 we have "booze". booze is an alias keyword defined in the
-included config/aliases.txt file. This particular alias sets a food stockpile to carry
-booze only, by sending the commands needed to navigate DF's stockpile settings
-menu.
+included config/aliases.txt file. This particular alias sets a food stockpile to
+carry booze only, by sending the commands needed to navigate DF's stockpile
+settings menu.
 
 The included Blueprints/Examples/bedroom-*.csv files provide a good simple
 example of a 4-layer QF blueprint. Check out aliases.txt for some helpful
@@ -339,7 +392,7 @@ starting aliases. Blueprints/TheQuickFortress/ provides a good detailed set of
 examples covering some more complex designs.
 
 
-Area expansion syntax
+Area expansion syntax                                         {#expansionsyntax}
 ---------------------
 
 In Quickfort 2.0, the following blueprints are equivalent:
@@ -380,9 +433,10 @@ should it have a long 4x2 along the bottom with a 2x2 in the upper left? QF2
 will choose one or the other, but you have no guarantee which way it will
 choose.
 
-If you need to guarantee a certain area arrangement unambiguously, use area expansion syntax:
+If you need to guarantee a certain area arrangement unambiguously, use area
+expansion syntax:
 
-    # place L shaped food stockpile; using ~ markers to denote placement (QF2 ignores ~ and ` chars)
+    # place L shaped food stockpile; ~ markers denote placement (ignored by QF2)
     f(2x4)` #
     ~ ~ ` ` #
     ~ ~ f f #
@@ -390,7 +444,7 @@ If you need to guarantee a certain area arrangement unambiguously, use area expa
     # # # # #
 
 
-Automatic area expansion
+Automatic area expansion                                        {#autoexpansion}
 ------------------------
 
 In Quickfort 1.x, buildings larger than 1x1, like workshops, had to be placed
@@ -433,7 +487,7 @@ This can be especially helpful for laying out structures like screw pump towers
 and waterwheels, whose "center point" can be non-obvious.
 
 
-Specifying a starting position
+Specifying a starting position                                       {#startpos}
 ------------------------------
 
 You can optionally specify a cursor starting position for a particular
@@ -463,11 +517,12 @@ See Blueprints/Tests/starting-position.csv for a simple example.
 The Blueprints/TheQuickFortress/*.csv examples all utilize start().
 
 
-Multilevel blueprints
+Multilevel blueprints                                              {#multilevel}
 ---------------------
 
 Multilevel blueprints are accommodated by separating Z-levels of the blueprint
-with #> (go down one z-level) or #< (go up one z-level) at the end of each floor.
+with #> (go down one z-level) or #< (go up one z-level) at the end of each
+floor.
 
     #dig Stairs leading down to a small room below
     j  `  `  #
@@ -484,7 +539,7 @@ as building a screw pump tower. See Blueprints/Examples/screw-pump-tower-*.csv
 for an example.
 
 
-Multiple build phases
+Multiple build phases                                              {#multiphase}
 ---------------------
 
 A complete QF specification for a floor of your fortress may contain 4 or more
@@ -492,12 +547,13 @@ separate blueprints, one for each "phase" of construction (dig/designate,
 build, place stockpiles, building adjustments). 
 
 Starting with Quickfort 2.0, all phases and even variations can be kept in a
-single .XLS or .XLSX file using multiple worksheets. Tools like Excel make it easy to 
-work with multiple worksheets and also retains all worksheet formatting/styling.
+single .XLS or .XLSX file using multiple worksheets. Tools like Excel make it
+easy to  work with multiple worksheets and also retains all worksheet
+formatting/styling.
 
-After opening a multisheet XLS/XLSX blueprint using Alt+F, Quickfort will present
-a dialog allowing you to choose which sheet to use. Alt+E can be subsequently
-used to select a different sheet from the same file.
+After opening a multisheet XLS/XLSX blueprint using Alt+F, Quickfort will
+present a dialog allowing you to choose which sheet to use. Alt+E can be
+subsequently used to select a different sheet from the same file.
 
 Quickfort 2.0 is also fully compatible with using single-sheet .CSV files for
 blueprints. The build phases suggest a convenient naming scheme for
@@ -517,12 +573,12 @@ smooth/engrave the area before performing the next phase, or dwarves won't be
 able to access walls behind/under furniture, etc.
 
 
-Command prompt
+Command prompt                                                  {#commandprompt}
 --------------
 
 Quickfort's command prompt can be accessed with Alt+T. Here you can enter
 commands as 'cells' to be played back. These can then be transformed with
-Alt+R if desired; see the Transformations section below.
+Alt+R if desired; see the [Transformations section](#transforms).
 
 Commands must be prefixed with the desired build phase, so that QF knows
 how to handle your commands properly:
@@ -567,11 +623,11 @@ lines with # like so:
 
 Note in the second example how the command ends with ##. This is because the #
 is treated as the end-of-row marker. If you want to add a final blank row to a
-multirow command, therefore, you need to end with two #'s: one to end the preceding line
-and another to end the last line.
+multirow command, therefore, you need to end with two #'s: one to end the
+preceding line and another to end the last line.
 
 
-Transformations
+Transformations                                                    {#transforms}
 ---------------
 
 Quickfort supports repeating and transforming your blueprints in various ways.
@@ -580,7 +636,7 @@ Use the Alt+R hotkey to open the transformation prompt and see a simple syntax
 primer. Enter ? to receive additional help.
 
 
-Transformations: Simple repetition
+Transformations: Simple repetition                                 {#repetition}
 ----------------------------------
 
 A blueprint can be repeated in any direction: north, south, east, west, up-z,
@@ -602,7 +658,7 @@ the first letter of the direction you want to repeat in.
     Repeats the blueprint in a 2x2x2 cube pattern (multi-z-level)
   
 
-Transformations: Simple transformation
+Transformations: Simple transformation                         {#transformation}
 --------------------------------------
 
 A blueprint can be transformed in the following ways:
@@ -624,36 +680,19 @@ A blueprint can be transformed in the following ways:
 
 
 
-Advanced transformations
+Advanced transformations                                        {#advtransforms}
 ------------------------
 
 Repetition and transformation commands can be combined for some interesting
 effects. To get the effect you want, however, you need to understand how
 Quickfort 2.0's transformation engine works.
 
-QF keeps track of two 'transformation buckets' during transformation. We will
-call these buckets the 'Memory bucket', or bucket A, and the 'Working bucket',
-or bucket B.
+QF keeps track of two *transformation buckets* during transformation. We will
+call these buckets the **Memory bucket**, or bucket A, and the 
+**Working bucket**, or bucket B.
 
-At the start of a transformation sequence, QF sets both buckets A and B to the
-original, untransformed blueprint.
-
-QF then executes each command in the transformation sequence in order.
-
-*Transformation commands* like `rotcw` affect *only* the Working bucket B. The
-contents of B will be replaced with the transformed version of B.
-
-*Repetition commands* like `5e`, on the other hand, utilize both buckets A and B. More
-specifically, A and B are *repeated in series* in the direction you indicate.
-The result of that repetition then replaces the contents of both A and B. If
-you specify `5e`, for example, you are actually getting the content of the
-buckets in series as the result: ABABA.
-
-Once all transformations in the sequence have been performed, the contents of
-*Working bucket B* are returned as the result, to be designated by Quickfort.
-
-Let's try following through an example. Observe how the buckets change as we
-execute the following transformation sequence:
+Let's follow an example and observer how the buckets change as we execute the
+following transformation sequence:
 
     #dig The blueprint we'll be transforming
     d d d #
@@ -663,14 +702,20 @@ execute the following transformation sequence:
 
     Alt+R -> rotcw 3e flipv 2s rotccw
 
-    ----------------------------------------------------------------------
-  
+At the start of a transformation sequence, QF sets both buckets A and B to the
+original, untransformed blueprint.
+
     Starting contents of transformation buckets (before any transformation):
 
         d d d    d d d
         d . .    d . .
         . . .    . . .
         --A--    --B--
+
+QF then executes each command in the transformation sequence in order.
+
+*Transformation commands* like `rotcw` affect *only* the Working bucket B. The
+contents of B will be replaced with the transformed version of B.
 
     After rotcw transformation (only modifies B):
 
@@ -679,12 +724,25 @@ execute the following transformation sequence:
         . . .    . . d
         --A--    --B--
 
+*Repetition commands* like `3e`, on the other hand, utilize both buckets A and
+B. More specifically, A and B are *repeated in series* in the direction you
+indicate. The result of that repetition then replaces the contents of both A and
+B. If you specify `3e`, for example, you are actually getting the content of the
+buckets in series as the result: ABA.
+
     After 3e repetition (ABA):
 
         d d d . d d d d d    d d d . d d d d d
         d . . . . d d . .    d . . . . d d . .
         . . . . . d . . .    . . . . . d . . . 
         --------A--------    --------B--------
+
+Once all transformations in the sequence have been performed, the contents of
+*Working bucket B* are returned as the result, to be designated by Quickfort.
+
+We have `flipv 2s rotccw` remaining to execute from our original transformation
+sequence `rotcw 3e flipv 2s rotccw`. Let's execute the remaining steps and
+see the result:
 
     After flipv transformation (only modifies B):
 
@@ -729,12 +787,24 @@ execute the following transformation sequence:
         d d . . d d
         -----------
 
+Making sense yet? To get a better handle on how this all works, just experiment
+with the Alt+R command.
 
-Advanced transformations: alignment
-------------------------------
+While it may seem unintuitive at first, this approach for transformation was
+intentionally chosen for Quickfort 2.0. It is meant to retain the simple
+QF1.x-style `2e 2s` repeat functionality, while also allowing the mixing of
+QF1.x repetition commands with QF2.x transformation commands and allowing for
+[interesting tesselations](#whirlpool).
 
-Consider the state our transformation buckets were in just before returning the result
-in the preceding example:
+_Author's note:_ I would be glad to hear of any suggestions for an alternative
+approach/syntax here.
+
+
+Advanced transformations: alignment                                 {#alignment}
+-----------------------------------
+
+Consider the state our transformation buckets were in just before returning the
+result in the preceding example:
 
     d d d . d d d d d    d . . . . d
     d . . . . d d . .    d . . . . d
@@ -817,11 +887,12 @@ Compare these results:
     d d d . d d d d d d d . . d d
     -----------------------------
 
-Note that `2e`/`2w` repetitions are only affected by `valign`, and `2s`/`2n` repetitions
-are only affected by `halign`. This is because we are specifying alignment *along
-the shared axis* between the repeated sections. Thus `valign=top 2s` doesn't do
-anything more than just `2s`, because it's the shared *horizontal* axis between the
-northern and southern copy that they are aligned along.
+Note that `2e`/`2w` repetitions are only affected by `valign`, and `2s`/`2n`
+repetitions are only affected by `halign`. This is because we are specifying
+alignment *along the shared axis* between the repeated sections. Thus
+`valign=top 2s` doesn't do anything more than just `2s`, because it's the shared
+*horizontal* axis between the northern and southern copy that they are aligned
+along.
 
 If you expect to do a lot of combined rotation and repetition to make
 interesting patterns and variety in your fortress, strongly consider using
@@ -829,15 +900,16 @@ perfectly square blueprints (width == height), which when repeated in a
 direction will adjoin nicely with neighboring designated blueprints. You'll
 worry much less about halign/valign issues within complex transform sequences.
 
-Advanced transformations: the rosette
+Advanced transformations: the whirlpool pattern                     {#whirlpool}
 -------------------------------------
 
-The rosette design is the 'holy grail' for many symmetrical/fractal layouts.
-It can make for very attractive and effective fortress layouts. The design
-rotates a blueprint clockwise around a central point resulting in *4-fold
+The so-called whirlpool pattern is the 'holy grail' for many symmetrical/fractal
+layouts. It can make for very attractive and effective fortress layouts. The
+design rotates a blueprint clockwise around a central point resulting in *4-fold
 rotational symmetry*. (I [looked it up](http://en.wikipedia.org/wiki/Rotational_symmetry#n-fold_rotational_symmetry "Rotational symmetry").)
 
-This can be accomplished using QF transformation, but with a twist (no pun intended).
+This can be accomplished using QF transformation, but with a twist (no pun
+intended).
 
     #dig
     d d d #
@@ -849,7 +921,8 @@ You might expect that you could do it this way:
 
     Alt+R -> rotcw 2e rotcw 2s
 
-But because the second `rotcw` only applies to Working bucket B, we end up with this:
+But because the second `rotcw` only applies to Working bucket B, we end up with
+this:
 
     d d d . d d
     d . . . . d
@@ -878,28 +951,38 @@ symmetrical mirror image of A) below (south of) it.
     d d . d d d   }
     -----------
 
-Voila.
+Voila. 
 
-For extra credit: how would you reverse the above transformation sequence to proceed
-in a counterclockwise fashion?
+Formula for the whirlpool pattern: 
+
+    Alt+R -> rotcw 2e fliph flipv 2s
+
+This effect can be trivially made larger. Try these and compare the results:
+
+    Alt+R -> rotcw 2e fliph flipv 2s 2e 2s
+
+    Alt+R -> 2e 2s rotcw 2e fliph flipv 2s
+
+For extra credit: how would you reverse the whirlpool pattern to proceed in a
+counterclockwise fashion?
 
 
-Advanced transformations: multiple Z-levels
+Advanced transformations: multiple Z-levels              {#multileveltransforms}
 -------------------------------------------
 
-Z-level repetitions are treated as a special case in Quickfort. When included in the
-transformation sequence, they are always executed last. Thus the following produce
-identical results:
+Z-level repetitions are treated as a special case in Quickfort. When included in
+the transformation sequence, they are always executed last. Thus the following
+produce identical results:
 
     Alt+R -> rotcw 2e 2s 10d
     Alt+R -> 10d rotcw 2e 2s
 
-Z-level repetitions may be used in conjunction with multi-z-level blueprints. See
-`Blueprints/Examples/screw-pump-tower-*.csv` for an example.
+Z-level repetitions may be used in conjunction with multi-z-level blueprints.
+See `Blueprints/Examples/screw-pump-tower-*.csv` for an example.
 
 
-Advanced transformations: the ! command
---------------------------------------
+Advanced transformations: the ! command                           {#bangcommand}
+---------------------------------------
 
 Normally transformations only apply to Working bucket B, leaving Memory bucket
 A untouched. Sometimes you may want to have what is in bucket B copied to
@@ -927,16 +1010,24 @@ Compare the output of the two transformation sequences below:
     i . d i . d
     ------------
 
-In the second example, we copied B to A *after* rotating B, but *before* repeating A+B 2e. We're essentially using the `!` command to "pre-rotate" A before we perform our repetition.
+In the second example, we copied B to A *after* rotating B, but *before*
+repeating 2e. We're essentially using the `!` command to "pre-rotate" A
+before we perform our repetition.
 
-Generally speaking, the `!` command can be thought of as a transformation sequence separator. `rotcw ! 2e` is the same as executing sequence `rotcw`, taking the result of that sequence from bucket B and copying it to A, then executing the sequence `2e` against A and B (which are identical after the `!` operation).
+Generally speaking, the `!` command can be thought of as a transformation
+sequence separator. `rotcw ! 2e` is the same as executing the sequence `rotcw`,
+then executing a separate sequence `2e` on the `rotcw` transformation's result.
+
+    Alt+R -> rotcw 2e: rotate B, then repeat AB twice east
+    Alt+R -> rotcw ! 2e: rotate the blueprint, then repeat it twice east
 
 
-Advanced transformations: debugging
+Advanced transformations: debugging                                 {#debugging}
 -----------------------------------
 
-By running `qfconvert.exe` or `qfconvert.py` from the command line, you can see the progression
-of a particular transformation sequence and the contents of buckets A and B after each step:
+By running `qfconvert.exe` or `qfconvert.py` from the command line, you can see
+the progression of a particular transformation sequence and the contents of
+buckets A and B after each step:
 
     > qfconvert.exe blueprints/Tests/transform-test.xls --mode=key --transform="rotcw 2e fliph flipv 2s" --show-transforms
 
@@ -944,16 +1035,17 @@ or using abbreviated syntax:
 
     > qfconvert.exe blueprints/Tests/transform-test.xls -mkey -t "rotcw 2e fliph flipv 2s" -X
 
-The use of `--mode=key` is just to avoid being spammed with DF-macro output (very verbose).
+The use of `--mode=key` is just to avoid being spammed with DF-macro output
+(very verbose).
 
 
-Stupid dwarf tricks
+Stupid dwarf tricks                                         {#stupiddwarftricks}
 -------------------
 
 Dig a 2x2 column of up/down stairs deep into the earth:
 
-    Alt+T -> dig i,i
-    Alt+R -> 2s 100d
+    Alt+T -> dig i(2x2)
+    Alt+R -> 100d
 
 Undesignate a large chunk of the map on multiple z-levels:
 
@@ -961,7 +1053,7 @@ Undesignate a large chunk of the map on multiple z-levels:
     Alt+R -> 10d
 
 
-Troubleshooting
+Troubleshooting                                               {#troubleshooting}
 ---------------
 
 * Always check QF's mousetip instructions before hitting Alt+D to begin a
@@ -979,26 +1071,26 @@ Troubleshooting
 * QF2 has no way of detecting when you run out of building materials during build
   mode. To compensate, QF2 sends (Shift+Enter, Down) repeatedly, and more often
   for larger size designations, to try and ensure that if we run out of a particular
-  kind of mat we select from the other available mats.
+  kind of mat we try to select from the other available mats.
 
   Some micromanagement of stockpile location or temporarily forbidding unwanted
-  materials can help here. Plan ahead.
+  materials can help here.
 
 * If a #build blueprint goes off the rails due to e.g. lack of mats, you
   can use the secret Alt+X hotkey while in DF's q menu. This causes QF to send x 30 
   times to DF - an easy way to remove a large region of buildings quickly.
 
 * Objects such as screw pumps and towers take special consideration in QF-based
-  construction. See the screw pump tower examples. For placing large areas of
-  flooring for towers, consider using instructions like Cf(10x10). QF doesn't
-  account for what needs to be built in what order. Setting up multiple 
-  phases as separate worksheets/blueprints may help.
+  construction. See the `Blueprints/Examples/screw-pump-tower-*.csv` examples.
+  For placing large areas of flooring for towers, consider using instructions
+  like `Cf(10x10)`. QF doesn't account for what needs to be built in what order.
+  Setting up multiple phases as separate worksheets/blueprints may help.
 
-* Avoid running QF too close to the edges of the map; the outermost tiles are
-  unbuildable and can seriously hose a blueprint playback.
+* Avoid running QF too close to the edges of the map; the outermost tiles of the
+  map are unbuildable and can seriously derail a QF designation.
 
 
-Create an Excel macro to size all columns to a uniform narrow width
+Create an Excel macro to size all columns to a uniform narrow width    {#excel1}
 -------------------------------------------------------------------
 
 This tip can help when working with a lot of files.
@@ -1021,7 +1113,7 @@ We'll create a new Ctrl+T hotkey in your local Excel installation:
 Now, hit Ctrl+T in Excel at any time to size all columns of the current sheet to
 a 2 unit width.
 
-Other Excel tips
+Other Excel tips                                                       {#excel2}
 ----------------
 
 * Save your work in XLS or XLSX file formats. Unlike CSV files, XLS/X files will
@@ -1043,7 +1135,7 @@ Other Excel tips
   are used in QF. For example, if Excel reports 9R x 4C, you would want to
   enter something like f(4x9) in your file.
 
-Links
+Links                                                                   {#links}
 -----
 
 ### Quickfort official links ###
@@ -1078,7 +1170,8 @@ The following tools convert image files (e.g. BMP) into Quickfort CSV files.
 
 ### Similar utilities to Quickfort ###
 
-The following tools work similarly to Quickfort, operating on CSV blueprint files.
+The following tools work similarly to Quickfort, operating on CSV blueprint
+files.
 
 * LinDesignator: http://www.bay12forums.com/smf/index.php?topic=36928.0
 * designator.ahk: http://www.bay12games.com/forum/index.php?topic=1428.0
@@ -1086,7 +1179,7 @@ The following tools work similarly to Quickfort, operating on CSV blueprint file
 If you look hard you can still find a few remnants of designator.ahk in the
 latest Quickfort.ahk source file!
 
-Todo/Future Ideas
+Todo/Future Ideas                                                        {#todo}
 -----------------
 
 
@@ -1103,10 +1196,13 @@ Todo/Future Ideas
   Excel-like GUI)
 * Undesignate feature that undesignates based on a specific blueprint
 
-<a name="changelog"/>
+
+Changelog                                                           {#changelog}
 ---------
-Changelog
----------
+
+### 2.00 (2011 June 21) ###
+
+* Updated documentation (readme.txt) covering all new 2.00 features.
 
 ### 2.00pre5 (2011 June 19) ###
 
@@ -1281,3 +1377,35 @@ Changelog
 ### 1.0 ###
 
 * Initial release
+
+
+Credits and License                                                   {#license}
+-------------------
+
+Quickfort is written by joelpt <quickfort@joelpt.net>.
+
+Thanks to the following individuals whose bug-hunting, feature-requesting, or
+code-writing resulted in improvements to Quickfort:
+
+    Valdemar
+    Snuffy
+    Xinael
+    Jhoosier
+    LegoLord
+    shadow_slicer
+    bakergo
+
+
+Copyright 2011 Joel Thornton
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+      http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
