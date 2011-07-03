@@ -16,7 +16,7 @@ BUILD_TYPE_CFG = {
     'build': {
         'init': ['^'],
         'completed': ['O'], # build dirt road to allow cursor repositioning
-        'designate': 'exitmenu menu cmd moveto setsize & % # %'.split(),
+        'designate': 'exitmenu menu cmd moveto setsize & % @ %'.split(),
         'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
         'submenukeys': ['i', 'w', 'e', 'C', 'T', 'M'],
@@ -34,8 +34,13 @@ BUILD_TYPE_CFG = {
                           'setmats': 'setmats'
                         },
 
-            # un/paved roads and bridges
-            r'o|O|g':   { 'sizebounds': (1, 10, 1, 10) },
+            # paved roads and bridges
+            r'o|g':   { 'sizebounds': (1, 10, 1, 10) },
+
+            # unpaved roads
+            r'O':       { 'sizebounds': (1, 10, 1, 10),
+                          'designate': 'exitmenu menu cmd moveto setsize &'.split()
+                        },
 
             # 5x5 siege workshop
             r'ws':      { 'sizebounds': (5, 5, 5, 5),
@@ -43,7 +48,7 @@ BUILD_TYPE_CFG = {
                         },
 
             # metalsmith forge, magma forge
-            r'w[fv]':   { 'designate': 'exitmenu menu cmd moveto setsize & % & % # %'.split(),
+            r'w[fv]':   { 'designate': 'exitmenu menu cmd moveto setsize & % & % @ %'.split(),
                           'sizebounds': (3, 3, 3, 3),
                           'setsize': 'setsize_fixed'
                         },
@@ -54,7 +59,7 @@ BUILD_TYPE_CFG = {
                         },
 
             # trade depot
-            r'D':       { 'designate': 'exitmenu cmd moveto setsize & % & % # %'.split(),
+            r'D':       { 'designate': 'exitmenu cmd moveto setsize & % & % @ %'.split(),
                           'sizebounds': (5, 5, 5, 5),
                           'setsize': 'setsize_fixed'
                         },
@@ -88,7 +93,7 @@ BUILD_TYPE_CFG = {
         'samecmd': ['cmd'],
         'diffcmd': ['cmd'],
         'submenukeys': '',
-        'sizebounds': None,
+        'sizebounds': (1, 1, 1, 1), # only ever operate on one cell at a time
         'custom': None,
         'setsize': 'setsize_standard'
     }

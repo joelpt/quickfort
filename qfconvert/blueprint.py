@@ -116,6 +116,9 @@ def convert_blueprint(layers, details, options):
 
     layers = FileLayers_to_GridLayers(layers)
 
+    if not layers: # empty blueprint handling
+        raise Exception, "Blueprint appears to be empty."
+
     # override starting position if startpos command line option was given
     if options.startpos is not None:
         details.start = parse_startpos(options.startpos,

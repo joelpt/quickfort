@@ -5,7 +5,7 @@
         ],
         "init": null,
         "submenukeys": "",
-        "sizebounds": null,
+        "sizebounds": [1, 1, 1, 1],
         "completed": null,
         "custom": null,
         "setsize": "setsize_standard",
@@ -167,14 +167,13 @@
                     "%"
                 ]
             },
-            "o|O|g": {
-                "sizebounds": [
-                    1,
-                    10,
-                    1,
-                    10
-                ]
-            },
+
+            "o|g":  { "sizebounds": [1, 10, 1, 10] },
+
+            "O":    { "sizebounds": [1, 10, 1, 10],
+                      "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&"]
+                    },
+
             "Mh": {
                 "sizebounds": [
                     1,

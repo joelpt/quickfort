@@ -1,4 +1,4 @@
-Quickfort 2.00
+Quickfort 2.01
 ==============
 by joelpt <quickfort@joelpt.net>
 
@@ -1183,6 +1183,7 @@ files.
 If you look hard you can still find a few remnants of designator.ahk in the
 latest Quickfort.ahk source file!
 
+
 Todo/Future Ideas                                                        {#todo}
 -----------------
 
@@ -1204,14 +1205,16 @@ Todo/Future Ideas                                                        {#todo}
 Changelog                                                           {#changelog}
 ---------
 
-### 2.01 (2011 June 21) ###
+### 2.01 (2011 July 3) ###
 
 * Added Alt+N "save named macro" function to QF GUI (Root Infinity)
-* Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
-  instead of the top, to avoid interfering with user-created macros
-* Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
-* readme.txt improvements (Thundercraft)
 * Set keys used by QF GUI for DF macro playback via options.txt (kurzedmetal)
+* Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
+  instead of the top, and include helpful titles
+* Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
+* qfconvert.py/exe will now find its config/ files regardless of working dir
+* readme.txt improvements (Thundercraft)
+* blueprints/Tests/*.csv fixups (Akylon)
 
 ### 2.00 (2011 June 21) ###
 
@@ -1400,13 +1403,12 @@ Quickfort is written by joelpt <quickfort@joelpt.net>.
 Thanks to the following individuals whose code contributions are present
 in Quickfort:
 
-  bakergo (proper CSV file parsing)
-  Valdemar (author of designator.ahk, which QF 1.00 was based on)
+    bakergo (proper CSV file parsing)
+    Valdemar (author of designator.ahk, which QF 1.00 was based on)
 
 Thanks to the following individuals whose bug-hunting or feature-requesting
 resulted in improvements to Quickfort:
 
-    Valdemar
     Snuffy
     Xinael
     Jhoosier
@@ -1416,6 +1418,7 @@ resulted in improvements to Quickfort:
     Root Infinity
     Thundercraft
     kurzedmetal
+    Akylon
 
 Copyright 2011 Joel Thornton
 

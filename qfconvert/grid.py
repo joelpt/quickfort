@@ -325,7 +325,7 @@ class Grid:
         rowstrings += [
             colsep.join(
                 ['' if not annotate else str(int(str(n + 1)[-1]) % 10) + '|'] +
-                ['.' if c.command == '' else c.command[-1] for c in row]) + '|' 
+                ['.' if c.command == '' else c.command[0] for c in row]) + '|' 
             for n, row in enumerate(rows)
         ]
 
