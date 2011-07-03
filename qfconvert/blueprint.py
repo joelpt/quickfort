@@ -1,7 +1,10 @@
 """Blueprint class and associated processing functions."""
 
+import os
 import re
 import textwrap
+
+import exetest
 
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
@@ -91,7 +94,9 @@ def convert_blueprint(layers, details, options):
         print ">>>> BEGIN CONVERSION"
 
     # apply aliases.txt to blueprint contents
-    aliases = load_aliases('config/aliases.txt')
+    aliases = load_aliases(
+        os.path.join(exetest.get_main_dir(), 'config/aliases.txt'))
+
     layers = apply_aliases(layers, aliases)
 
     # transform the blueprint

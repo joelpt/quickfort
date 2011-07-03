@@ -12,7 +12,7 @@ import exetest
 import util
 
 # load global KEY_LIST which is used liberally below and would be inefficient to constantly reload
-KEY_LIST = load_json("config/keys.json")
+KEY_LIST = load_json(os.path.join(exetest.get_main_dir(), "config/keys.json"))
 
 class Keystroker:
     """

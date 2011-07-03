@@ -1,9 +1,13 @@
-from filereader import load_json
+import os
 import re
+
+import exetest
+from filereader import load_json
 
 # load global BUILD_TYPE_CFG which is used liberally below
 # and would be inefficient to constantly reload
-BUILD_TYPE_CFG = load_json("config/buildconfig.json")
+BUILD_TYPE_CFG = load_json(
+    os.path.join(exetest.get_main_dir(), "config/buildconfig.json"))
 
 
 class BuildConfig:
