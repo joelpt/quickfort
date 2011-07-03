@@ -1,4 +1,6 @@
-#dig Basic 10w x 5h dig test,,,,
-d,d,d,d,d
-d,r,d,d,d
-d,d,d,d,d
+#dig Basic 10w x 5h dig test with multiple types of designation,,,,,,,,,
+r,r,r,r,r,r,r,r,r,r
+r,d,d,i,d,d,i,d,d,r
+r,i,i,i,i,i,i,i,i,r
+r,d,d,i,d,d,i,d,d,r
+r,r,r,r,r,r,r,r,r,r

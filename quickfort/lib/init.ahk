@@ -27,6 +27,7 @@ Init()
   SelectedFilename := ""
   SelectedSheetIndex =
   SelectedFolder := ""
+  SelectedModifiedOn =
   CommandLineMode := False
   CommandLineFile =
   StartPos := ""
@@ -37,7 +38,9 @@ Init()
   ShowFullTip := 1
   LastSendKeys =
   LastMacroWasPlayed := false
-  
+  LaunchedOn := A_Now
+  LaunchedTickCount := A_TickCount
+
   ; Init saved gui state
   LoadAppState()
 

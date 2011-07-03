@@ -9,8 +9,34 @@ ConvertAndPlayMacro()
   global
   local title, starttime, elapsed, destfile
 
-  title := GetRandomFileName() . "-" . (CommandLineMode ? EvalMode "-cmd" : BuildType%SelectedSheetIndex% "-" SubStr(SelectedFilename, 1, 24))
+  ; construct a somewhat useful title for the macro
+  if (CommandLineMode)
+  {
+    title := EvalMode "-cmd" 
+  }
+  else
+  {
+    title := ""
+    buildType := BuildType%SelectedSheetIndex%
+    sheetName := Name%SelectedSheetIndex%
+    if (sheetName && sheetName != SelectedFilename)
+    {
+      if (buildType != SubStr(sheetName, 1, StrLen(buildType)))
+      {
+        title := title . buildType . "-"
+      }
 
+      title := title . RegExReplace(RegExReplace(Name%SelectedSheetIndex% , "[^\w\(\)]", "-"), "-{2,}", "-")
+    }
+    else
+    {
+      title := title . buildType 
+    }
+    title := title . "-" . SelectedFilename
+  }
+
+  title := GetRandomFileName() "-" SubStr(title, 1, 30)  
+  
   ; Clock how long it takes
   starttime := A_TickCount
 

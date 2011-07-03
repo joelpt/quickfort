@@ -288,12 +288,27 @@ $!D::
   {
     Building := True
     Tip("Building...")
+
+    ;; Check if file was modified before testing if we can replay last macro played
+    if (!CommandLineMode && SelectedModifiedOn)
+    {
+      FileGetTime, currentModifiedOn, %SelectedFile%, M
+      if (SelectedModifiedOn != currentModifiedOn)
+      {
+        LastMacroWasPlayed := false
+        LastSendKeys := false
+        SelectedModifiedOn := currentModifiedOn
+      }
+    }
+
+    ;; initiate playback based on PlaybackMode and whether we can just replay
+    ;; the last macro/keys
     if (PlaybackMode == "macro")
     {
       if (LastMacroWasPlayed)
       {
         ; just play the last played macro
-        SendKeys("^p") 
+        Send %KeyMacroPlay%
       }
       else
       {
@@ -310,7 +325,7 @@ $!D::
     }
 
     If (RepeatPattern)
-      LastRepeatPattern := RepeatPattern ; remembered for transform GUI default
+      LastRepeatPattern := RepeatPattern ; remembered for transform GUI's default
 
     Building := False
     ClearTip()

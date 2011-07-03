@@ -62,11 +62,13 @@ SetVarsByBuildType(buildtype)
 ;; Set global variables which are dependent on the current filepath
 SetSelectedFile(filepath)
 {
-  global SelectedFile, SelectedSheetIndex, SelectedFilename, SelectedFolder
+  global SelectedFile, SelectedSheetIndex, SelectedFilename, SelectedFolder, SelectedModifiedOn
   
   SelectedFile := filepath
   SelectedSheetIndex =
 
   ; split filename up into parts we use elsewhere
   SplitPath, SelectedFile, SelectedFilename, SelectedFolder
+
+  FileGetTime, SelectedModifiedOn, %SelectedFile%, M
 }

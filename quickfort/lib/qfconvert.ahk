@@ -60,12 +60,27 @@ ExecQfconvert(infile, outfile, params)
 ;; ---------------------------------------------------------------------------
 GetRandomFileName()
 {
-  ; We use macro names that should always go in increasing sort order in DF's UI
-  ; (between reboots); and we always delete our macros after use. However DF doesn't
+  ; We use macro names that should always go in increasing sort order in DF's UI.
+  ; This is done by recording the datetime in local timezone and current tick
+  ; count when QF launches, then whenever this method is called we compute
+  ; the delta in the tick count from launch and add that amount of time to the
+  ; remembered launch datetime. This helps ensure that if the machine date/time
+  ; changes while QF is running we won't start getting out-of-order entries
+  ; in the DF macro menu.
+  
+  ; We always delete our macros after use. However DF doesn't
   ; update its macro list when macros are deleted; thus the desire to have our new
   ; macro always be sorted to the top item in DF's macro list. It allows QF to just
   ; use Ctrl+L, Up, Enter to select the last macro in the list, which should always
   ; be our just-created macro due to this naming methodology.
-  title = ~qf%A_TickCount%
+
+  global LaunchedOn, LaunchedTickCount
+  
+  elapsedMS := A_TickCount - LaunchedTickCount
+  elapsedSec := elapsedMS / 1000
+  newDate := LaunchedOn
+  EnvAdd, newDate, %elapsedSec%, Seconds
+  dateStr := SubStr(newDate, 3, 14)
+  title = ~qf%dateStr% ;%A_MSec% <-- not needed; we'll never do 2 in 1 second
   return title
 }

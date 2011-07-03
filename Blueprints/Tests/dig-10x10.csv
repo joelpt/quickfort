@@ -1,16 +1,11 @@
-#dig Basic 15x15 dig test,,,,,,,,,,,,,,
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
-d,d,d,d,d,d,d,d,d,d,d,d,d,d,d
+#dig Basic 10x10 dig test,,,,,,,,,
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
+d,d,d,d,d,d,d,d,d,d
