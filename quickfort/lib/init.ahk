@@ -165,5 +165,5 @@ SaveAppState()
 ;; Clean up old temp files
 CleanUpTempFiles()
 {
-  FileDelete, %A_ScriptDir%\@qf*.*
+  FileDelete, %A_ScriptDir%\~qf*.*
 }

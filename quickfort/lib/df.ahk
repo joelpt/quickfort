@@ -7,16 +7,16 @@ PlayMacro(delay)
 {
   if (delay < 500)
     delay := 500
-  else if (delay > 5000)
-    delay := 5000
+  else if (delay > 10000)
+    delay := 10000
 
   ActivateGameWin()
   ReleaseModifierKeys()
-  Send ^l
+  Send ^l{Up} ;; show load macro menu and highlight last macro in the list
   Sleep 1000
-  Send {Enter}
+  Send {Enter} ;; select macro
   Sleep %delay%
-  Send ^p
+  Send ^p ;; play it after delay
   return
 }
 

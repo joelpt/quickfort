@@ -7,40 +7,15 @@
 ConvertAndPlayMacro()
 {
   global
-  local title, outfile, dfpath, destfile, starttime, result
+  local title, starttime, elapsed, destfile
 
-  title := GetRandomFileName()
-  outfile := A_ScriptDir "\" title ".mak"
-  ActivateGameWin()
-  dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
-  SplitPath, dfpath, , dfpath
-  destfile := dfpath "\data\init\macros\" title ".mak"
+  title := GetRandomFileName() . "-" . (CommandLineMode ? EvalMode "-cmd" : BuildType%SelectedSheetIndex% "-" SubStr(SelectedFilename, 1, 24))
 
   ; Clock how long it takes
   starttime := A_TickCount
 
-  if (CommandLineMode)
-  {
-    result := ConvertBlueprint(CommandLineFile, outfile, 1, "macro", title, StartPos, RepeatPattern, false)
-  }
-  else
-  {
-    result := ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "macro", title, StartPos, RepeatPattern, false)
-  }
-
-  if (!result)
-  {
-    MsgBox, Error: ConvertBlueprint() returned false
-    return false
-  }
-  
-  ; Move to DF dir
-  FileMove, %outfile%, %destfile%, 1
-  if (ErrorLevel > 0)
-  {
-    MsgBox, Error: Could not move macro file`nFrom: %outfile%`nTo: %destfile%
-    return false
-  }
+  ; convert and save
+  destfile := ConvertAndSaveMacro(title)
 
   ; measure elapsed time for run
   elapsed := A_TickCount - starttime
@@ -57,8 +32,51 @@ ConvertAndPlayMacro()
   LastMacroWasPlayed := true
 
   FileDelete, %destfile%
-  FileDelete, %outfile%
+
   return true
+}
+
+
+;; ---------------------------------------------------------------------------
+;; convert blueprint to specification, then place the output macro file
+;; in the DF macros dir with the specified title. Returns the path
+;; to the file in its final location.
+ConvertAndSaveMacro(title)
+{
+  global
+  local outfile, dfpath, destfile, result
+
+  outfile := A_ScriptDir "\" title ".mak"
+  ActivateGameWin() ; TODO try to get dfpath without focusing the game window
+  dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
+  SplitPath, dfpath, , dfpath
+  destfile := dfpath "\data\init\macros\" title ".mak"
+
+
+  if (CommandLineMode)
+  {
+    result := ConvertBlueprint(CommandLineFile, outfile, 1, "macro", title, StartPos, RepeatPattern, false)
+  }
+  else
+  {
+    result := ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "macro", title, StartPos, RepeatPattern, false)
+  }
+
+  if (!result)
+  {
+    MsgBox, Error: ConvertBlueprint() returned false
+    return -1
+  }
+  
+  ; Move to DF dir
+  FileMove, %outfile%, %destfile%, 1
+  if (ErrorLevel > 0)
+  {
+    MsgBox, Error: Could not move macro file`nFrom: %outfile%`nTo: %destfile%
+    return -1
+  }
+
+  return destfile
 }
 
 

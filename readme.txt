@@ -1201,6 +1201,13 @@ Todo/Future Ideas                                                        {#todo}
 Changelog                                                           {#changelog}
 ---------
 
+### 2.01 (2011 June 21) ###
+
+* Added Alt+N "save named macro" function to QF GUI.
+* Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
+  instead of the top, to avoid interfering with user-created macros.
+* Single-line QF command support for qfconvert.py via --command="dig d,d#d,d".
+
 ### 2.00 (2011 June 21) ###
 
 * Updated documentation (readme.txt) covering all new 2.00 features.
@@ -1396,6 +1403,7 @@ code-writing resulted in improvements to Quickfort:
     shadow_slicer
     bakergo
     starrrie
+    Root Infinity
     
 
 Copyright 2011 Joel Thornton

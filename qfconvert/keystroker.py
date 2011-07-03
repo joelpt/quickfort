@@ -321,7 +321,7 @@ def convert_to_macro(keycodes, title):
         os.path.join(exetest.get_main_dir(), 'config/interface.txt') )
 
     if not title: # make up a macro title if one is not provided to us
-        title = '@qf' + str(random.randrange(0, 999999999))
+        title = '~qf' + str(random.randrange(0, 999999999))
 
     output = [title] # first line of macro is macro title
 

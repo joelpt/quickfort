@@ -60,12 +60,12 @@ ExecQfconvert(infile, outfile, params)
 ;; ---------------------------------------------------------------------------
 GetRandomFileName()
 {
-  ; We use macro names that should always go in decreasing sort order in DF's UI
+  ; We use macro names that should always go in increasing sort order in DF's UI
   ; (between reboots); and we always delete our macros after use. However DF doesn't
   ; update its macro list when macros are deleted; thus the desire to have our new
   ; macro always be sorted to the top item in DF's macro list. It allows QF to just
-  ; use Ctrl+L, Enter to select our just-created macro.
-  inverseticks := 4294967296 - A_TickCount
-  title = @qf%inverseticks%
+  ; use Ctrl+L, Up, Enter to select the last macro in the list, which should always
+  ; be our just-created macro due to this naming methodology.
+  title = ~qf%A_TickCount%
   return title
 }

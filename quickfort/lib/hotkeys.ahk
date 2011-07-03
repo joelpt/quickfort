@@ -190,17 +190,19 @@ Examples:
   4e -- make a row of the blueprint repeated 4 times going east
   3e 3s -- 3x3 repeating pattern of blueprint
   5e 5s 5d -- 5x5x5 cube of blueprint (multi z level)
-  fliph -- flip the blueprint horizontally
   rotcw -- rotate the blueprint clockwise 90 degrees
+  fliph -- flip the blueprint horizontally
   fliph 2e flipv 2s -- 2x2 symmetrical pattern of blueprint
   rotcw 2e flipv fliph 2s -- 2x2 rotated around a center point
   rotcw valign=top 2e -- after rotating, top-align and repeat 2e
   rotcw ! 2e -- rotate original blueprint, then repeat that 2x east
   valign=m halign=m rotcw 2e flipv fliph 2s 2e 2s 2d -- big example
 
+Read the Quickfort user manual for more details.
+
 Enter transformation pattern below.
       )
-      InputBox, pattern, Transform blueprint, %msg%, , 440, 480, , , , , %LastRepeatPattern%
+      InputBox, pattern, Transform blueprint, %msg%, , 440, 520, , , , , %LastRepeatPattern%
       ActivateGameWin()
     }
 
@@ -289,6 +291,35 @@ $!D::
     Building := False
     ClearTip()
   }
+  return
+}
+
+
+;; ---------------------------------------------------------------------------
+;; Save named macro (Alt+N)
+$!N::
+{
+  if (Building || !ReadyToBuild)
+  {
+    return
+  }
+  
+  if (PlaybackMode != "macro")
+  {
+    MsgBox, Alt+N only works in macro output mode. Use Alt+K to change output modes.
+    return
+  }
+
+  InputBox, title, Save named macro, Specify a name for the new macro., , , 130
+
+  if (ErrorLevel || !title) ;; user clicked cancel or entered nothing
+  {
+    return
+  }
+
+  ConvertAndSaveMacro(title)
+  MsgBox, Saved macro as '%title%' in DF macros folder.
+  
   return
 }
 

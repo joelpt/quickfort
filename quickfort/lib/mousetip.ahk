@@ -148,7 +148,8 @@ UpdateTip()
             . "`n"
             . "Alt+F/E picks a new file/sheet.`n"
             . "Alt+T for command line.`n"
-            . "Alt+K sets mode [now: " PlaybackMode "]`n"
+            . (PlaybackMode == "macro" ? "Alt+N saves named macro.`n" : "")
+            . "Alt+K sets mode [now: " PlaybackMode "].`n"
             . "Alt+M for minitip, Alt+H to hide tip."
       }
       else
