@@ -18,3 +18,4 @@ glob:quickfort/release/*
 glob:qfconvert/test.csv
 glob:qfconvert/trash
 glob:quickfort_stx.sublime-project
+glob:quickfort/config/state.ini
