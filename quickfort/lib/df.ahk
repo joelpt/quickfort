@@ -5,6 +5,8 @@
 ;; execute macro by sending keys to DF window
 PlayMacro(delay)
 {
+  global KeyMacroLoad, KeyMacroHighlightLastMacro, KeyMacroSelectMacro, KeyMacroPlay
+
   if (delay < 500)
     delay := 500
   else if (delay > 10000)
@@ -12,11 +14,14 @@ PlayMacro(delay)
 
   ActivateGameWin()
   ReleaseModifierKeys()
-  Send ^l{Up} ;; show load macro menu and highlight last macro in the list
-  Sleep 1000
-  Send {Enter} ;; select macro
+  
+  Send %KeyMacroLoad% ;; show load macro menu
+  Sleep 250
+  Send %KeyMacroHighlightLastMacro%  ;; highlight last macro in the list
+  Sleep 750
+  Send %KeyMacroSelectMacro% ;; select macro
   Sleep %delay%
-  Send ^p ;; play it after delay
+  Send %KeyMacroPlay% ;; play it after delay
   return
 }
 

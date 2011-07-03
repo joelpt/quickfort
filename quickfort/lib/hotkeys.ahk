@@ -1,8 +1,49 @@
 ;; Hotkey definitions.
 
 ;; ---------------------------------------------------------------------------
+;; Dynamically a few hotkeys that are controlled through options.txt
+InitHotkeys()
+{
+  global KeyMacroPlay, KeyMacroLoad, KeyMacroSave, KeyMacroRecord
+
+  Hotkey, IfWinActive, Dwarf Fortress
+
+  ; $ means don't catch this key if we generate it
+  Hotkey, $%KeyMacroPlay%, MacroPlayKeyPressed, On 
+  
+  ; ~ means don't eat this key if pressed (let them pass through to the DF window)
+  Hotkey, ~%KeyMacroLoad%, MacroKeyPressed, On
+  Hotkey, ~%KeyMacroSave%, MacroKeyPressed, On
+  Hotkey, ~%KeyMacroRecord%, MacroKeyPressed, On
+  
+  return
+}
+
+
+;; ---------------------------------------------------------------------------
+;; Intercept Ctrl-P command to DF and send it ourselves. If sent manually, for large
+;; macros it causes DF to repeat the macro twice with a single Ctrl-P press.
+;; QF can send a single Ctrl-P that will not cause DF to repeat the macro.
+MacroPlayKeyPressed:
+{
+  ReleaseModifierKeys()
+  Send %KeyMacroPlay%
+  LastMacroWasPlayed := false
+  return
+}
+
+;; ---------------------------------------------------------------------------
+;; Detect use of Ctrl+S/L/R and reset LastMacroWasPlayed when it happens
+MacroKeyPressed:
+{
+  LastMacroWasPlayed := false
+  return
+}
+
+;; ---------------------------------------------------------------------------
 ;; Toggle suspend of the script (Shift-Alt-Z) while also letting it pass
 ;; through to OS
+#IfWinActive ; any window not just DF
 ~$+!Z::
   Suspend, Permit
   if (A_IsSuspended) {
@@ -23,23 +64,6 @@
 
 ;; ---------- remaining commands only work when DF window is active ----------
 #IfWinActive Dwarf Fortress
-
-;; ---------------------------------------------------------------------------
-;; Intercept Ctrl-P command to DF and send it ourselves. If sent manually, for large
-;; macros it causes DF to repeat the macro twice with a single Ctrl-P press.
-;; QF can send a single Ctrl-P that will not cause DF to repeat the macro.
-$^p:: 
-  Send ^p
-  LastMacroWasPlayed := false
-  return
-
-;; ---------------------------------------------------------------------------
-;; Detect use of Ctrl+S/L/R and reset LastMacroWasPlayed when it happens
-~^L:: 
-~^S::
-~^R::
-  LastMacroWasPlayed := false
-  return
 
 ;; ---------------------------------------------------------------------------
 ;; Exit the script (Shift-Alt-X)

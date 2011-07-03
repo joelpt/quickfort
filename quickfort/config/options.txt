@@ -25,6 +25,15 @@ KeyExitMenu = {Esc}
 # DF v0.28.181.40d and earlier: use {Space} to exit menus.
 #KeyExitMenu = {Space}
 
+# The following keybinds are used to get Dwarf Fortress to play
+# macros. Syntax: http://www.autohotkey.com/docs/commands/Send.htm
+KeyMacroLoad = ^l
+KeyMacroHighlightLastMacro = {Up}
+KeyMacroSelectMacro = {Enter}
+KeyMacroPlay = ^p
+KeyMacroRecord = ^r
+KeyMacroSave = ^s
+
 
 #----------------------------
 # Quickfort GUI options

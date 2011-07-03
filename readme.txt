@@ -14,9 +14,10 @@ stockpiles, and making adjustments).
 Original idea and initial codebase from Valdemar's designator.ahk script
 <http://www.bay12games.com/forum/index.php?topic=1428.0>.
 
-User contributed blueprints can be found at
-<http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/>. See the 
-[Links section](#links) for more.
+User contributed blueprints can be found [here](http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/) 
+or in [one RAR file](http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar).
+
+See the [Links section](#links) for various tools that work with Quickfort.
 
 
 Table of Contents
@@ -61,10 +62,12 @@ Features                                                             {#features}
 
 * Design complete blueprints to handle 4 main phases of DF construction
 * .CSV and multi-worksheet .XLS/.XLSX blueprint files supported
+* Intelligent designator minimizes keystrokes needed to designate blueprints
 * Multi-Z-level blueprints
 * Blueprint transformation (rotate, flip, repeat in direction)
 * Aliases to automate frequent keystroke combos
-* Windows minimalist GUI with built-in command line mode
+* Minimalist (and optional) GUI for Windows
+* Simple "command line" entry mode in GUI
 * Win/Linux/OSX support via command line qfconvert utility (Python based)
 * DF macro- or keysending-based output methods supported
 * Assortment of sample blueprints included
@@ -134,8 +137,8 @@ relying on qfconvert for all blueprint processing and manipulation.
 A list of the shiny new bits:
 
 * Conversion engine rewritten in cross-platform Python
-* Smart designation: ~400% fewer DF commands required versus QF1.x for the
-  same tasks
+* Intelligent designator: ~25% as many DF commands required as QF1.x for the
+  same tasks (no more "typewriter" style playback)
 * DF macros support: faster, more reliable, works cross-platform
 * XLS/XLSX (Excel) workbooks support makes it easy to bundle multi-phase 
   blueprints
@@ -1147,7 +1150,7 @@ Links                                                                   {#links}
 
 ### Quickfort community submitted blueprints ###
 
-* http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints.rar/
+* http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar
 * http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/
 
 ### Visual designers for Quickfort ###
@@ -1203,10 +1206,12 @@ Changelog                                                           {#changelog}
 
 ### 2.01 (2011 June 21) ###
 
-* Added Alt+N "save named macro" function to QF GUI.
+* Added Alt+N "save named macro" function to QF GUI (Root Infinity)
 * Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
-  instead of the top, to avoid interfering with user-created macros.
-* Single-line QF command support for qfconvert.py via --command="dig d,d#d,d".
+  instead of the top, to avoid interfering with user-created macros
+* Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
+* readme.txt improvements (Thundercraft)
+* Set keys used by QF GUI for DF macro playback via options.txt (kurzedmetal)
 
 ### 2.00 (2011 June 21) ###
 
@@ -1392,8 +1397,14 @@ Credits and License                                                   {#license}
 
 Quickfort is written by joelpt <quickfort@joelpt.net>.
 
-Thanks to the following individuals whose bug-hunting, feature-requesting, or
-code-writing resulted in improvements to Quickfort:
+Thanks to the following individuals whose code contributions are present
+in Quickfort:
+
+  bakergo (proper CSV file parsing)
+  Valdemar (author of designator.ahk, which QF 1.00 was based on)
+
+Thanks to the following individuals whose bug-hunting or feature-requesting
+resulted in improvements to Quickfort:
 
     Valdemar
     Snuffy
@@ -1401,10 +1412,10 @@ code-writing resulted in improvements to Quickfort:
     Jhoosier
     LegoLord
     shadow_slicer
-    bakergo
     starrrie
     Root Infinity
-    
+    Thundercraft
+    kurzedmetal
 
 Copyright 2011 Joel Thornton
 

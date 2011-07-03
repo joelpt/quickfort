@@ -41,6 +41,9 @@ Init()
   ; Init saved gui state
   LoadAppState()
 
+  ; Init hotkeys
+  InitHotkeys()
+  
   ; Init mousetip
   InitMouseTip()
 
@@ -84,6 +87,13 @@ SetDefaultOptions()
   ShowMouseTooltip := 1
   EnableSafetyAbort := 1
   MouseTooltipUpdateMs := 15
+  KeyMacroLoad = ^l
+  KeyMacroHighlightLastMacro = {Up}
+  KeyMacroSelectMacro = {Enter}
+  KeyMacroPlay = ^p
+  KeyMacroRecord = ^r
+  KeyMacroSave = ^s
+
   return
 }
 
