@@ -5,7 +5,7 @@ import textwrap
 
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
-from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_file
+from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_file, parse_command
 from geometry import Point, Direction
 from grid import GridLayer, Grid
 from keystroker import Keystroker, convert_keys
@@ -38,8 +38,7 @@ def get_blueprint_info(path):
 
 def process_blueprint_file(path, options):
     """
-    Main routine for reading a blueprint, transforming it, and rendering
-    keystrokes/macros required to plot or visualize the blueprint specified.
+    Parses a blueprint file and converts it to desired output.
     """
 
     if options.debugfile:
@@ -59,6 +58,37 @@ def process_blueprint_file(path, options):
     if options.debugfile:
         print '#### Parsed %s' % path
         print FileLayer.str_layers(layers)
+        print "<<<< END INPUT FILE PARSING"
+
+    return convert_blueprint(layers, details, options)
+
+
+def process_blueprint_command(command, options):
+    """
+    Parses a QF one-line command and converts it to the desired output.
+    """
+    if options.debugfile:
+        print ">>>> BEGIN COMMAND LINE PARSING"    
+
+    layers, details = parse_command(command)
+
+    if options.debugfile:
+        print '#### Parsed %s' % command
+        print FileLayer.str_layers(layers)
+        print "<<<< END COMMAND LINE PARSING"    
+
+    return convert_blueprint(layers, details, options)
+
+
+def convert_blueprint(layers, details, options):
+    """
+    Transforms the provided layers if required by options, then renders
+    keystrokes/macros required to plot or visualize the blueprint specified
+    by layers and details and pursuant to options.
+    """
+
+    if options.debugfile:
+        print ">>>> BEGIN CONVERSION"
 
     # apply aliases.txt to blueprint contents
     aliases = load_aliases('config/aliases.txt')
@@ -90,9 +120,6 @@ def process_blueprint_file(path, options):
     # convert layers and other data to Blueprint
     bp = Blueprint('', layers, details)
 
-    if options.debugfile:
-        print "<<<< END INPUT FILE PARSING"
-
     # get keys/macrocode to outline or plot the blueprint
     if options.visualize:
         keys = bp.trace_outline(options)
@@ -100,6 +127,9 @@ def process_blueprint_file(path, options):
         keys = bp.plot(options)
 
     output = convert_keys(keys, options.mode, options.title)
+
+    if options.debugfile:
+        print "<<<< END CONVERSION"
 
     if options.debugsummary:
         print ">>>> BEGIN SUMMARY"

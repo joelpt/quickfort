@@ -156,6 +156,53 @@ def parse_file(filename, sheetid):
     return filelayers, details
 
 
+def parse_command(command):
+    """
+    Parse the given one-line QF command analogously to parse_file().
+    """
+    m = re.match(r'^\#?([bdpq]|build|dig|place|query)\s+(.+)', command)
+        
+    if m is None:
+        raise Exception, "Invalid command format '%s'." % command
+
+    # set up details object
+    details = SheetDetails()
+
+    if m.group(1) == 'd':
+        details.build_type = 'dig'
+    elif m.group(1) == 'b':
+        details.build_type = 'build'
+    elif m.group(1) == 'p':
+        details.build_type = 'place'
+    elif m.group(1) == 'q':
+        details.build_type = 'query'
+    else:
+        details.build_type = m.group(1)
+
+    details.start = Point(0, 0)
+    details.start_comment = ''
+    details.comment = ''
+
+    # break apart lines by # and cells by ,
+    lines = [[cell.strip() for cell in line.split(',')] 
+        for line 
+        in m.group(2).split('#')
+    ]
+    
+    # break up lines into z-layers separated by #> or #<
+    # TODO: actually support this properly, right now we are just
+    # calling this to do conversion to FileLayers for us
+    filelayers = split_zlayers(lines)
+
+    # tidy up the layers
+    for fl in filelayers:
+        fl.fixup()
+        fl.cleanup()
+
+    return filelayers, details
+
+
+
 def read_sheet(filename, sheetid):
     """
     Read ths specified sheet from the specified file.

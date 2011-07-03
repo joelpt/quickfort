@@ -326,6 +326,7 @@ def convert_to_macro(keycodes, title):
     output = [title] # first line of macro is macro title
 
     for key in keycodes:
+        print key
         if key == '':
             continue # empty keycode, output nothing
         elif keybinds.get(key) is None:
@@ -355,13 +356,18 @@ def split_keystring_into_keycodes(keystring):
     cmdedit = re.sub(r'\+\&', '|+&|', cmdedit)
     cmdedit = re.sub(r'\&', '|&|', cmdedit)
     cmdedit = re.sub(r'\^', '|^|', cmdedit)
+    cmdedit = re.sub(r'\+(\w)', '|1:\\1|', cmdedit)
+    cmdedit = re.sub(r'\!(\w)', '|4:\\1|', cmdedit)
     cmdedit = re.sub(r'\%wait\%', '|{wait}|', cmdedit) # support QF1.x's %wait%
     cmdsplit = re.split(r'\|+', cmdedit) # ...and split tokens at | chars.
 
     # break into individual keycodes
     codes = []
     for k in cmdsplit:
-        if k and k[0] == '{':
+        if not k:
+            continue
+
+        if k[0] == '{':
             # check for keycodes like {Right 5}
             match = re.match(r'\{(\w+) (\d+)\}', k)
             if match is None:
@@ -369,10 +375,17 @@ def split_keystring_into_keycodes(keystring):
             else:
                 # repeat the specified keycode the specified number of times
                 codes.extend(['{' + match.group(1) + '}'] * int(match.group(2)))
-        elif k and k[0] in ('&', '^', '+', '%'):
-            codes.append(k) # preserve these as individual keystrokes
-        else:
-            codes.extend(k) # separate a series of individual keystrokes
+            continue
+
+        if k[0:2] in ('1:', '4:'):
+            codes.append(k) # preserve Alt/Shift combos as distinct keycodes
+            continue
+
+        if k[0] in ('&', '^', '+', '%', '!'):
+            codes.append(k) # preserve these as distinct keycodes
+            continue
+
+        codes.extend(k) # just separate a series of individual keystrokes
 
     return codes
 

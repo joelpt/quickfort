@@ -14,7 +14,7 @@ version = '2.00'
 
 def parse_options(argv):
     """Read options and args from argv (the command line parameters)."""
-    usage = "usage: %prog [options] input_file [output_file]"
+    usage = "usage: %prog [options] [input_file] [output_file]"
     parser = OptionParser(usage=usage, version="%prog " + version)
     parser.add_option("-s", "--sheetid",
                       dest="sheetid", default=None,
@@ -28,9 +28,12 @@ def parse_options(argv):
     parser.add_option("-m", "--mode",
                       dest="mode", default='macro',
                       help="output mode: key or macro [default: %default]")
+    parser.add_option("-c", "--command",
+                      dest='command',
+                      help="Eval QF one-line command instead of input_file")
     parser.add_option("-T", "--title",
                       dest='title',
-                      help="title of macro")
+                      help="title of output macro")
     parser.add_option("-i", "--info",
                       action="store_true", dest="info", default=False,
                       help="output information about input_file")
@@ -57,14 +60,22 @@ def parse_options(argv):
                       help="profile qfconvert performance")
     options, args = parser.parse_args(args=argv)
 
-    if len(args) < 1:
-        parser.print_help()
-        return None, None
-
     if options.mode not in ('key', 'macro'):
         raise Exception, \
             "Invalid mode '%s', must be either 'key' or 'macro'" % \
                 options.mode
+
+    if options.command is not None:
+        options.infile = None
+        options.outfile = args[0] if len(args) > 0 else None
+        return options
+
+    if len(args) < 1:
+        parser.print_help()
+        return None
+
+    options.infile = args[0]
+    options.outfile = args[1] if len(args) > 1 else None
 
     if options.sheetid is not None:
         try:
@@ -73,45 +84,48 @@ def parse_options(argv):
             raise Exception, "sheetid must be numeric, not '%s'" % \
                 options.sheetid
 
-    return options, args
+    return options
 
 
 def run():
     """Perform filereading/conversion work and output result."""
-    global options, args
-    infile = args[0]
-    outfile = args[1] if len(args) > 1 else None
+    global options
 
     try:
-        if options.info:
-            output = blueprint.get_blueprint_info(infile)
+        if options.command:
+            output = blueprint.process_blueprint_command(options.command, options)
+        elif options.info:
+            output = blueprint.get_blueprint_info(options.infile)
         else:
-            output = blueprint.process_blueprint_file(infile, options)
+            output = blueprint.process_blueprint_file(options.infile, options)
 
-        if outfile:
-            with open(outfile, 'w') as outf:
+        if options.outfile:
+            with open(options.outfile, 'w') as outf:
                 outf.write(output)
         else:
             print output
     except Exception as ex:
         traceback.print_exc()
-        if outfile:
-            with open(outfile, 'w') as outf:
+        if options.outfile:
+            with open(options.outfile, 'w') as outf:
                 outf.write('Exception: ' + str(ex))
     return
 
 
 def main(argv=sys.argv[1:]):
     """Parse options file, parse and convert blueprint, and output result."""
-    global options, args
+    global options
 
     try:
-        options, args = parse_options(argv)
-        if args is not None:
-            if options.profile:
-                cProfile.run('run()')
-            else:
-                run()
+        options = parse_options(argv)
+
+        if options is None:
+            return
+
+        if options.profile:
+            cProfile.run('run()')
+        else:
+            run()
     except Exception as ex:
         print 'Error: ' + str(ex)
 

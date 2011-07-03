@@ -691,7 +691,7 @@ QF keeps track of two *transformation buckets* during transformation. We will
 call these buckets the **Memory bucket**, or bucket A, and the 
 **Working bucket**, or bucket B.
 
-Let's follow an example and observer how the buckets change as we execute the
+Let's follow an example and observe how the buckets change as we execute the
 following transformation sequence:
 
     #dig The blueprint we'll be transforming
@@ -787,8 +787,9 @@ see the result:
         d d . . d d
         -----------
 
-Making sense yet? To get a better handle on how this all works, just experiment
-with the Alt+R command.
+Making sense yet? To get a better handle on how this all works, the best approach
+is probably to just start experimenting with the Alt+R command. Also see 
+[transformation debugging](#debugging).
 
 While it may seem unintuitive at first, this approach for transformation was
 intentionally chosen for Quickfort 2.0. It is meant to retain the simple
