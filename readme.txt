@@ -1214,7 +1214,7 @@ Changelog                                                           {#changelog}
 * Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
 * qfconvert.py/exe will now find its config/ files regardless of working dir
 * readme.txt improvements (Thundercraft)
-* blueprints/Tests/*.csv fixups (Akylon)
+* blueprints/Tests/*.csv cleanup and a couple additions (Aklyon)
 
 ### 2.00 (2011 June 21) ###
 
@@ -1418,7 +1418,7 @@ resulted in improvements to Quickfort:
     Root Infinity
     Thundercraft
     kurzedmetal
-    Akylon
+    Aklyon
 
 Copyright 2011 Joel Thornton
 

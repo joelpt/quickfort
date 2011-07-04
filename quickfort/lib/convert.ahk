@@ -52,7 +52,7 @@ ConvertAndPlayMacro()
   ; the OS; a too-short delay here will cause DF to miss our macro-loading-and-playing
   ; keystrokes. The first time we go through this process usually is (and needs to be)
   ; much slower than subsequent runs.
-  PlayMacro(elapsed / 2) 
+  PlayMacro(elapsed) 
 
   ; remember for repeated use of Alt+D
   LastMacroWasPlayed := true
