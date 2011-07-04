@@ -16,9 +16,7 @@ PlayMacro(delay)
   ReleaseModifierKeys()
   
   Send %KeyMacroLoad% ;; show load macro menu
-  Sleep 250
   Send %KeyMacroHighlightLastMacro%  ;; highlight last macro in the list
-  Sleep 750
   Send %KeyMacroSelectMacro% ;; select macro
   Sleep %delay%
   Send %KeyMacroPlay% ;; play it after delay

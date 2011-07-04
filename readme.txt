@@ -1216,7 +1216,7 @@ Todo/Future Ideas                                                        {#todo}
 Changelog                                                           {#changelog}
 ---------
 
-### 2.01 (2011 July 3) ###
+### 2.01 (2011 July 4) ###
 
 * KNOWN ISSUE: DF 0.31.25 will stop playing back any macro if you move your 
   mouse pointer off the DF window (including ONTO Quickfort's mouse-tip). 
@@ -1228,7 +1228,7 @@ Changelog                                                           {#changelog}
 * Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
 * qfconvert.py/exe will now find its config/ files regardless of working dir
 * 2d/2u style z-repetitions are now performed after plotting/routing rather than
-  beforehand; greatly improves speed of e.g. Alt+T->d(100x100), Alt+R->100d
+  beforehand; greatly improves speed of e.g. Alt+T->x(100x100), Alt+R->100d
 * QF GUI nows wait longer between sending DF load macro and play macro commands;
   if we do it too fast DF sometimes misses the latter part of the macro
 * DF cursor is no longer returned to the starting z-level after a multi-z-level
