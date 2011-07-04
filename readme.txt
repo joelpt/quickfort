@@ -1213,6 +1213,8 @@ Changelog                                                           {#changelog}
   instead of the top, and include helpful titles
 * Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
 * qfconvert.py/exe will now find its config/ files regardless of working dir
+* QF GUI nows wait longer between sending DF load macro and play macro commands;
+  if we do it too fast DF sometimes misses the latter part of the macro
 * readme.txt improvements (Thundercraft)
 * blueprints/Tests/*.csv cleanup and a couple additions (Aklyon)
 

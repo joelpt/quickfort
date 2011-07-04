@@ -1,4 +1,4 @@
-rmdir /s /q release
+rmdir /s /q release 2> nul:
 mkdir release
 mkdir release\src
 mkdir release\blueprints
@@ -20,9 +20,3 @@ robocopy /s qfconvert\config release\src\qfconvert\config
 
 :: Copy readme.txt
 copy readme.txt release\readme.txt
-
-:: Move finalized release folder up one folder (keeping it out of trunk to avoid HG messiness)
-rmdir /s /q ..\release 2> nul:
-move release ..
-
-:cd release

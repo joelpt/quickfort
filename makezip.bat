@@ -1,7 +1,12 @@
-cd ..
+del release.zip 2> nul:
+
+mkdir zip_temp
+move release zip_temp
+cd zip_temp
 ren release quickfort
-del release.zip
+
 zip -9 -r release.zip quickfort\*
-ren quickfort release
-dir
-cd trunk
+move release.zip ..
+cd ..
+
+rmdir /s /q zip_temp
