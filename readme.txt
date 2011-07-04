@@ -1218,21 +1218,20 @@ Changelog                                                           {#changelog}
 
 ### 2.01 (2011 July 4) ###
 
-* KNOWN ISSUE: DF 0.31.25 will stop playing back any macro if you move your 
-  mouse pointer off the DF window (including ONTO Quickfort's mouse-tip). 
-  Warnings added to troubleshooting section and the QF GUI on-playback mousetip.
 * Added Alt+N "save named macro" function to QF GUI (Root Infinity)
 * Set keys used by QF GUI for DF macro playback via options.txt (kurzedmetal)
 * Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
   instead of the top, and include helpful titles
 * Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
+* Found that DF 0.31.25 will stop playing back any macro if you move your 
+  mouse pointer off the DF window (including ONTO Quickfort's mouse-tip). 
+  Warnings added to troubleshooting section and the QF GUI on-playback mousetip.
 * qfconvert.py/exe will now find its config/ files regardless of working dir
 * 2d/2u style z-repetitions are now performed after plotting/routing rather than
   beforehand; greatly improves speed of e.g. Alt+T->x(100x100), Alt+R->100d
-* QF GUI nows wait longer between sending DF load macro and play macro commands;
-  if we do it too fast DF sometimes misses the latter part of the macro
 * DF cursor is no longer returned to the starting z-level after a multi-z-level
   blueprint playback; that behavior was unintuitive
+* Macro playback started faster (removed delays between ^L {Up} {Enter} ^P)
 * QF GUI mousetip positioning tweaked
 * readme.txt improvements (Thundercraft)
 * blueprints/Tests/*.csv cleanup and a couple additions (Aklyon)

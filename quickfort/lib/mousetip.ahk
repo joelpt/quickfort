@@ -136,7 +136,7 @@ UpdateTip()
       }
       else
       {
-        body := "Started designation.`n`nWARNING: DF aborts playback when the`nmouse moves into/out of the DF window."
+        body := "Started designation.`n`nWARNING: DF aborts playback if the`nmouse moves into/out of the DF window`nor the QF mousetip."
       }
     }
     else if (mode == "prebuild")

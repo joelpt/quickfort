@@ -47,6 +47,8 @@ ConvertAndPlayMacro()
   elapsed := A_TickCount - starttime
   
   ; Play the macro.
+
+  ; TODO: strip this block of textplanation out if PlayMacro(0) proves to be safe
   ; The macro playback delay is made proportional to the time it takes to execute
   ; qfconvert.exe because it is a good signal of the current response speed of
   ; the OS; a too-short delay here will cause DF to miss our macro-loading-and-playing
@@ -54,9 +56,9 @@ ConvertAndPlayMacro()
   ; much slower than subsequent runs.
   ; PlayMacro(elapsed) 
   
-  ; We'll just do a small delay here as it appears that we can do ^L{Enter}^P very
+  ; We'll just do a micro-delay here as it appears that we can do ^L{Enter}^P very
   ; quickly without issue, as long as we don't delete the .mak file too quickly
-  PlayMacro(100) 
+  PlayMacro(0) 
 
   ; remember for repeated use of Alt+D
   LastMacroWasPlayed := true
