@@ -47,7 +47,7 @@ class FileLayer:
         """Returns current height of FileLayer's rows (row count)."""
         return len(self.rows) if self.rows else 0
 
-    def cleanup(self):
+    def clean_cells(self):
         """Remove non-sending characters from cells."""
         self.rows = [['' if c in ('~', '`', '#') else c for c in r]
             for r in self.rows]
@@ -85,7 +85,6 @@ class FileLayer:
         for row in self.rows:
             if len(row) < maxwidth:
                 row.extend( ['' for x in range(maxwidth - len(row))] )
-
         return
 
     @staticmethod
@@ -151,7 +150,7 @@ def parse_file(filename, sheetid):
     # tidy up the layers
     for fl in filelayers:
         fl.fixup()
-        fl.cleanup()
+        fl.clean_cells()
 
     return filelayers, details
 
@@ -197,7 +196,7 @@ def parse_command(command):
     # tidy up the layers
     for fl in filelayers:
         fl.fixup()
-        fl.cleanup()
+        fl.clean_cells()
 
     return filelayers, details
 

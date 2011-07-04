@@ -13,7 +13,8 @@ def parse_transform_str(transform_str):
     """
     Converts space separated transform string e.g. '2e valign=top rotcw' 
     into list of tuples, e.g. [(2, 'e'), ('t', 'valign'), (1, 'rotcw')]
-    Returns the conversion result as a list of tuples.
+    Returns the conversion result as 2 lists of tuples: 
+    x/y transforms, and z-level transforms.
     """
     transforms = transform_str.lower().strip().split(' ')
     readies = []
@@ -46,9 +47,11 @@ def parse_transform_str(transform_str):
             "Did not recognize transform command.\n" + \
             "Transform string: %s\nDid not recognize: %s" % (transform_str, t)
 
-    # put zup/zdown transforms at the end so we do x/y transforms first
-    readies.sort(key=lambda x: 1 if x[1][0] in ('u', 'd') else 0)
-    return readies
+    # separate zup/zdown transforms from x/y transforms
+    xys = [t for t in readies if t[1][0] not in ('u', 'd')]
+    zs = [t for t in readies if t[1][0] in ('u', 'd')]
+
+    return xys, zs
 
 
 class Transformer:
@@ -82,9 +85,6 @@ class Transformer:
             left = transforms
             for t in transforms:
                 param, cmd = t
-                if cmd in ('d', 'u'): # z-up/z-down handled in next loop
-                    break
-                
                 left = left[1:] # remove this cmd from the remaining cmds
 
                 if cmd == 'halign':
@@ -112,37 +112,6 @@ class Transformer:
 
                 # we'll return the result in b
                 layers[i].rows = b
-
-        # do remaining zup/zdown transforms, if any (multiple layers)
-        for t in left:
-            param, cmd = t
-
-            if cmd not in ('d', 'u'):
-                raise Exception, \
-                    "Transform sequence contains invalid transformation %s%s" % t
-
-            # clone z-layers
-            addlayers = deepcopy(layers)
-
-            # determine z-level offset after drawing layers
-            dz = GridLayer.zoffset(addlayers)
-
-            # add appropriate z-up/down chars for transitioning between zlevels
-            if cmd == 'd':
-                if dz >= 0:
-                    zfix = ['>']
-                else:
-                    zfix = ['>'] * ((abs(dz) * 2) + 1)
-            else: # 'u'
-                if dz <= 0:
-                    zfix = ['<']
-                else:
-                    zfix = ['<'] * ((dz * 2) + 1)
-
-            # add new layers with appropriate onexit transitions
-            for i in xrange(1, param):
-                layers[-1].onexit += zfix
-                layers.extend(deepcopy(addlayers))
 
         self.start, self.layers = start, layers
 

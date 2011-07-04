@@ -130,7 +130,14 @@ UpdateTip()
   {
     if (mode == "build")
     {
-      body := "Designating..."
+      if (PlaybackMode == "key")
+      {
+        body := "Designating..."
+      }
+      else
+      {
+        body := "Started designation.`n`nWARNING: DF aborts playback when the`nmouse moves into/out of the DF window."
+      }
     }
     else if (mode == "prebuild")
     {
@@ -209,11 +216,21 @@ ShowMouseTip:
   {
     SetTimer, ShowMouseTip, %MouseTooltipUpdateMs%
 
-    xpos += 25
-    if (ypos + 100 > ScreenHeight)
-      ypos := ScreenHeight - 100 ; put tooltip above mouse pointer if we're near the bottom
+    xpos += 30
+
+    if (Building)
+      tipheight := 140
+    else if (ReadyToBuild && ShowFullTip)
+      tipheight := 280
+    else if (ReadyToBuild && ShowFullTip)
+      tipheight := 140
     else
-      ypos += 10 ; below
+      tipheight := 100
+
+    if (ypos + tipheight > ScreenHeight)
+      ypos := ScreenHeight - tipheight + 20 ; don't let tooltip touch the bottom (restrain at edge)
+    else
+      ypos += 20 ; below
 
     if (LastTooltip != FullTip || LastMouseX != xpos || LastMouseY != ypos)
     {

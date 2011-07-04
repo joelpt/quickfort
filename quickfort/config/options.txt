@@ -47,7 +47,7 @@ ShowMouseTooltip = 1
 
 # Try increasing this value if you have trouble with a flickering
 # mouse tooltip.
-MouseTooltipUpdateMs = 15
+MouseTooltipUpdateMs = 3
 
 #----------------------------
 # Key-sending

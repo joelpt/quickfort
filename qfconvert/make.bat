@@ -11,3 +11,5 @@ copy config\*.* release\config
 copy dist\*.* release
 rmdir /s /q dist
 rmdir /s /q build
+del *.pyc
+del *.pyo

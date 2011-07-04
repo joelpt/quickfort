@@ -24,8 +24,7 @@ def get_blueprint_info(path):
     s = ''
     for sheet in sheets:
         try:
-            (layers, details) = \
-                parse_file(path, sheet[1])
+            (layers, details) = parse_file(path, sheet[1])
             layers = FileLayers_to_GridLayers(layers)
             bp = Blueprint(sheet[0], layers, details)
             s += '>>>> Sheet id %d\n' % sheet[1]
@@ -100,15 +99,16 @@ def convert_blueprint(layers, details, options):
     layers = apply_aliases(layers, aliases)
 
     # transform the blueprint
+    ztransforms = []
     if options.transform:
         if options.debugtransform:
             print "#### Transforming with: %s" % options.transform
 
-        transforms = parse_transform_str(options.transform)
-        trans = Transformer(layers, details.start, options.debugtransform)
-        trans.transform(transforms)
-        details.start = trans.start
-        layers = trans.layers
+        transforms, ztransforms = parse_transform_str(options.transform)
+        tran = Transformer(layers, details.start, options.debugtransform)
+        tran.transform(transforms) # do the x/y transformations
+        details.start = tran.start
+        layers = tran.layers
 
         if options.debugfile:
             print "#### Results of transform:"
@@ -132,7 +132,7 @@ def convert_blueprint(layers, details, options):
     if options.visualize:
         keys = bp.trace_outline(options)
     else:
-        keys = bp.plot(options)
+        keys = bp.plot(ztransforms, options)
 
     output = convert_keys(keys, options.mode, options.title)
 
@@ -193,12 +193,13 @@ class Blueprint:
         self.start_comment = details.start_comment
         self.comment = details.comment
 
-    def plot(self, options):
-        """Plots a route through the blueprint."""
+    def plot(self, ztransforms, options):
+        """Plots a route through the blueprint, then does ztransforms."""
         buildconfig = BuildConfig(self.build_type)
         keys = []
         start = self.start
         ks = None
+
         for layer in self.layers:
             grid = layer.grid
             layer.start = start # first layer's start or last layer's exit pos
@@ -213,10 +214,48 @@ class Blueprint:
             # generate key sequence to render this series of plots in game
             ks = Keystroker(grid, buildconfig)
             keys += ks.plot(layer.plots, start) + layer.onexit
-            start = end
 
-        # move cursor back to start pos x, y, z
-        keys += ks.move(end, self.start, -GridLayer.zoffset(self.layers))
+            # move cursor back to start pos x, y, so start==end
+            keys += ks.move(end, self.start, 0)
+            #start = end
+
+        if len(ztransforms) > 0:
+            # do z-transforms directly on keys array (much faster than actually
+            # repeating and plotting those layers prior to generating keys)
+            
+            # relative z-layer-steps we have taken for the existing layers;
+            # for single-z-layer blueprints this is 0, for blueprints with 1+ #>
+            # it is >=1, and for blueprints with 1+ #< it is <=-1.
+            zdelta = GridLayer.zoffset(self.layers)
+
+            for t in ztransforms:
+                count, command = t
+                if count < 2:
+                    continue
+                
+                if command not in ('d', 'u'):
+                    raise Exception, 'Unrecognized ztransform ' + command
+                
+                # direction we want to move: 1=zdown, -1=zup
+                dirsign = 1 if command == 'd' else -1
+
+                # if we want to move in the same direction as the stack does,
+                # we only need to move 1 z-level in that direction
+                if dirsign * zdelta > 0: # if signs of dirsign and zdelta match
+                    zdelta = 0 # 'no z-change caused by stack'
+
+                # get keys needed to move desired number of z-levels
+                # in desired z-direction; for multilevel blueprints combined
+                # with a ztransform moving in the opposite direction we
+                # need to move twice the height of the blueprint-stack
+                # so that the subsequent repetition of the original blueprint's
+                # keys can playback without overlapping onto zlevels
+                # that we've already designated.
+                zdistance = dirsign * (-1 + 2 * (1 + (dirsign * -zdelta)))
+                zmove = ks.move(start, start, zdistance)
+
+                # assemble repetition of z layers' keys
+                keys = ((keys + zmove) * (count - 1)) + keys
 
         return keys
 

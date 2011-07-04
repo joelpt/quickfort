@@ -1,8 +1,11 @@
-Quickfort 2.01
-==============
+Quickfort 2.01 
+===============
 by joelpt <quickfort@joelpt.net>
 
 <http://sun2design.com/quickfort>
+
+User Manual
+===========
 
 Quickfort 2 is a utility for Dwarf Fortress that helps you build fortresses
 from "blueprint" .CSV, .XLS, and .XLSX files. Many applications exist to edit
@@ -984,6 +987,9 @@ produce identical results:
 Z-level repetitions may be used in conjunction with multi-z-level blueprints.
 See `Blueprints/Examples/screw-pump-tower-*.csv` for an example.
 
+Using multiple #d/#u transformations in a single sequence is not well supported.
+Prefer combining them into one transformation, e.g. `6d` instead of `3d 2d`.
+
 
 Advanced transformations: the ! command                           {#bangcommand}
 ---------------------------------------
@@ -1062,6 +1068,11 @@ Troubleshooting                                               {#troubleshooting}
 
 * Always check QF's mousetip instructions before hitting Alt+D to begin a
   blueprint. Being in the wrong menu is a common cause of wacky behavior.
+
+* During DF macro playback, don't move the mouse into or out of the DF window 
+  (including ONTO the QF mousetip). Doing so will cause DF to stop playing
+  your macro. It is usually safe to move the mouse (not too quickly) around
+  the DF window itself.
 
 * If you use a non-English keyboard layout, QF2 may require some tweaking first.
   The simplest solution is to switch to an English keyboard layout while running
@@ -1207,14 +1218,22 @@ Changelog                                                           {#changelog}
 
 ### 2.01 (2011 July 3) ###
 
+* KNOWN ISSUE: DF 0.31.25 will stop playing back any macro if you move your 
+  mouse pointer off the DF window (including ONTO Quickfort's mouse-tip). 
+  Warnings added to troubleshooting section and the QF GUI on-playback mousetip.
 * Added Alt+N "save named macro" function to QF GUI (Root Infinity)
 * Set keys used by QF GUI for DF macro playback via options.txt (kurzedmetal)
 * Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
   instead of the top, and include helpful titles
 * Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
 * qfconvert.py/exe will now find its config/ files regardless of working dir
+* 2d/2u style z-repetitions are now performed after plotting/routing rather than
+  beforehand; greatly improves speed of e.g. Alt+T->d(100x100), Alt+R->100d
 * QF GUI nows wait longer between sending DF load macro and play macro commands;
   if we do it too fast DF sometimes misses the latter part of the macro
+* DF cursor is no longer returned to the starting z-level after a multi-z-level
+  blueprint playback; that behavior was unintuitive
+* QF GUI mousetip positioning tweaked
 * readme.txt improvements (Thundercraft)
 * blueprints/Tests/*.csv cleanup and a couple additions (Aklyon)
 

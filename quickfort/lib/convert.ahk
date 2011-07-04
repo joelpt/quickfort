@@ -52,11 +52,20 @@ ConvertAndPlayMacro()
   ; the OS; a too-short delay here will cause DF to miss our macro-loading-and-playing
   ; keystrokes. The first time we go through this process usually is (and needs to be)
   ; much slower than subsequent runs.
-  PlayMacro(elapsed) 
+  ; PlayMacro(elapsed) 
+  
+  ; We'll just do a small delay here as it appears that we can do ^L{Enter}^P very
+  ; quickly without issue, as long as we don't delete the .mak file too quickly
+  PlayMacro(100) 
 
   ; remember for repeated use of Alt+D
   LastMacroWasPlayed := true
 
+  if (elapsed > 5000)
+    elapsed := 5000 ; 5sec max sleep
+  Sleep, %elapsed% ; sleeping for the same time it took qfconvert to run
+
+  ; discard the file (DF will retain a memory of it anyway as it currently works)
   FileDelete, %destfile%
 
   return true
