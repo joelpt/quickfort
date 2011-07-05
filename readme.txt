@@ -1234,7 +1234,9 @@ Changelog                                                           {#changelog}
 * Macro playback started faster (removed delays between ^L {Up} {Enter} ^P)
 * QF GUI mousetip positioning tweaked
 * readme.txt improvements (Thundercraft)
-* blueprints/Tests/*.csv cleanup and a couple additions (Aklyon)
+* blueprints/Tests/*.csv cleanup (Thundercraft) and a couple new ones
+* Removed unused KeyExitMenu option from config/options.txt; this can now
+  be configured in config/keys.json
 
 ### 2.00 (2011 June 21) ###
 
@@ -1435,10 +1437,10 @@ resulted in improvements to Quickfort:
     LegoLord
     shadow_slicer
     starrrie
+    Aklyon
     Root Infinity
     Thundercraft
     kurzedmetal
-    Aklyon
 
 Copyright 2011 Joel Thornton
 

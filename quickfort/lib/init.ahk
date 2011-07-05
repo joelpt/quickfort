@@ -85,7 +85,6 @@ SetDefaultOptions()
   KeyPressDuration := 1
   EmbeddedDelayDuration := 250
   SendMode := "ControlSend"
-  KeyExitMenu := "{Esc}"
   ShowStartupTrayTip := 1
   ShowMouseTooltip := 1
   EnableSafetyAbort := 1

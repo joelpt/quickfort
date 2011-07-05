@@ -13,17 +13,8 @@
 # Set this to 'macro' to use DF 0.31.x's macro ability (very fast).
 # Set this to 'key' to send keystrokes to the DF game window (slower).
 # The visualize command (Alt+V) always sends keystrokes.
+# This can be persistently toggled using QF's Alt+K hotkey.
 PlaybackMode = macro
-
-# If PlaybackMode=key, you may need to un/comment the below setting
-# based on your version of Dwarf Fortress. PlaybackMode=macro will
-# only work in DF v0.31+.
-
-# DF v0.31+: use {Esc} to exit menus.
-KeyExitMenu = {Esc}
-
-# DF v0.28.181.40d and earlier: use {Space} to exit menus.
-#KeyExitMenu = {Space}
 
 # The following keybinds are used to get Dwarf Fortress to play
 # macros. Syntax: http://www.autohotkey.com/docs/commands/Send.htm
