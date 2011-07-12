@@ -445,6 +445,10 @@ Examples:
 
         EvalCommands := evalMatch2
 
+        ; Clean last CommandLineFile if any
+        if (CommandLineFile)
+          FileDelete, %CommandLineFile%
+          
         outfile := A_ScriptDir "\" GetRandomFileName() ".csv"
         WriteCommandLineToCSVFile(EvalMode, EvalCommands, outfile)
         ;SetSelectedFile(outfile)
