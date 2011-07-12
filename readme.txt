@@ -66,6 +66,7 @@ Features                                                             {#features}
 * Design complete blueprints to handle 4 main phases of DF construction
 * .CSV and multi-worksheet .XLS/.XLSX blueprint files supported
 * Intelligent designator minimizes keystrokes needed to designate blueprints
+* Designates fast: 10x faster than QF1.11 typical
 * Multi-Z-level blueprints
 * Blueprint transformation (rotate, flip, repeat in direction)
 * Aliases to automate frequent keystroke combos
