@@ -18,7 +18,7 @@ def parse_options(argv):
     parser = OptionParser(usage=usage, version="%prog " + version)
     parser.add_option("-s", "--sheetid",
                       dest="sheetid", default=None,
-                      help="worksheet index for xls/xlsx files [default: 1]")
+                      help="worksheet index for xls/xlsx files [default: 0]")
     parser.add_option("-p", "--position",
                       dest="startpos", default=None,
                       help="starting position [one of: (x,y) ne nw se sw]")
