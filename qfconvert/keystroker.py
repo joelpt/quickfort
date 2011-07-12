@@ -34,7 +34,7 @@ class Keystroker:
         submenukeys = self.buildconfig.get('submenukeys')
         last_command = ''
         last_submenu = ''
-        keys = self.buildconfig.get('init') or []
+        keys = copy(self.buildconfig.get('init')) or []
         completed = self.buildconfig.get('completed') or []
 
         # construct the list of keystrokes required to move to each
@@ -143,7 +143,6 @@ class Keystroker:
 
         # append on-completed keys, if any
         keys.extend(completed)
-
         return keys
 
     def move(self, start, end, zoffset=0, allowjumps=True):
