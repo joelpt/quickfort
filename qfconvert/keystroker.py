@@ -284,14 +284,23 @@ class Keystroker:
 
 def convert_keys(keys, mode, title):
     """
-    Convert keycodes to keystrokes or DF macro syntax based on mode.
+    Convert keycodes to desired output, based on mode.
     Returns string of all keystrokes or macro-content.
     """
-    keys = translate_keycodes(keys, mode)
+
+    transmode = 'macro' if mode == 'macro' else 'key'
+    keys = translate_keycodes(keys, transmode)
+
     if mode == 'macro':
         return '\n'.join(convert_to_macro(keys, title)) + '\n'
     elif mode == 'key':
+        # simple keys string
         return ''.join(keys)
+    elif mode == 'keylist':
+        # simple comma separated keys, embedded commas are currently
+        # NOT handled but should never really be found in blueprint cells
+        # anyway
+        return ','.join(keys)
     else:
         raise Exception, 'Unknown Keystroker.render() mode "%s"' % mode
 

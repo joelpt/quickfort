@@ -131,11 +131,11 @@ ConvertAndSendKeys(visualizing)
 
   if (CommandLineMode)
   {
-    result := ConvertBlueprint(CommandLineFile, outfile, 1, "key", "", StartPos, RepeatPattern, visualizing)
+    result := ConvertBlueprint(CommandLineFile, outfile, 1, "keylist", "", StartPos, RepeatPattern, visualizing)
   }
   else
   {
-    result := ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "key", "", StartPos, RepeatPattern, visualizing)
+    result := ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "keylist", "", StartPos, RepeatPattern, visualizing)
   }
 
   if (!result)
