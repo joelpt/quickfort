@@ -5,6 +5,6 @@ del /z /y /q release
 mkdir release
 mkdir release\config
 move Quickfort.exe release
-copy Quickfort.ico release
+:copy Quickfort.ico release
 copy config\options.txt release\config
 
