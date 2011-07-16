@@ -61,7 +61,7 @@ DelayMultiplier = 1
 # How long to pause after building doors, picking from materials
 # lists, etc. If QF seems to go off the rails in these
 # circumstances, try increasing this value.
-EmbeddedDelayDuration = 150
+EmbeddedDelayDuration = 250
 
 # Increase this to make QF hold down the keys longer when sending
 # them to DF.

@@ -7,10 +7,10 @@ PlayMacro(delay)
 {
   global KeyMacroLoad, KeyMacroHighlightLastMacro, KeyMacroSelectMacro, KeyMacroPlay
 
-  if (delay < 500)
-    delay := 500
-  else if (delay > 10000)
-    delay := 10000
+  ;if (delay < 500)
+  ;  delay := 500
+  ;else if (delay > 10000)
+  ;  delay := 10000
 
   ActivateGameWin()
   ReleaseModifierKeys()
@@ -25,45 +25,55 @@ PlayMacro(delay)
 
 
 ;; ---------------------------------------------------------------------------
-;; send keystrokes to game window
-SendKeys(keys)
+;; send keystrokes to game window; keys should be separated by commas
+SendKeys(keystrokes)
 {
   global
   ActivateGameWin()
   ReleaseModifierKeys()
   Sleep, 0
 
-  if (Instr(keys, "{wait}"))
-  {
-    ; Convert {wait} statements to ¢ so we can Loop Parse in chunks
-    ; and sleep between each chunk.
-    StringReplace, keys, keys, {wait}, ¢, All
-  }
-  ; TODO: seed {waits} into long key sequences which have no {wait}s
-  ; in them, to permit for catching Alt+C and safety abort
+  ;if (Instr(keys, "{wait}"))
+  ;{
+  ;  ; Convert {wait} statements to ¢ so we can Loop Parse in chunks
+  ;  ; and sleep between each chunk.
+  ;  StringReplace, keys, keys, {wait}, ¢, All
+  ;}
+  ;; TODO: seed {waits} into long key sequences which have no {wait}s
+  ;; in them, to permit for catching Alt+C and safety abort
 
-  ; Count total number of ¢ chars
-  StringSplit, pctarray, keys, ¢
-  numPctChars := pctarray0
+  ;; Count total number of ¢ chars
+  ;StringSplit, pctarray, keys, ¢
+  ;keylen := pctarray0
 
   SetKeyDelay, KeyDelay, KeyPressDuration
   SetKeyDelay, 1, 1, Play
+  
+  ; count number of , chars in the keys string
+  StringReplace, testkeys, keystrokes,`,,`,,UseErrorLevel
+  testkeys := ""
+  keylen := ErrorLevel
 
-  Loop, parse, keys, ¢
+  ; loop through the keys
+  Loop, parse, keystrokes, `,
   {
-    pctDone := Floor((A_Index/numPctChars) * 100)
-
-    Tip("Quickfort running (" pctDone "% done)`nHold Alt+C to cancel.")
-
-    Sleep, 0
-    Sleep, KeyDelay
     if (!Building)
     {
       ; build was cancelled by user.
       break
     }
 
+    pctDone := Floor((A_Index/keylen) * 100)
+    Tip("Quickfort running (" pctDone "% done)`nHold Alt+C to cancel.")
+
     keys := A_LoopField
+
+    if (keys = "{wait}")
+    {
+      Sleep, %EmbeddedDelayDuration%
+      continue
+    }
+
 
     UseSafeMode := 0
     ch := SubStr(keys, 1, 1)
@@ -91,9 +101,7 @@ SendKeys(keys)
     ; actually send the keys!
     if (UseSafeMode)
     {
-      ;MsgBox % "safe mode on " keys
       ; Make sure the DF window is active
-
       ActivateGameWin()
 
       ; Send desired keys "safely"
@@ -118,8 +126,6 @@ SendKeys(keys)
       MsgBox, Unsupported SendMode '%SendMode%'.
       return
     }
-
-    Sleep, %EmbeddedDelayDuration%
   }
   return
 }
