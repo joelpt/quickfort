@@ -1,0 +1,7 @@
+#dig Spiral staircase.,,
+u,j,#
+j,u,#
+#>,#,#
+j,u,#
+u,j,#
+#,#,#
