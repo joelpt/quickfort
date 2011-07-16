@@ -100,6 +100,9 @@ UpdateTip()
       header := header " (" BuildType%SelectedSheetIndex% " mode)"
       header := header ", " Width%SelectedSheetIndex% "x" Height%SelectedSheetIndex%
 
+      if (!ShowFullTip)
+        header := header " [" PlaybackMode "]"
+
       if (LayerCount%SelectedSheetIndex% > 1)
         header := header "x" LayerCount%SelectedSheetIndex%
     }
