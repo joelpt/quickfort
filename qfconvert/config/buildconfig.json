@@ -1,233 +1,144 @@
+// Build logic configuration file.
+//
+// From here, you can customize what keystroke patterns and build logic is used to carry out
+// cell designations per-build-phase. Within each build-phase, you can also customize these
+// settings using regex pattern-matching against individual cell values.
+//
+// Format:
+// {
+//     "phase-name": {
+//         "key": "value", 
+//         ...,
+//         "custom": {
+//             "cell-regex": {
+//                 "key":, "value",
+//                 ...
+//             },
+//             ...
+//         }
+//     }, 
+//     ...
+// }
+//
+// Keys and what they do:
+//  init: keys to send at start of a blueprint playback
+//  completed: keys to send at end of a blueprint playback
+//  designate: keys to send in order to designate each cell, utilizing some special tokens:
+//             'cmd': insertion point for blueprint cell's value during designation
+//             'moveto': replaced with the movement keystrokes needed to position designation cursor
+//             'exitmenu': exits a designation submenu if needed (e.g. the build->workshops submenu)
+//             'menu': sends keystroke to enter a new submenu (not needed if we're in the desired submenu)
+//             'setsize': runs the setsize function (see below) to adjust size of designation
+//             'setmats': runs the setmats function (see below) to select mats for constructions
+//             '&' '%' '@': see options/aliases.txt for definitions
+//  samecmd: pattern to use for 'cmd' in 'designate' value when last cell had the same command as this cell
+//  diffcmd: pattern to use for 'cmd' in 'designate' value when last cell had a different command 
+//  submenukeys: list of keys that open a DF submenu when pressed (e.g. 'w' opens build->workshops submenu)
+//  sizebounds: sets min and max size limits for area auto-expansion: [minwidth, maxwidth, minheight, maxheight] 
+//  setsize: name of Python function which will return keys needed to size a designation appropriately
+//  setmats: name of Python function which will return keys needed to select required mats for constructions
+//  custom: list of key-value pairs that can be used to customize QF's key patterns for specific designations.
+//              key:   regex expression to match blueprint cell-values against
+//                     treated as re.match(), i.e. 'p' is executed as '^p$'
+//              value: { "key": value, ... }
+//                     key:value pairs that override parent build-phase's values when key matches a cell
+
 {
-    "query": {
-        "diffcmd": [
-            "cmd"
-        ],
+    "dig": { // designate
         "init": null,
+        "completed": null,
+        "designate": ["moveto", "cmd", "&", "setsize", "&"],
+        "samecmd": null,
+        "diffcmd": ["cmd"],
         "submenukeys": "",
+        "sizebounds": null,
+        "setsize": "setsize_standard",
+        "custom": null
+     },
+
+    "build": { // build constructions
+        "init": ["^"],
+        "completed": ["O"], // build dirt road to allow cursor repositioning
+        "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "@", "%"],
+        "samecmd": ["cmd"],
+        "diffcmd": ["cmd"],
+        "submenukeys": ["i", "w", "e", "C", "T", "M"],
         "sizebounds": [1, 1, 1, 1],
-        "completed": null,
-        "custom": null,
-        "setsize": "setsize_standard",
-        "samecmd": [
-            "cmd"
-        ],
-        "designate": [
-            "moveto",
-            "cmd",
-            "setsize",
-            "&"
-        ]
-    },
-    "dig": {
-        "diffcmd": [
-            "cmd"
-        ],
-        "init": null,
-        "submenukeys": "",
-        "sizebounds": null,
-        "completed": null,
-        "custom": null,
-        "setsize": "setsize_standard",
-        "samecmd": null,
-        "designate": [
-            "moveto",
-            "cmd",
-            "&",
-            "setsize",
-            "&"
-        ]
-    },
-    "place": {
-        "diffcmd": [
-            "cmd"
-        ],
-        "init": null,
-        "submenukeys": "",
-        "sizebounds": null,
-        "completed": null,
-        "custom": null,
-        "setsize": "setsize_standard",
-        "samecmd": null,
-        "designate": [
-            "moveto",
-            "cmd",
-            "&",
-            "setsize",
-            "&"
-        ]
-    },
-    "build": {
-        "diffcmd": [
-            "cmd"
-        ],
-        "init": [
-            "^"
-        ],
-        "submenukeys": [
-            "i",
-            "w",
-            "e",
-            "C",
-            "T",
-            "M"
-        ],
-        "sizebounds": [
-            1,
-            1,
-            1,
-            1
-        ],
-        "completed": [
-            "O"
-        ],
-        "custom": {
-            "D": {
-                "setsize": "setsize_fixed",
-                "sizebounds": [
-                    5,
-                    5,
-                    5,
-                    5
-                ],
-                "designate": [
-                    "exitmenu",
-                    "cmd",
-                    "moveto",
-                    "setsize",
-                    "&",
-                    "%",
-                    "&",
-                    "%",
-                    "@",
-                    "%"
-                ]
-            },
-            "p": {
-                "sizebounds": [
-                    1,
-                    10,
-                    1,
-                    10
-                ],
-                "designate": [
-                    "exitmenu",
-                    "cmd",
-                    "moveto",
-                    "setsize",
-                    "&"
-                ]
-            },
-            "Mv": {
-                "sizebounds": [
-                    1,
-                    1,
-                    1,
-                    10
-                ]
-            },
-            "ws": {
-                "setsize": "setsize_fixed",
-                "sizebounds": [
-                    5,
-                    5,
-                    5,
-                    5
-                ]
-            },
-            "C.": {
-                "setmats": "setmats",
-                "sizebounds": [
-                    1,
-                    10,
-                    1,
-                    10
-                ],
-                "designate": [
-                    "exitmenu",
-                    "menu",
-                    "cmd",
-                    "moveto",
-                    "setsize",
-                    "&",
-                    "%",
-                    "setmats"
-                ]
-            },
-            "Ms": {
-                "designate": [
-                    "exitmenu",
-                    "menu",
-                    "cmd",
-                    "moveto",
-                    "&",
-                    "&",
-                    "&",
-                    "&",
-                    "%"
-                ]
-            },
-
-            "o|g":  { "sizebounds": [1, 10, 1, 10] },
-
-            "O":    { "sizebounds": [1, 10, 1, 10],
-                      "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&"]
-                    },
-
-            "Mh": {
-                "sizebounds": [
-                    1,
-                    10,
-                    1,
-                    1
-                ]
-            },
-            "w[fv]": {
-                "setsize": "setsize_fixed",
-                "sizebounds": [
-                    3,
-                    3,
-                    3,
-                    3
-                ],
-                "designate": [
-                    "exitmenu",
-                    "menu",
-                    "cmd",
-                    "moveto",
-                    "setsize",
-                    "&",
-                    "%",
-                    "&",
-                    "%",
-                    "@",
-                    "%"
-                ]
-            },
-            "w[^sfv]|e.": {
-                "setsize": "setsize_fixed",
-                "sizebounds": [
-                    3,
-                    3,
-                    3,
-                    3
-                ]
-            }
-        },
         "setsize": "setsize_build",
-        "samecmd": [
-            "cmd"
-        ],
-        "designate": [
-            "exitmenu",
-            "menu",
-            "cmd",
-            "moveto",
-            "setsize",
-            "&",
-            "%",
-            "@",
-            "%"
-        ]
+        "custom": {
+            // farm plot
+            "p":        { "sizebounds": [1, 10, 1, 10],
+                          "designate": ["exitmenu", "cmd", "moveto", "setsize", "&"]
+                        },
+
+            // all constructions
+            "C.":       { "sizebounds": [1, 10, 1, 10],
+                          "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "setmats"],
+                          "setmats": "setmats"
+                        },
+
+            // paved roads and bridges
+            "o|g":      { "sizebounds": [1, 10, 1, 10] },
+
+            // unpaved roads
+            "O":        { "sizebounds": [1, 10, 1, 10],
+                          "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&"]
+                        },
+
+            // 5x5 siege workshop
+            "ws":       { "sizebounds": [5, 5, 5, 5],
+                          "setsize": "setsize_fixed"
+                        },
+
+            // metalsmith forge, magma forge
+            "w[fv]":    { "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "&", "%", "@", "%"],
+                          "sizebounds": [3, 3, 3, 3],
+                          "setsize": "setsize_fixed"
+                        },
+
+            // 3x3 workshops & furnaces other than those already accounted for
+            "w[^sfv]|e.":
+                        { "sizebounds": [3, 3, 3, 3],
+                          "setsize": "setsize_fixed"
+                        },
+
+            // trade depot
+            "D":        { "designate": ["exitmenu", "cmd", "moveto", "setsize", "&", "%", "&", "%", "@", "%"],
+                          "sizebounds": [5, 5, 5, 5],
+                          "setsize": "setsize_fixed"
+                        },
+
+            // screw pump
+            "Ms":      { "designate": ["exitmenu", "menu", "cmd", "moveto", "&", "&", "&", "&", "%"] },
+
+            // horizontal and vertical axles
+            "Mh":      { "sizebounds": [1, 10, 1, 1] },
+            "Mv":      { "sizebounds": [1, 1, 1, 10] }
+
+            }
+    },
+
+    "place": { // place stockpiles
+        "init": null,
+        "completed": null,
+        "designate": ["moveto", "cmd", "&", "setsize", "&"],
+        "samecmd": null,
+        "diffcmd": ["cmd"],
+        "submenukeys": "",
+        "sizebounds": null,
+        "custom": null,
+        "setsize": "setsize_standard"
+    },
+
+    "query": { // set building/task prefs
+        "init": null,
+        "completed": null,
+        "designate": ["moveto", "cmd", "setsize"],
+        "samecmd": ["cmd"],
+        "diffcmd": ["cmd"],
+        "submenukeys": "",
+        "sizebounds": [1, 1, 1, 1], // #query actions only ever operate on one cell at a time
+        "custom": null,
+        "setsize": "setsize_standard"
     }
 }

@@ -8,6 +8,7 @@ import csv
 from xls import read_xls_file, read_xls_sheets
 from xlsx import read_xlsx_file, read_xlsx_sheets
 
+from minify_json import json_minify
 from geometry import Point
 from grid import Grid, GridLayer
 from util import Struct
@@ -25,8 +26,10 @@ def read_csv_file(filename):
 def load_json(filename):
     """Loads a JSON document at filename and returns the decoded result."""
     with open(filename) as f:
-        return json.load(f)
-
+        stripped = ""
+        for line in f: # naively strip single line comments prefixed with //
+            stripped += re.sub(r'//.*$', '', line)
+        return json.loads(stripped)
 
 class FileLayer:
     """
