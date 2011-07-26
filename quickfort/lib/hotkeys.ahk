@@ -420,7 +420,7 @@ Examples:
 
     if (command != "")
     {
-      evalOK := RegExMatch(command, "S)^([bdpq])\w*\s+(.+)", evalMatch)
+      evalOK := RegExMatch(command, "S)^\#?([bdpq])\w*\s+(.+)", evalMatch)
       if (!evalOK)
       {
         MsgBox, Error: Invalid command syntax`nExpected: [b|d|p|q] cmd(,cmd2,..,cmdN)(#cmd,...)`n`n%command%
