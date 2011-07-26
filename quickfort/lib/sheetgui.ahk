@@ -196,7 +196,14 @@ UpdateGuiSheetInfo(index)
 
   newtext := newtext "`n`n"
   newtext := newtext Comment%index%
-  newtext := newtext "`n`nCommand usage frequencies:`n" CommandUseCounts%index%
+  newtext := newtext "`n"
+  
+  if (UsesManualMats%index% = "true")
+  {
+    newtext := newtext "`n** This blueprint uses manual material selection **`n"
+  }
+
+  newtext := newtext "`nCommand usage frequencies:`n" CommandUseCounts%index%
   newtext := newtext "`n`nDimensions: " Width%index% "w x " Height%index% "h"
   newtext := newtext "`n`n" BlueprintPreview%index%
   GuiControl,, SheetName, %newtitle%

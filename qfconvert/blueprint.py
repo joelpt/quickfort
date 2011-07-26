@@ -306,7 +306,10 @@ class Blueprint:
         # count the number of occurrences of each command in the blueprint
         counts = [(c, commands.count(c)) for c in cmdset]
         counts.sort(key=lambda x: x[1], reverse=True)
-        
+
+        # look for the manual-mat character anywhere in the commands
+        uses_manual_mats = is_substring_in_list(':', cmdset)
+
         # make a row of repeating numbers to annotate the blueprint with
         width = self.layers[0].grid.width
         numbering_row = '  ' + ('1234567890' * (width // 10))[0:width]
@@ -322,6 +325,7 @@ class Blueprint:
             First layer width: %d
             First layer height: %d
             Layer count: %d
+            Uses manual material selection: %s
             Command use counts: %s
             """).strip() % (
                 self.name,
@@ -332,6 +336,7 @@ class Blueprint:
                 width,
                 self.layers[0].grid.height,
                 len(self.layers),
+                uses_manual_mats,
                 ', '.join("%s:%d" % c for c in counts)
                 ) + \
             "\nBlueprint preview:\n" + \
@@ -340,3 +345,13 @@ class Blueprint:
                         '\n#' + ''.join(layer.onexit)
                     for layer in self.layers
                 )
+
+def is_substring_in_list(needle, haystack):
+    """
+    Determine if any string in haystack:list contains the specified 
+    needle:string as a substring.
+    """
+    for e in haystack:
+        if needle in e:
+            return True
+    return False

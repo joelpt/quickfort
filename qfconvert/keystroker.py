@@ -27,7 +27,9 @@ class Keystroker:
 
     def plot(self, plots, cursor):
         """
-        Plots a track through the grid following the positions in plots.
+        Follows the route given by plots, generating the keys necessary
+        to plot/designate those areas in DF.
+
         Returns list of keycodes generated.
         """
 
@@ -62,14 +64,27 @@ class Keystroker:
             setsize, newpos = setsizefun(pos, endpos)
             subs['setsize'] = setsize
 
+            # look for mat selection syntax like Cw:1
+            mat_label = None
+            if ':' in command:
+                match = re.search(r'(.+):([\w]+)$', command)
+                if match is None:
+                    raise Exception, \
+                        'Invalid characters in material label: ' + command
+
+                # split command:mat_label into command and mat_label
+                command = match.group(1)
+                mat_label = match.group(2)
+                # TODO: pitch a fit if we're not in key output mode
+
             # setmats = keys to select mats for an area
             setmatscfg = self.buildconfig.get('setmats', command)
             if setmatscfg:
                 setmatsfun = getattr(self, setmatscfg)
-                subs['setmats'] = setmatsfun(cell.area.size())
+                subs['setmats'] = setmatsfun(cell.area.size(), mat_label)
 
             # handle submenus
-            justcommand = None
+            use_command = None
             for k in submenukeys:
                 if re.match(k, command):
                     # this command needs to be called in a DF submenu
@@ -91,11 +106,11 @@ class Keystroker:
                         subs['exitmenu'] = []
 
                     # drop the submenu key from command
-                    justcommand = command[1:]
+                    use_command = command[1:]
                     continue
 
             # no known submenu found in command?
-            if not justcommand:
+            if not use_command:
                 if last_submenu:
                     # was in a submenu, now want to be at parent menu
                     subs['exitmenu'] = ['^']
@@ -105,10 +120,10 @@ class Keystroker:
 
                 subs['menu'] = []
                 last_submenu = ''
-                justcommand = command[:]
+                use_command = command[:]
 
             # break command into keycodes
-            codes = split_keystring_into_keycodes(justcommand)
+            codes = split_keystring_into_keycodes(use_command)
 
             # substitute keycodes into nextcmd where we find the string 'cmd'
             nextcodes = []
@@ -265,21 +280,41 @@ class Keystroker:
 
         return keys, midpoint
 
-    def setmats(self, areasize):
+    def setmats_build(self, areasize, manual_label):
         """
-        Tries to avoid running out of a given material type by blithely
-        attempting to all-select from DF's materials list repeatedly.
-        qfconvert will attempt this 1+sqrt(areasize) times, which should
-        be good enough most of the time.
+        Returns keycodes needed to select materials for the given int areasize,
+        and either generic material selection or manual(ly assisted)
+        material selection.
+
+        If manual_label is None, we prefix the "enter mats menu and wait"
+        keycodes and postfix a "wait" to the keys needed to choose the mats.
+
+        If manual_label is not None, we use {EnterMatMenuSafe} and
+        {SelectMat label count} keycodes for use by QFAHK for entering
+        the material menu and doing manual material selection.
         """
-        if areasize == 1:
-            return ['@'] # shift-enter
+        # generic mat selection
+        if manual_label is None:
+            keys = ['&', '%'] # {Enter}{Wait}
+            if areasize == 1:
+                keys += ['@'] # shift-enter
+                return keys
 
-        reps = 2 * int(sqrt(areasize))
-        keys = ['@', '{menudown}'] * (reps - 1)
-        keys.append('@')
-        return keys
+            # Tries to avoid running out of a given material type by blithely
+            # attempting to all-select from DF's materials list repeatedly.
+            # qfconvert will attempt this 1+sqrt(areasize) times, which should
+            # be good enough most of the time.
+            reps = 1 if areasize == 1 else 1 + 2 * int(sqrt(areasize))
+            keys += ['@', '{menudown}'] * (reps - 1)
+            keys += ['%'] # {Wait} at the end
 
+            return keys
+        
+        # Manually assisted material selection: enter materials menu and
+        # wait for that region of the screen to change, then select manually
+        # chosen material.
+        return ['{EnterMatMenuSafe}', 
+            '{SelectMat %s %d}' % (manual_label, areasize)]
 
 
 def convert_keys(keys, mode, title):

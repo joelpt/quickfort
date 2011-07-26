@@ -21,3 +21,7 @@ glob:quickfort_stx.sublime-project
 glob:quickfort/config/state.ini
 glob:release.zip
 glob:zip_temp/
+glob:release/*
+glob:*.lnk
+glob:qfconvert/dist/*
+glob:quickfort/~qf*

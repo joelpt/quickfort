@@ -10,7 +10,7 @@
 //         "key": "value", 
 //         ...,
 //         "custom": {
-//             "cell-regex": {
+//             "cell-regex-key": {
 //                 "key":, "value",
 //                 ...
 //             },
@@ -39,7 +39,7 @@
 //  setmats: name of Python function which will return keys needed to select required mats for constructions
 //  custom: list of key-value pairs that can be used to customize QF's key patterns for specific designations.
 //              key:   regex expression to match blueprint cell-values against
-//                     treated as re.match(), i.e. 'p' is executed as '^p$'
+//                     treated as re.match(), i.e. 'p' is performed as the regex '^p'
 //              value: { "key": value, ... }
 //                     key:value pairs that override parent build-phase's values when key matches a cell
 
@@ -59,11 +59,12 @@
     "build": { // build constructions
         "init": ["^"],
         "completed": ["O"], // build dirt road to allow cursor repositioning
-        "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "@", "%"],
+        "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "setmats"],
         "samecmd": ["cmd"],
         "diffcmd": ["cmd"],
         "submenukeys": ["i", "w", "e", "C", "T", "M"],
         "sizebounds": [1, 1, 1, 1],
+        "setmats": "setmats_build",
         "setsize": "setsize_build",
         "custom": {
             // farm plot
@@ -72,10 +73,7 @@
                         },
 
             // all constructions
-            "C.":       { "sizebounds": [1, 10, 1, 10],
-                          "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "setmats"],
-                          "setmats": "setmats"
-                        },
+            "C.":       { "sizebounds": [1, 10, 1, 10] },
 
             // paved roads and bridges
             "o|g":      { "sizebounds": [1, 10, 1, 10] },

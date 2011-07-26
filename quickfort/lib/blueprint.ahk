@@ -54,7 +54,6 @@ GetBlueprintInfo(filename)
   params = --info
   outfile := A_ScriptDir "\" GetRandomFileName() ".tmp"
   result := ExecQfConvert(filename, outfile, params)
-  FileDelete, %outfile%
 
   ClearTip()
 
@@ -66,15 +65,16 @@ GetBlueprintInfo(filename)
     cnt := 0
     Loop, Parse, result, ¢
     {
-      info = %A_LoopField% ; whitespace trim
+      info = %A_LoopField% ; AHK style whitespace trim
       if (StrLen(info) > 3)
       {
-        needle := "Sheet id (\d+)\RBlueprint name: (.+)\RBuild type: (.+)\RComment: (.*)\RStart position: (.+)\RStart comment: (.*)\RFirst layer width: (.+)\RFirst layer height: (.+)\RLayer count: (.+)\RCommand use counts: (.*)\RBlueprint preview:\R((.+\R)+)#"
+        needle := "Sheet id (\d+)\RBlueprint name: (.+)\RBuild type: (.+)\RComment: (.*)\RStart position: (.+)\RStart comment: (.*)\RFirst layer width: (.+)\RFirst layer height: (.+)\RLayer count: (.+)\RUses manual material selection: (.+)\RCommand use counts: (.*)\RBlueprint preview:\R((.+\R)+)#"
         if (!RegExMatch(info, needle, matches))
         {
           MsgBox, Error reading blueprint information from qfconvert.py output file %outfile%
           return False
         }
+
         Name%cnt% := matches2
         BuildType%cnt% := matches3
         StringReplace, Comment%cnt%, matches4, \n, `n, All
@@ -83,12 +83,14 @@ GetBlueprintInfo(filename)
         Width%cnt% := matches7
         Height%cnt% := matches8
         LayerCount%cnt% := matches9
-        CommandUseCounts%cnt% := matches10
-        BlueprintPreview%cnt% := matches11
+        UsesManualMats%cnt% := matches10
+        CommandUseCounts%cnt% := matches11
+        BlueprintPreview%cnt% := matches12
         cnt += 1
       }
       SheetCount := cnt
     }
+    FileDelete, %outfile%
     return True
   }
   else

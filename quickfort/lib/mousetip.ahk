@@ -65,7 +65,9 @@ UpdateTip()
   local mode, header, body
   
   ; Determine tip mode.
-  if (Building)
+  if (SelectingMat)
+    mode := "mat"
+  else if (Building)
     mode := "build"
   else if (CommandLineMode)
     mode := "prebuild"
@@ -77,7 +79,11 @@ UpdateTip()
     mode := "prebuild"
 
   ; Determine contents of mouse tooltip based on mode.
-  if (mode == "pickfile")
+  if (mode == "mat")
+  {
+    header := ""
+  }
+  else if (mode == "pickfile")
   {
     header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F.`nAlt+T for command line."
   }
@@ -97,16 +103,16 @@ UpdateTip()
         header := header ": " Name%SelectedSheetIndex%
       }
 
-      header := header " (" BuildType%SelectedSheetIndex% " mode)"
+      if (ShowFullTip)
+        header := header " (" BuildType%SelectedSheetIndex% " mode)"
+      else
+        header := header " (#" BuildType%SelectedSheetIndex% " " PlaybackMode ")"
       header := header ", " Width%SelectedSheetIndex% "x" Height%SelectedSheetIndex%
-
-      if (!ShowFullTip)
-        header := header " [" PlaybackMode "]"
 
       if (LayerCount%SelectedSheetIndex% > 1)
         header := header "x" LayerCount%SelectedSheetIndex%
-    }
 
+    }
 
     if (RepeatPattern)
       header := header "`nALT+R: " RepeatPattern
@@ -173,7 +179,7 @@ UpdateTip()
     }
   }
 
-  FullTip := header (body ? "`n`n" body : "")
+  FullTip := header (header && body ? "`n`n" : "") body
   RequestMouseTipUpdate()
 }
 
@@ -214,36 +220,36 @@ ShowMouseTip:
   {
     Tooltip,
     LastToolTip =
+    return
   }
+
+  SetTimer, ShowMouseTip, %MouseTooltipUpdateMs%
+
+  xpos += 30
+
+  if (Building)
+    tipheight := 140
+  else if (ReadyToBuild && ShowFullTip)
+    tipheight := 280
+  else if (ReadyToBuild && ShowFullTip)
+    tipheight := 140
   else
+    tipheight := 100
+
+  if (ypos + tipheight > ScreenHeight)
+    ypos := ScreenHeight - tipheight + 20 ; don't let tooltip touch the bottom (restrain at edge)
+  else
+    ypos += 20 ; below
+
+  if (LastTooltip != FullTip || LastMouseX != xpos || LastMouseY != ypos)
   {
-    SetTimer, ShowMouseTip, %MouseTooltipUpdateMs%
+    LastTooltip := FullTip
+    LastMouseX := xpos
+    LastMouseY := ypos
 
-    xpos += 30
-
-    if (Building)
-      tipheight := 140
-    else if (ReadyToBuild && ShowFullTip)
-      tipheight := 280
-    else if (ReadyToBuild && ShowFullTip)
-      tipheight := 140
-    else
-      tipheight := 100
-
-    if (ypos + tipheight > ScreenHeight)
-      ypos := ScreenHeight - tipheight + 20 ; don't let tooltip touch the bottom (restrain at edge)
-    else
-      ypos += 20 ; below
-
-    if (LastTooltip != FullTip || LastMouseX != xpos || LastMouseY != ypos)
-    {
-      LastTooltip := FullTip
-      LastMouseX := xpos
-      LastMouseY := ypos
-
-      ToolTip, %FullTip%, %xpos%, %ypos%
-    }
+    ToolTip, %FullTip%, %xpos%, %ypos%
   }
+
   return
 }
 

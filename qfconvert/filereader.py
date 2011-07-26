@@ -8,7 +8,6 @@ import csv
 from xls import read_xls_file, read_xls_sheets
 from xlsx import read_xlsx_file, read_xlsx_sheets
 
-from minify_json import json_minify
 from geometry import Point
 from grid import Grid, GridLayer
 from util import Struct

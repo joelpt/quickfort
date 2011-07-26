@@ -40,15 +40,17 @@ Init()
   LastMacroWasPlayed := false
   LaunchedOn := A_Now
   LaunchedTickCount := A_TickCount
+  MemorizedMats := {}
+  MatMenuCoords := {}
+  SelectingMat := false
 
   ; Init saved gui state
   LoadAppState()
 
-  ; Init hotkeys
+  ; Init subsystems
   InitHotkeys()
-  
-  ; Init mousetip
   InitMouseTip()
+  InitScreenClipper()
 
   ; Show mousetip
   ShowTip()
@@ -65,6 +67,8 @@ Init()
     TrayTip, Quickfort, Version %Version%, , 1
   }
 
+  ; Ready our MACRO_MS checker
+  CheckDFMacroMS()
   return
 }
 
@@ -95,6 +99,11 @@ SetDefaultOptions()
   KeyMacroPlay = ^p
   KeyMacroRecord = ^r
   KeyMacroSave = ^s
+  KeyEnter = {Enter}
+  KeyNextMenuItem = {+}
+  WaitForMatMenuMaxMS := 15000
+  MaxMatSearchChecks := 200
+  MatMenuSearchDelay := 50
 
   return
 }
@@ -126,12 +135,14 @@ LoadOptions()
 ;; Load app state from config/state.ini
 LoadAppState()
 {
-  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
+  global
+
   IniRead, PlaybackMode, config/state.ini, GUI, PlaybackMode
   IniRead, SelectedFolder, config/state.ini, GUI, LastFolder
   IniRead, LastRepeatPattern, config/state.ini, GUI, LastRepeatPattern
   IniRead, LastCommandLine, config/state.ini, GUI, LastCommandLine
   IniRead, ShowFullTip, config/state.ini, GUI, ShowFullTip
+  IniRead, DoMacroMSCheck, config/state.ini, GUI, DoMacroMSCheck
 
   ; defaults used when no such INI key exists
   if (PlaybackMode == "ERROR")
@@ -149,19 +160,22 @@ LoadAppState()
   if (ShowFullTip == "ERROR")
     ShowFullTip := 1
 
+  if (DoMacroMSCheck == "ERROR")
+    DoMacroMSCheck := 1
+
   return
 }
-
 
 ;; ---------------------------------------------------------------------------
 ;; Save app state to config/state.ini
 SaveAppState()
 {
-  global SelectedFolder, LastRepeatPattern, LastCommandLine, ShowFullTip, PlaybackMode
+  global
 
   IniWrite, %PlaybackMode%, config/state.ini, GUI, PlaybackMode
   IniWrite, %ShowFullTip%, config/state.ini, GUI, ShowFullTip
   IniWrite, %SelectedFolder%, config/state.ini, GUI, LastFolder
+  IniWrite, %DoMacroMSCheck%, config/state.ini, GUI, DoMacroMSCheck
 
   if (LastCommandLine)
     IniWrite, %LastCommandLine%, config/state.ini, GUI, LastCommandLine

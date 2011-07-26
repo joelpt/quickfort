@@ -16,15 +16,16 @@
 # This can be persistently toggled using QF's Alt+K hotkey.
 PlaybackMode = macro
 
-# The following keybinds are used to get Dwarf Fortress to play
-# macros. Syntax: http://www.autohotkey.com/docs/commands/Send.htm
+# The following keybinds are used to get Dwarf Fortress to do stuff.
+# Syntax: http://www.autohotkey.com/docs/commands/Send.htm
 KeyMacroLoad = ^l
 KeyMacroHighlightLastMacro = {Up}
 KeyMacroSelectMacro = {Enter}
 KeyMacroPlay = ^p
 KeyMacroRecord = ^r
 KeyMacroSave = ^s
-
+KeyEnter = {Enter}
+KeyNextMenuItem = {+}
 
 #----------------------------
 # Quickfort GUI options
@@ -41,11 +42,30 @@ ShowMouseTooltip = 1
 MouseTooltipUpdateMs = 3
 
 #----------------------------
+# Manual material selection
+#----------------------------
+
+# How long to wait during manual material selection for the
+# materials menu to appear after QF sends Enter to show it
+WaitForMatMenuMaxMS = 15000
+
+# Max # of times Quickfort should step through the materials 
+# menu looking for a memorized material before giving up
+MaxMatSearchChecks = 200
+
+# How many MS to wait between each check while searching
+# through the materials list for a memorized mat; if this
+# is too small it can check before DF has a chance to
+# update its display
+MatMenuSearchDelay = 50
+
+#----------------------------
 # Key-sending
 #----------------------------
 
-# The following options only apply when PlaybackMode = key
-# or when using Alt+V 'visualize'.
+# The following options only apply when PlaybackMode = key,
+# when using Alt+V 'visualize', and when using manual material
+# selection e.g. #dig Cw:granite
 
 # Determines key-sending method, one of: 
 #   Send SendEvent SendInput SendPlay ControlSend
