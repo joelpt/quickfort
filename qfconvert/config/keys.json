@@ -12,16 +12,19 @@
 // }
 //
 // For macro output, the output-codes correspond to [KEY:xxx] or [SYM:xxx] values in config/interface.txt.
-// This interface.txt can be copied directly from a DF installation's data/init folder.
-// Specifying "^" as an output-code causes QF to output the "LEAVESCREEN" DF macro-code.
+// This interface.txt file can be copied directly from any DF installation's data/init folder.
+// Specifying "^" as a macro output-code causes QF to output the "LEAVESCREEN" DF macro-code (== Esc key).
 //
 // For key output, the output-codes correspond to keystrokes in AutoHotKey's Send syntax:
 //      http://www.autohotkey.com/docs/commands/Send.htm
-// QFAHK additionally understands some {Key} style codes which affect QFAHK's key-sending routine:
+// QFAHK additionally understands some {Key} style key output-codes which affect QFAHK's key sending:
 //      {Wait} briefly pauses playback
 //
 // Internally QF represents cursor movements through use of square-bracketed keycodes.
 // Codes like [n] move one step in a direction; codes like [+n] move 10 steps in a direction.
+//
+// The following additional QF keycodes are utilized in code:
+//      {heighten} {widen} {exitmenu} {menudown} {menuup} & @ ^ %
 
 {
     "macro": {
