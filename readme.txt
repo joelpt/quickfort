@@ -40,6 +40,7 @@ Table of Contents
   * [Specifying a starting position](#startpos)
   * [Multilevel blueprints](#multilevel)
   * [Multiple build phases](#multiphase)
+  * [Manual material selection](#manualmats)
 * [Command prompt](#commandprompt)
 * [Transformations](#transforms)
   * [Transformations: Simple repetition](#repetition)
@@ -49,6 +50,8 @@ Table of Contents
     * [Advanced transformations: the whirlpool pattern](#whirlpool)
     * [Advanced transformations: multiple Z-levels](#multileveltransforms)
     * [Advanced transformations: the ! command](#bangcommand)
+    * [Advanced transformations: Search and replace](#searchandreplace)
+    * [Advanced transformations: Change build phase](#changebuildphase)
     * [Advanced transformations: debugging](#debugging)
 * [Stupid dwarf tricks](#stupiddwarftricks)
 * [Troubleshooting](#troubleshooting)
@@ -686,7 +689,6 @@ A blueprint can be transformed in the following ways:
     Mirror the blueprint around both x and y axes.
 
 
-
 Advanced transformations                                        {#advtransforms}
 ------------------------
 
@@ -908,6 +910,7 @@ perfectly square blueprints (width == height), which when repeated in a
 direction will adjoin nicely with neighboring designated blueprints. You'll
 worry much less about halign/valign issues within complex transform sequences.
 
+
 Advanced transformations: the whirlpool pattern                     {#whirlpool}
 -------------------------------------
 
@@ -1033,6 +1036,90 @@ then executing a separate sequence `2e` on the `rotcw` transformation's result.
     Alt+R -> rotcw ! 2e: rotate the blueprint, then repeat it twice east
 
 
+Advanced transformations: Search and replace                 {#searchandreplace}
+--------------------------------------------
+
+The substitution command can be used to change the contents of cells using
+a regular-expression based search and replace.
+
+The syntax is:
+
+    s/pattern/replacement/
+
+For example, to change all `Ts` (stonefall trap) cells on a blueprint into
+`Tw` (weapon trap) cells:
+
+    Alt+R -> s/Ts/Tw/
+
+`pattern` is a regular expression pattern; for more information please see
+<http://www.regular-expressions.info/>. Most of the time, just using a
+simple substring pattern will do what you expect.
+
+`replacement` is the value to replace `pattern` with, and can be any valid
+string. Use \1, \2, ... for regex capture-group matching.
+
+Quickfort additionally supports two more useful features: matching empty
+cells (`s//replacement/`) and match negation (`s/~pattern/replacement/`).
+
+    Alt+R -> s//d/
+    Matches all empty cells in a blueprint and fills them with `d`
+
+    Alt+R -> s/~d/i/
+    Turns all cells which do NOT match `d` into `i`
+
+    Alt+R -> s/~/d/
+    Turns all NON-empty cells into `d`
+
+By default, Quickfort matches anywhere within the contents of a cell. Thus
+the following:
+
+    Alt+R -> s/oo/ee/
+
+will turn cells containing `booze` into `beeze`. To require the entire cell
+to match, use regex's `^` (match at start) and `&` (match at end) codes:
+
+    Alt+R -> s/^oo&/ee/
+    Used on cell `booze`, has no effect - cell stays as `booze`;
+    used on cell `oo`, cell becomes `ee`
+
+Quickfort only updates Working bucket B with `s/foo/bar/` commands. This
+allows for making alternating patterns if desired. If this is not what
+you want, either put the `s/foo/bar` commands *after* other transformation
+commands, or follow it with a `!` command.
+
+A few more examples:
+  
+    Alt+R -> s/Cw/Cw:foo/
+    Adds manual material label `:foo` to all `Cw` cells
+
+    Alt+R -> s/(Cw|Cf)/\1:foo/
+    Adds manual material label `:foo` to all `Cw` or `Cf` cells
+
+    Alt+R -> s/Cf/Cf:foo/ ! s/Cf:foo/Cf:bar/ 4e fliph flipv 4s
+    Repeat a flooring blueprint as a checkerboard, using alternating manual mats
+
+
+Advanced transformations: Change build phase                 {#changebuildphase}
+--------------------------------------------
+
+Particularly when using the `s/pattern/replacement/` substitution command, it
+can be useful to change the build phase without editing the blueprint directly.
+This can be accomplished using the `phase=...` command.
+
+For these examples, assume we start with a #dig blueprint. Observe:
+
+    Alt+R -> phase=build
+    Simply changes the #dig blueprint into a #build blueprint.
+
+    Alt+R -> phase=build s/d/Cf/
+    Sets as #build print, then changes all `d` cells into `Cf` (floor tiles).
+
+    Alt+R -> phase=b s//Cw/ s/~Cw//
+    Sets as #build, turns empty cells into `Cw` walls, and clears all others.
+
+All build phases and their first-letter abbreviations are accepted.
+
+
 Advanced transformations: debugging                                 {#debugging}
 -----------------------------------
 
@@ -1062,6 +1149,14 @@ Undesignate a large chunk of the map on multiple z-levels:
 
     Alt+T -> dig x(100x100)
     Alt+R -> 10d
+
+Manually choose and use the same material for all walls in a #build blueprint:
+
+    Alt+R -> s/Cw/Cw:foo/
+
+Turn all 'd' cells of a #dig blueprint into 'Cf' flooring using #build phase:
+
+    Alt+R -> phase=build s/d/Cf/ s/~Cf//
 
 
 Troubleshooting                                               {#troubleshooting}

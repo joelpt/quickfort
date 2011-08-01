@@ -4,6 +4,7 @@ import os
 import re
 import textwrap
 
+import buildconfig
 import exetest
 
 from areaplotter import AreaPlotter
@@ -104,7 +105,12 @@ def convert_blueprint(layers, details, options):
         if options.debugtransform:
             print "#### Transforming with: %s" % options.transform
 
-        transforms, ztransforms = parse_transform_str(options.transform)
+        newphase, transforms, ztransforms = \
+            parse_transform_str(options.transform)
+
+        if newphase is not None:
+            details.build_type = buildconfig.get_full_build_type_name(newphase)
+
         tran = Transformer(layers, details.start, options.debugtransform)
         tran.transform(transforms) # do the x/y transformations
         details.start = tran.start

@@ -5,6 +5,8 @@ import re
 import os.path
 import csv
 
+import buildconfig
+
 from xls import read_xls_file, read_xls_sheets
 from xlsx import read_xlsx_file, read_xlsx_sheets
 
@@ -169,17 +171,7 @@ def parse_command(command):
     # set up details object
     details = SheetDetails()
 
-    if m.group(1) == 'd':
-        details.build_type = 'dig'
-    elif m.group(1) == 'b':
-        details.build_type = 'build'
-    elif m.group(1) == 'p':
-        details.build_type = 'place'
-    elif m.group(1) == 'q':
-        details.build_type = 'query'
-    else:
-        details.build_type = m.group(1)
-
+    details.build_type = buildconfig.get_full_build_type_name(m.group(1))
     details.start = Point(0, 0)
     details.start_comment = ''
     details.comment = ''
@@ -201,7 +193,6 @@ def parse_command(command):
         fl.clean_cells()
 
     return filelayers, details
-
 
 
 def read_sheet(filename, sheetid):

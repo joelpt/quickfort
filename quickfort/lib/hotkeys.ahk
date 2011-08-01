@@ -170,15 +170,15 @@ $!C::
   {
     msg =
     (
-Enter transformation pattern below.
+Enter transformation pattern below. The following commands are recognized:
 
-  Syntax: #D #D #D ... where D is one of:
-    n s e w u d flipv fliph rotcw rotccw ! halign=.. valign=..
+  Repetition: #D, where # is a positive number and D is one of: n s e w u d
+  Transforms: flipv fliph rotcw rotccw ! halign=.. valign=.. phase=.. s/pattern/repl/
 
   Examples:
     2e 2s
-    rotcw
-    fliph 2e flipv 2s
+    fliph 11e flipv 11s 11d
+    s/d/Cw/ halign=left rotcw 2e flipv 2s 2d
 
 Enter ? for more help.
     )
@@ -200,13 +200,21 @@ Enter ? for more help.
     {
       msg =
       (
-Base syntax: [#]D [[#]D [#]D...]
+Any number of transformations can be chained together.
+
+Repetition commands syntax: #D
   # = times to repeat action, defaults to 1 if omitted
-  D = one of: n s e w u d flipv fliph rotcw rotccw !
-  Any number of transformations can be chained together.
+  D = one of: n s e w u d (4 cardinal directions plus zup/zdown)
   #d/#u transforms (multi z-level) are always performed last.
 
-Alignment codes can be used to specify chaining alignments.
+Transformation commands:
+  flipv, fliph: flip horizontally/vertically
+  rotcw, rotccw: rotate clockwise/counterclockwise
+  !: transformation sequence separator
+  phase=dig|build|place|query|d|b|p|q: override build phase
+  s/pat/repl/: regex match cells vs. pat and replace with repl
+
+Alignment codes can be used to control alignment in command chains.
   halign=left|middle|right|l|m|r
   valign=top|middle|bottom|t|m|b
 
@@ -220,6 +228,7 @@ Examples:
   rotcw 2e flipv fliph 2s -- 2x2 rotated around a center point
   rotcw valign=top 2e -- after rotating, top-align and repeat 2e
   rotcw ! 2e -- rotate original blueprint, then repeat that 2x east
+  phase=build s/d/Cf/ -- #build flooring from a #dig blueprint
   valign=m halign=m rotcw 2e flipv fliph 2s 2e 2s 2d -- big example
 
 Read the Quickfort user manual for more details.

@@ -12,26 +12,41 @@ from filereader import FileLayer
 def parse_transform_str(transform_str):
     """
     Converts space separated transform string e.g. '2e valign=top rotcw' 
-    into list of tuples, e.g. [(2, 'e'), ('t', 'valign'), (1, 'rotcw')]
-    Returns the conversion result as 2 lists of tuples: 
-    x/y transforms, and z-level transforms.
+    into list of tuples, e.g. [(2, 'e'), ('t', 'valign'), (1, 'rotcw')].
+    
+    Transforms of format s/pat/repl/ are stored as (('pat', 'repl'), 'sub')
+
+    Returns the conversion result as follows:
+        ('newphase', (x/y transforms), (z-level transforms))
     """
-    transforms = transform_str.lower().strip().split(' ')
+    transforms = transform_str.strip().split(' ')
     readies = []
+    newphase = None
     for t in transforms:
-        
+        lt = t.lower()
         try:
-            m = re.match(r'(halign)=(l|m|r)\w*', t)
+            m = re.match(r'^(halign)=(l|m|r)\w*$', lt)
             if m is not None:
                 readies.append(m.group(2, 1))
                 continue
             
-            m = re.match(r'(valign)=(t|m|b)\w*', t)
+            m = re.match(r'^(valign)=(t|m|b)\w*$', lt)
             if m is not None:
                 readies.append(m.group(2, 1))
                 continue
 
-            m = re.match(r'(\d+)?(n|s|e|w|u|d|rotcw|rotccw|fliph|flipv|!)', t)
+            m = re.match(r'^(phase)=(b|d|p|q)\w*$', lt)
+            if m is not None:
+                newphase = m.group(2)
+                continue
+
+            # matches s/pattern/replacement/, allows escaping / as \/
+            m = re.match(r'^(s|sub)/(\S*?)(?<!\\)/(\S*?)(?<!\\)/$', t)
+            if m is not None:
+                readies.append((m.group(2, 3), 'sub'))
+                continue
+
+            m = re.match(r'^(\d+)?(n|s|e|w|u|d|rotcw|rotccw|fliph|flipv|!)$', lt)
             if m is not None:
                 count = int(m.group(1)) if m.group(1) else 1
                 readies.append( (count, m.group(2)) )
@@ -51,7 +66,7 @@ def parse_transform_str(transform_str):
     xys = [t for t in readies if t[1][0] not in ('u', 'd')]
     zs = [t for t in readies if t[1][0] in ('u', 'd')]
 
-    return xys, zs
+    return newphase, xys, zs
 
 
 class Transformer:
@@ -136,27 +151,55 @@ class Transformer:
         b = deepcopy(b) # ensure a and b are different objects
         count, action = trans
 
+        if action == 'sub':
+            # do regex search-and-replace against every cell in B
+            (pattern, replacement) = count
+
+            # handle 'empty' patterns for the user by matching the empty string
+            if pattern == '': pattern = '^$'
+            elif pattern == '~': pattern = '~^$' # matches any non empty cell
+
+            print pattern
+            print replacement
+
+            if len(pattern) > 0 and pattern[0] == '~': 
+                # "negate" the pattern - s/~d/x/ turns all non-d cells to x
+                pattern = pattern[1:]
+                b = [[replacement if re.search(pattern, cell) is None 
+                        else cell
+                        for cell in row]
+                    for row in b]
+                return a, b
+
+            # do normal by-cell search and replace
+            b = [[re.sub(pattern, replacement, cell) 
+                    for cell in row]
+                for row in b]
+            return a, b
+
         if action == 'flipv':
             # flip b vertically
             b.reverse()
             return a, b
 
-        elif action == 'fliph':
+        if action == 'fliph':
             # flip b horizontally
             for row in b:
                 row.reverse()
             return a, b
 
-        elif action in ('rotcw', 'rotccw'):
+        if action in ('rotcw', 'rotccw'):
             # rotate a clockwise or counterclockwise 90 degrees
             rot = [list(x) for x in zip(*b)] # pivot the grid (cols become rows)
+            
             if action == 'rotcw':
-                return self.apply_transform((1, 'fliph'), a, rot)
-            if action == 'rotccw':
-                return self.apply_transform((1, 'flipv'), a, rot)
+                return self.apply_transform((1, 'fliph'), a, rot) # clockwise
 
-        elif action in ('n', 's', 'e', 'w'):
-            ha, hb, wa, wb = len(a), len(b), len(a[0]), len(b[0]) # heights and widths
+            return self.apply_transform((1, 'flipv'), a, rot) # counterclockwise
+
+        if action in ('n', 's', 'e', 'w'):
+            # heights and widths
+            ha, hb, wa, wb = len(a), len(b), len(a[0]), len(b[0]) 
 
             # handle alignment issues when a and b have differing dimensions
             if action in ('e', 'w'):
@@ -195,9 +238,7 @@ class Transformer:
                     out.append(newrow)
             return out, deepcopy(out) # must be treated as two different objects
 
-        else:
-            raise Exception, 'Unknown transformation type: %d %s' % trans
-            
+        raise Exception, 'Unknown transformation type: %d %s' % trans
 
     def expand_width(self, rows, targetwidth, alignment):
         """Expand rows to requested targetwidth, aligning according to alignment param."""
