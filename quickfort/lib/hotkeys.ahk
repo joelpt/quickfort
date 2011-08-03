@@ -140,6 +140,7 @@ $!C::
 !E::
   if (!Building && SelectedFile)
   {
+    CheckIfSelectedFileModified()
     ShowSheetInfoGui()
     LastMacroWasPlayed := false
     LastSendKeys =
@@ -170,20 +171,21 @@ $!C::
   {
     msg =
     (
-Enter transformation pattern below. The following commands are recognized:
+Enter transformation pattern below.
 
-  Repetition: #D, where # is a positive number and D is one of: n s e w u d
-  Transforms: flipv fliph rotcw rotccw ! halign=.. valign=.. phase=.. s/pattern/repl/
+  Repetition: #D, where # is a number and D is one of: n s e w u d
+  Transforms: flipv fliph rotcw rotccw halign= valign=
+  Other: ! s/pat/repl/ phase=
 
   Examples:
     2e 2s
     fliph 11e flipv 11s 11d
-    s/d/Cw/ halign=left rotcw 2e flipv 2s 2d
+    phase=build s/d/Cf/ ! 2e
 
 Enter ? for more help.
     )
 
-    InputBox, pattern, Transform blueprint, %msg%, , 440, 300, , , , , %LastRepeatPattern%
+    InputBox, pattern, Transform blueprint, %msg%, , 440, 310, , , , , %LastRepeatPattern%
     ActivateGameWin()
     
     LastMacroWasPlayed := false
@@ -212,36 +214,32 @@ Transformation commands:
   rotcw, rotccw: rotate clockwise/counterclockwise
   !: transformation sequence separator
   phase=dig|build|place|query|d|b|p|q: override build phase
-  s/pat/repl/: regex match cells vs. pat and replace with repl
-
-Alignment codes can be used to control alignment in command chains.
-  halign=left|middle|right|l|m|r
-  valign=top|middle|bottom|t|m|b
+  s/PATTERN/NEW/: replace cells matching PATTERN with NEW
+  s/~PATTERN/NEW/: replace cells NOT matching PATTERN with NEW
+  halign=left|middle|right|l|m|r: set horizontal repeat alignment
+  valign=top|middle|bottom|t|m|b: set vertical repeat alignment
 
 Examples:
   4e -- make a row of the blueprint repeated 4 times going east
   3e 3s -- 3x3 repeating pattern of blueprint
   5e 5s 5d -- 5x5x5 cube of blueprint (multi z level)
   rotcw -- rotate the blueprint clockwise 90 degrees
-  fliph -- flip the blueprint horizontally
   fliph 2e flipv 2s -- 2x2 symmetrical pattern of blueprint
-  rotcw 2e flipv fliph 2s -- 2x2 rotated around a center point
   rotcw valign=top 2e -- after rotating, top-align and repeat 2e
   rotcw ! 2e -- rotate original blueprint, then repeat that 2x east
-  phase=build s/d/Cf/ -- #build flooring from a #dig blueprint
-  valign=m halign=m rotcw 2e flipv fliph 2s 2e 2s 2d -- big example
+  phase=build s/d/Cf/ -- use a #dig blueprint to #build flooring
 
-Read the Quickfort user manual for more details.
+Read the Quickfort user manual for in-depth explanations.
 
 Enter transformation pattern below.
       )
-      InputBox, pattern, Transform blueprint, %msg%, , 440, 520, , , , , %LastRepeatPattern%
+      InputBox, pattern, Transform blueprint, %msg%, , 440, 560, , , , , %LastRepeatPattern%
       ActivateGameWin()
     }
 
     pattern = %pattern% ; magic AHK whitespace trim
 
-    if (RegExMatch(pattern, "^((\d*([dunsew]|flip[vh]|rotc?cw|\!)|halign=([lmr]|left|middle|right)|valign=([tmb]|top|middle|bottom))\s*)+$"))
+    if (RegExMatch(pattern, "^((\d*([dunsew]|flip[vh]|rotc?cw|\!)|halign=([lmr]|left|middle|right)|valign=([tmb]|top|middle|bottom)|phase=(b|d|p|q|build|dig|place|query)|s/(\S*?)(?<!\\)/(\S*?)(?<!\\)/)\s*)+$"))
     {
       RepeatPattern := LastRepeatPattern := pattern
       SaveAppState()
@@ -298,22 +296,19 @@ $!D::
     Building := True
     Tip("Building...")
 
-    ;; Check if file was modified before testing if we can replay last macro played
-    if (!CommandLineMode && SelectedModifiedOn)
-    {
-      FileGetTime, currentModifiedOn, %SelectedFile%, M
-      if (SelectedModifiedOn != currentModifiedOn)
-      {
-        LastMacroWasPlayed := false
-        LastSendKeys := false
-        SelectedModifiedOn := currentModifiedOn
-      }
-    }
+    ;; Check if file was modified before testing whether we can replay last macro played
+    CheckIfSelectedFileModified()
 
-    ;; initiate playback based on PlaybackMode and whether we can just replay
-    ;; the last macro/keys
-    if (PlaybackMode == "macro")
+    ;; initiate playback
+    if (UsesManualMats%SelectedSheetIndex% == True)
     {
+      ; Using manual material selection: forcibly use keys mode and don't
+      ; reuse existing keys
+      ConvertAndSendKeys(false)
+    }
+    else if (PlaybackMode == "macro")
+    {
+      ; macro playback mode
       if (LastMacroWasPlayed)
       {
         ; just play the last played macro
@@ -321,16 +316,21 @@ $!D::
       }
       else
       {
+        ; do blueprint-to-macro conversion then play that macro
         ConvertAndPlayMacro()
       }
     }
-    else if (LastSendKeys)
-    {
-      SendKeys(LastSendKeys)
-    }
     else
     {
-      ConvertAndSendKeys(false)
+      ; keys playback mode
+      if (LastSendKeys)
+      {
+        SendKeys(LastSendKeys)
+      }
+      else
+      {
+        ConvertAndSendKeys(false)
+      }
     }
 
     If (RepeatPattern)
