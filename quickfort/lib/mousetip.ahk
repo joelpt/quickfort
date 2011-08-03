@@ -141,11 +141,11 @@ UpdateTip()
     {
       if (PlaybackMode == "key")
       {
-        body := "Designating..."
+        body := "Designating...`nAlt+C cancels playback."
       }
       else
       {
-        body := "Started designation.`n`nWARNING: DF aborts playback if the`nmouse moves into/out of the DF window`nor the QF mousetip."
+        body := "Started designation.`nAVOID MOVING THE MOUSE."
       }
     }
     else if (mode == "prebuild")
