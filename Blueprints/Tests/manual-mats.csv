@@ -1,6 +1,6 @@
 #build Manual mat selection test,,,,
-Cf:O,Cf:O,Cf:O,Cf:O,Cf:O
-Cf:O,Cf:I,Cf:I,Cf:I,Cf:O
-Cf:O,Cf:I,Cw:wall,Cf:I,Cf:O
-Cf:O,Cf:I,Cf:I,Cf:I,Cf:O
-Cf:O,Cf:O,Cf:O,Cf:O,Cf:O
+Cf:shiny,Cf:shiny,Cf:shiny,Cf:shiny,Cf:shiny
+Cf:shiny,Cf:dull,Cf:dull,Cf:dull,Cf:shiny
+Cf:shiny,Cf:dull,Cf,Cf:dull,Cf:shiny
+Cf:shiny,Cf:dull,Cf:dull,Cf:dull,Cf:shiny
+Cf:shiny,Cf:shiny,Cf:shiny,Cf:shiny,Cf:shiny
