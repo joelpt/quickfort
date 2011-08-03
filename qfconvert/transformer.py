@@ -41,7 +41,7 @@ def parse_transform_str(transform_str):
                 continue
 
             # matches s/pattern/replacement/, allows escaping / as \/
-            m = re.match(r'^(s|sub)/(\S*?)(?<!\\)/(\S*?)(?<!\\)/$', t)
+            m = re.match(r'^(s)/(\S*?)(?<!\\)/(\S*?)(?<!\\)/$', t)
             if m is not None:
                 readies.append((m.group(2, 3), 'sub'))
                 continue
