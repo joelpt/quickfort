@@ -83,7 +83,7 @@ GetBlueprintInfo(filename)
         Width%cnt% := matches7
         Height%cnt% := matches8
         LayerCount%cnt% := matches9
-        UsesManualMats%cnt% := matches10
+        UsesManualMats%cnt% := (matches10 = "True")
         CommandUseCounts%cnt% := matches11
         BlueprintPreview%cnt% := matches12
         cnt += 1
@@ -97,3 +97,29 @@ GetBlueprintInfo(filename)
     return False
 }
 
+
+;; ---------------------------------------------------------------------------
+;; Checks if SelectedFile has been modified and resets LastMacro/LastSend vars 
+;; to false if so
+CheckIfSelectedFileModified() 
+{
+  global CommandLineMode, SelectedModifiedOn, SelectedFile, LastMacroWasPlayed, LastSendKeys
+
+  if (!CommandLineMode && SelectedModifiedOn)
+  {
+    FileGetTime, currentModifiedOn, %SelectedFile%, M
+    if (SelectedModifiedOn != currentModifiedOn)
+    {
+      LastMacroWasPlayed := false
+      LastSendKeys := false
+      SelectedModifiedOn := currentModifiedOn
+
+      ; Re-read blueprint info since blueprint file was modified
+      GetBlueprintInfo(SelectedFile)
+
+      return true ; is modified
+    }
+  }
+
+  return false ; not modified
+}
