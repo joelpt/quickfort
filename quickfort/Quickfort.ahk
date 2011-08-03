@@ -30,9 +30,3 @@ return
 #include lib/state.ahk
 #include lib/util.ahk
 #include lib/win32.ahk
-
-#I:: MemorizeMat("test")
-#J:: MsgBox % HaveMatMenuCoordinates()
-#K:: MsgBox % WaitForMatMenuChange()
-#O:: MsgBox % SearchForMat("test")
-#P:: MsgBox % PromptOnMissingMat("test")
