@@ -26,6 +26,7 @@ KeyMacroRecord = ^r
 KeyMacroSave = ^s
 KeyEnter = {Enter}
 KeyNextMenuItem = {+}
+KeyPrevMenuPage = {/}
 
 #----------------------------
 # Quickfort GUI options

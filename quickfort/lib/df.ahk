@@ -6,6 +6,7 @@
 PlayMacro(delay)
 {
   global KeyMacroLoad, KeyMacroHighlightLastMacro, KeyMacroSelectMacro, KeyMacroPlay
+  global LastMacroSentToWinID
 
   ;if (delay < 500)
   ;  delay := 500
@@ -15,11 +16,20 @@ PlayMacro(delay)
   ActivateGameWin()
   ReleaseModifierKeys()
 
-  Sleep, 1000 ;; sometimes DF needs a moment 
+  ; Check if we have already played a macro to this DF instance; if not
+  ; we wait an extra long time for the first macro playback to avoid DF
+  ; throwing a macro I/O load error
+  winID := WinActive()
+  if (LastMacroSentToWinID != winID)
+  {
+    LastMacroSentToWinID := winID
+    Sleep, 3000
+  }
+
   Send %KeyMacroLoad% ;; show load macro menu
   Send %KeyMacroHighlightLastMacro%  ;; highlight last macro in the list
   Send %KeyMacroSelectMacro% ;; select macro
-  Sleep %delay%
+  ;Sleep %delay%
   Send %KeyMacroPlay% ;; play it after delay
   return
 }
@@ -30,7 +40,7 @@ PlayMacro(delay)
 SendKeys(keystrokes)
 {
   global
-  local key, testkeys, keylen, pctDone, ch, asc, msg, success
+  local key, testkeys, keylen, ch, asc, msg, success
   ActivateGameWin()
   ReleaseModifierKeys()
   Sleep, 0
@@ -46,10 +56,11 @@ SendKeys(keystrokes)
   ; loop through the keys
   Loop, parse, keystrokes, `,
   {
-    if (!Building) return ; user build cancellation
+    if (!Building)
+      return ; user build cancellation
 
-    pctDone := Floor((A_Index/keylen) * 100)
-    Tip("Quickfort running (" pctDone "% done)`nHold Alt+C to cancel.")
+    Tip("Sending keystrokes (" . ((100 * A_Index)//keylen) . "% done)`nPress Alt+C to cancel.")
+    Sleep, 0
 
     key := A_LoopField
 
@@ -65,7 +76,8 @@ SendKeys(keystrokes)
       {
         if (!WaitForMatMenuChange())
         {
-          if (!Building) return ; user hit Alt+C to cancel
+          if (!Building) 
+            return ; user hit Alt+C to cancel
           
           MsgBox, Error: Quickfort timed out waiting for the materials menu. Aborting playback.
           return
@@ -83,9 +95,7 @@ SendKeys(keystrokes)
     if (SubStr(key, 1, 10) = "{SelectMat")
     {
       ; Handle {SelectMat label count} manual material selection.
-      SelectingMat := true
       success := HandleSelectMatKeycode(key)
-      SelectingMat := false
       
       if (!success)
         return ; User cancelled process or there was an error, abort playback.
@@ -145,6 +155,7 @@ SendKeys(keystrokes)
       return
     }
   }
+  InitMemorizedMats() ; clean up as needed
   return
 }
 
@@ -240,6 +251,11 @@ InitMemorizedMats()
   global MemorizedMats, MatMenuCoords
   MemorizedMats := {}
   MatMenuCoords := {}
+  
+  ; Clean up any leftover clip files from last round
+  path := A_ScriptDir "\~qfmatclip_*.bmp" 
+  FileDelete, %path%
+
   return
 }
 
@@ -248,15 +264,23 @@ InitMemorizedMats()
 ;; user and screenclips the rectangle formed by the two clicks. 
 MemorizeMat(matLabel)
 {
-  global MemorizedMats, MatMenuCoords
+  global MemorizedMats, MatMenuCoords, SelectingMat
 
   ActivateGameWin()
 
+  SelectingMat := true
+
   ; Get left coord
   ;KeyWait, LButton ; wait for lbutton to be released
-  msg := "USER INPUT REQUIRED - MEMORIZING MATERIAL :" matLabel "`n"
-  Tip(msg "Step 1: Highlight the desired material using +-/* keys.`nStep 2: Click to the LEFT of the FIRST highlighted letter.")
-  WaitForMemorizationClick()
+  msg := "USER INPUT REQUIRED`nMEMORIZING MATERIAL '" matLabel "'`n"
+  msgSuffix := "`n`nPress Alt+C to cancel playback."
+  Tip(msg "Step 1: Highlight the desired material using +-/* keys.`nStep 2: Click to the LEFT of the FIRST highlighted letter." msgSuffix)
+  SoundPlay, config\matselect-1.wav
+  
+  if (!WaitForMemorizationClick()) { ; wait for user to click or cancel
+    SelectingMat := false
+    return false ; user cancelled
+  }
 
   CoordMode, Mouse, Screen
   MouseGetPos, x1, y1
@@ -265,8 +289,14 @@ MemorizeMat(matLabel)
 
   ; Get right coord
   KeyWait, LButton ; wait for lbutton to be released
-  Tip(msg "Step 3: Click to the RIGHT of the LAST highlighted letter.`nFor long rows, click to the LEFT of the Dist number.")
-  WaitForMemorizationClick()
+  Tip(msg "Step 3: Click to the RIGHT of the LAST highlighted letter.`nFor long rows, click to the LEFT of the Dist number." msgSuffix)
+  SoundPlay, config\matselect-2.wav
+
+  if (!WaitForMemorizationClick()) { ; wait for user to click or cancel
+    SelectingMat := false
+    return false ; user cancelled
+  }
+
   while (true)
   {
     KeyWait, LButton, D
@@ -296,6 +326,8 @@ MemorizeMat(matLabel)
   FileDelete, %path%
   CaptureScreenRegionToFile(path, x1, y1, x2 - x1 + 1, y2 - y1 + 1)
 
+  SelectingMat := false
+
   if (!FileExist(path))
   {
     MsgBox, There was an error while memorizing '%matLabel%'. Could not create memorized image file:`n%path%`nAborting playback.
@@ -313,7 +345,11 @@ MemorizeMat(matLabel)
   MatMenuCoords.x2 := x2
   MatMenuCoords.y1 := y1
   MatMenuCoords.y2 := y2
+  
+  SoundPlay, config\matselect-3.wav
 
+  ; Get the mouse out of the way so it doesn't mess up ImageSearches
+  MouseMove, 0, 250, , R
   return true
 }
 
@@ -346,15 +382,17 @@ Click Cancel to abort playback.
 ;; MaxMatSearchChecks iterations.
 SearchForMat(matLabel)
 {
-  global MemorizedMats, KeyNextMenuItem, MaxMatSearchChecks, MatMenuSearchDelay
+  global MemorizedMats, KeyNextMenuItem, KeyPrevMenuPage
+  global MaxMatSearchChecks, MatMenuSearchDelay
 
   CoordMode, Pixel, Screen
   CoordMode, Mouse, Screen
   mat := MemorizedMats[matLabel]
   path := mat.path
-  checksLeft := MaxMatSearchChecks
+  checksDone := 0
   Tip("Searching for material :" matLabel)
-  while (--checksLeft >= 0)
+  Sleep, %MatMenuSearchDelay%
+  while (checksDone++ < MaxMatSearchChecks)
   {
     if (!WinActive("Dwarf Fortress"))
     {
@@ -368,9 +406,23 @@ SearchForMat(matLabel)
     if (!ErrorLevel)
         return true ; mat found
 
-    Send, % KeyNextMenuItem
-    Sleep, % MatMenuSearchDelay
+    if (checksDone == 1)
+    {
+      ; If this is our first check, send previous-page key before starting
+      ; next-item key iteration. This helps us find nearby materials which
+      ; are on the first page of the material menu without cycling forward
+      ; through the entire list to finally encounter it.
+      Sleep, %MatMenuSearchDelay%
+      Send, %KeyPrevMenuPage%
+      Sleep, %MatMenuSearchDelay%
+    }
+    else
+    {
+      Send, %KeyNextMenuItem%
+    }
+    Sleep, %MatMenuSearchDelay%
   }
+
   return false ; mat not found
 }
 
@@ -394,7 +446,7 @@ WaitForMatMenuChange()
   CoordMode, Mouse, Screen
   ActivateGameWin()
   WinGetPos, winLeft, winTop, winWidth, winHeight, A
-  
+  Tip("Waiting for material menu...")
   ;MouseMove, MatMenuCoords.x1 - 1, winTop + 48
   ;Sleep, 1000
   if (!ScreenRegionWaitChange(MatMenuCoords.x1 - 1, winTop + 48, 32, Min(150, winHeight - winTop), KeyEnter, WaitForMatMenuMaxMS))
@@ -562,12 +614,16 @@ SetDFInitTxtSetting(name, newValue)
 ;; activate the DF window
 WaitForMemorizationClick()
 {
-  SoundPlay, config/attention.wav
+  global Building
+
   while (true)
   {
-    KeyWait, LButton, D
-    if (WinActive("Dwarf Fortress") && !IsMouseOverTitleBar())
-      break
+    KeyWait, LButton, D T0.25
+    if (!Building) ; user cancelled with Alt+C
+      return false
+    if (ErrorLevel == 1) ; lbutton not yet clicked, keep waiting
+      continue
+    if (WinActive("Dwarf Fortress") && !IsMouseOverTitleBar()) ; DF window click
+      return true
   }
-  return
 }

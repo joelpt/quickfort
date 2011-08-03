@@ -43,6 +43,7 @@ Init()
   MemorizedMats := {}
   MatMenuCoords := {}
   SelectingMat := false
+  LastMacroSentToWinID =
 
   ; Init saved gui state
   LoadAppState()
@@ -101,6 +102,7 @@ SetDefaultOptions()
   KeyMacroSave = ^s
   KeyEnter = {Enter}
   KeyNextMenuItem = {+}
+  KeyPrevMenuPage = {/}
   WaitForMatMenuMaxMS := 15000
   MaxMatSearchChecks := 200
   MatMenuSearchDelay := 50
