@@ -113,6 +113,14 @@ ConvertAndSaveMacro(title)
     return -1
   }
 
+  ; Read file in new location - this is to try and delay the starting of
+  ; DF macro playback an appropriate length of time to avoid DF-side
+  ; macro-I/O errors; if we can read the whole file DF should be ready to
+  Loop, Read, %destfile%
+  {
+    Sleep, 0
+  }
+
   return destfile
 }
 
