@@ -558,16 +558,16 @@ build, place stockpiles, building adjustments).
 
 Starting with Quickfort 2.0, all phases and even variations can be kept in a
 single .XLS or .XLSX file using multiple worksheets. Tools like Excel make it
-easy to  work with multiple worksheets and also retains all worksheet
-formatting/styling.
+easy to work with multiple worksheets and also retains all worksheet styling
+such as cell sizes and coloring.
 
 After opening a multisheet XLS/XLSX blueprint using Alt+F, Quickfort will
 present a dialog allowing you to choose which sheet to use. Alt+E can be
 subsequently used to select a different sheet from the same file.
 
 Quickfort 2.0 is also fully compatible with using single-sheet .CSV files for
-blueprints. The build phases suggest a convenient naming scheme for
-blueprints, as seen in the Blueprints/General folder:
+blueprints. The build phases suggest a convenient naming scheme for CSV based
+blueprint "stacks", as seen in the Blueprints/General folder:
 
     bedroom-dig.csv
     bedroom-build.csv
@@ -578,9 +578,75 @@ The naming scheme is up to you, of course. A similar approach is used in the
 Blueprints/TheQuickFortress folder.
 
 Protip: After digging out an area, it's often wise to dump all leftover stone
-in the area before beginning the build phase. You may also wish to
-smooth/engrave the area before performing the next phase, or dwarves won't be
-able to access walls behind/under furniture, etc.
+in the area before beginning the build phase. You may also wish to smooth and/or
+engrave the area before starting the build phase, as dwarves may be unable to
+access walls/floors that are behind/under built objects.
+
+Manual material selection                                          {#manualmats}
+-------------------------
+
+Quickfort supports manual material selection for #build blueprints. This enables
+you to manually select the materials that Quickfort should build with during
+playback.
+
+Currently, manual material selection only works on Windows when using the
+Quickfort GUI (Quickfort.exe). It also requires using QF's key-sending playback
+method because user interaction is required during playback. Lastly, note that
+this feature is considered EXPERIMENTAL. Most types of constructions should
+work with manual material selection, but some are untested.
+
+To use manual material selection, just append :label to the end of any cells
+in a #build blueprint. `label` can be any alphanumeric label that you'd like
+to use to identify the material to be used. Multiple different labels can be
+used in a single blueprint, allowing for multiple distinct materials to be
+applied during construction.
+
+A simple example:
+
+    #build Uses 3 different materials to build 3 rows of flooring
+    Cf:top,Cf:top,Cf:top,Cf:top,Cf:top
+    Cf:mid,Cf:mid,Cf:mid,Cf:mid,Cf:mid
+    Cf:bot,Cf:bot,Cf:bot,Cf:bot,Cf:bot
+
+After starting playback with Alt+D, when Quickfort first encounters a new
+`:label`, you will be prompted to help Quickfort memorize the material you want
+to use for cells with that label. There are three steps to memorize a material:
+
+1. Use DF's +-/* keys to highlight the desired material in DF's material menu
+2. Click to the LEFT of the FIRST letter of the highlighted material
+3. Click to the RIGHT of the LAST letter of the highlighted material
+
+Quickfort uses onscreen prompts and sound notifications to take you through
+these steps. 
+
+The process lets Quickfort take a screen-clipping of the region between your
+mouse-clicks. This clipping of the highlighted material's row is then used by
+Quickfort as a "fingerprint" of your chosen material.
+
+When QF encounters another cell with the same `:label` later, it will search
+through the materials list, automatically moving the highlight and checking if
+the "fingerprint" is found onscreen. When the correct material is again
+highlighted, QF will use the material and continue.
+
+__Important notes about memorization__
+
+In memorization steps 2 and 3, you should normally click just OUTSIDE of the
+highlighted material's name (to the left or right). This ensures that a
+fingerprint taken of material "marble" is distinguishable from a fingerprint
+for "marble bars"; if we had just clicked on the "m" and "e" in "marble", the
+fingerprint for "marble" would also match "marble bars" since "marble" is
+contained within "marble bars". By clicking OUTSIDE the letters, we include
+the empty space before/after "marble" and thus will not confuse it with
+"marble bars".
+
+On step 3, note that for very long material names like
+"petrified wood blocks", you should click to the LEFT of the Dist column
+in the material menu instead (on the last letter of the material name before
+the Dist column).
+
+If QF mis-selects a material you memorized, try to click nearer the top and
+bottom edges of your highlighted material during memorization. This will make
+the fingerprint larger and thus less liable to later mis-identification.
 
 
 Command prompt                                                  {#commandprompt}
@@ -1157,6 +1223,14 @@ Manually choose and use the same material for all walls in a #build blueprint:
 Turn all 'd' cells of a #dig blueprint into 'Cf' flooring using #build phase:
 
     Alt+R -> phase=build s/d/Cf/ s/~Cf//
+
+Undesignate (undo) a #dig blueprint:
+
+    Alt+R -> s/~/x/
+
+Undesignate (undo) a #build blueprint (make sure you are in DF 'q' mode):
+
+    Alt+R -> s/~/x/ phase=q
 
 
 Troubleshooting                                               {#troubleshooting}
