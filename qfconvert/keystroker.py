@@ -316,6 +316,15 @@ class Keystroker:
         return ['{EnterMatMenuSafe}', 
             '{SelectMat %s %d}' % (manual_label, areasize)]
 
+    def setmats_bridge(self, areasize, manual_label):
+        """
+        Returns keycodes needed to select materials for the given int areasize;
+        see setmats_build() for basic description. This method differs
+        from setmats_build() in how it determines how many mat units are needed
+        to build bridges, which use a formula of (areasize//4)+1 instead.
+        """
+        return self.setmats_build(areasize / 4 + 1, manual_label)
+
 
 def convert_keys(keys, mode, title):
     """
