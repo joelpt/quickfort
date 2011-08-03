@@ -130,6 +130,7 @@ ButtonOK:
   RepeatPattern := ""
   SetVarsByBuildType(BuildType%SelectedSheetIndex%)
 
+  ActivateGameWin()
   ShowTip()
   return
 }
@@ -165,8 +166,9 @@ ButtonCopyText:
 ButtonEditBlueprint:
 {
   editing := SelectedFile
-  Gosub ButtonCancel
+  ;Gosub ButtonCancel
   Run, %editing%
+  return
 }
 
 
