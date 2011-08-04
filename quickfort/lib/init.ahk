@@ -101,6 +101,7 @@ SetDefaultOptions()
   KeyMacroRecord = ^r
   KeyMacroSave = ^s
   KeyEnter = {Enter}
+  KeySelectAll = +{Enter}
   KeyNextMenuItem = {+}
   KeyPrevMenuPage = {/}
   WaitForMatMenuMaxMS := 15000

@@ -34,7 +34,7 @@ ClipScreenRegionToBitmap(byRef hBM, x, y, w, h)
 ;   return hash
 ;}
 
-ScreenRegionWaitChange(x, y, w, h, sendKeys, maxWaitMs)
+ScreenRegionWaitChange(x, y, w, h, sendKeys, maxWaitMs, minWaitMs)
 {
    sz := VarSetCapacity(bits, w*h*4, 0)
 
@@ -44,22 +44,18 @@ ScreenRegionWaitChange(x, y, w, h, sendKeys, maxWaitMs)
    init := CRC32(bits, sz)
    current := init
 
-   Send, % sendKeys
+   Send, %sendKeys%
+   Sleep, %minWaitMs%
 
    beginTicks := A_TickCount
    while (init == current)
    {
       if (A_TickCount - maxWaitMs > beginTicks)
          return false   ; waited longer than maxWaitMs
-
-      Sleep, 50
-      ;Tip("pre clip")
       ClipScreenRegionToBitmap(hBM, x, y, w, h)
       DllCall("GetBitmapBits", "UInt", hBM, "UInt", sz, "UInt", &bits)
       DllCall("DeleteObject", "Uint", hBM)
-      ;Tip("post clip")
       current := CRC32(bits, sz)
-      ;Tip("post hash: " current)
    }
 
    return true

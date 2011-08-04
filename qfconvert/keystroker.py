@@ -77,7 +77,7 @@ class Keystroker:
                 mat_label = match.group(2)
                 # TODO: pitch a fit if we're not in key output mode
 
-            # setmats = keys to select mats for an area
+            # subs['setmats'] keys are used to select mats for an area
             setmatscfg = self.buildconfig.get('setmats', command)
             if setmatscfg:
                 setmatsfun = getattr(self, setmatscfg)
@@ -289,7 +289,7 @@ class Keystroker:
         If manual_label is None, we prefix the "enter mats menu and wait"
         keycodes and postfix a "wait" to the keys needed to choose the mats.
 
-        If manual_label is not None, we use {EnterMatMenuSafe} and
+        If manual_label is not None, we use {WaitAfterNext} and
         {SelectMat label count} keycodes for use by QFAHK for entering
         the material menu and doing manual material selection.
         """
@@ -313,7 +313,7 @@ class Keystroker:
         # Manually assisted material selection: enter materials menu and
         # wait for that region of the screen to change, then select manually
         # chosen material.
-        return ['{EnterMatMenuSafe}', 
+        return ['%>', '&',
             '{SelectMat %s %d}' % (manual_label, areasize)]
 
     def setmats_bridge(self, areasize, manual_label):

@@ -25,6 +25,7 @@ KeyMacroPlay = ^p
 KeyMacroRecord = ^r
 KeyMacroSave = ^s
 KeyEnter = {Enter}
+KeySelectAll = +{Enter}
 KeyNextMenuItem = {+}
 KeyPrevMenuPage = {/}
 
