@@ -82,7 +82,7 @@ SendKeys(keystrokes)
 
     if (waitAfterNext)
     {
-      if (!WaitForMenuAfterSending(key)) ; sends keystroke and waits for screen change
+      if (!WaitForMenuAfterSending(key, WaitForMatMenuMaxMS)) ; sends keystroke and waits for screen change
       {
         if (!Building) 
           return ; user hit Alt+C to cancel

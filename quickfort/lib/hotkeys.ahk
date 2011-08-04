@@ -239,7 +239,7 @@ Enter transformation pattern below.
 
     pattern = %pattern% ; magic AHK whitespace trim
 
-    if (RegExMatch(pattern, "^((\d*([dunsew]|flip[vh]|rotc?cw|\!)|halign=([lmr]|left|middle|right)|valign=([tmb]|top|middle|bottom)|phase=(b|d|p|q|build|dig|place|query)|s/(\S*?)(?<!\\)/(\S*?)(?<!\\)/)\s*)+$"))
+    if (RegExMatch(pattern, "^((\d*([dunsew]|flip[vh]|rotc?cw|\!)|halign=([lmr]|left|middle|right)|valign=([tmb]|top|middle|bottom)|phase=(b|d|p|q|build|dig|place|query)|s/(\S*?)(?<!\\)/(([^\s/]|\\/)*)(?<!\\)/?)\s*)+$"))
     {
       RepeatPattern := LastRepeatPattern := pattern
       SaveAppState()

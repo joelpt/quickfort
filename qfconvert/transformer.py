@@ -41,9 +41,11 @@ def parse_transform_str(transform_str):
                 continue
 
             # matches s/pattern/replacement/, allows escaping / as \/
-            m = re.match(r'^(s)/(\S*?)(?<!\\)/(\S*?)(?<!\\)/$', t)
+            m = re.match(r'^(s)/(\S*?)(?<!\\)/(([^\s/]|\\/)*)(?<!\\)/?$', t)
             if m is not None:
-                readies.append((m.group(2, 3), 'sub'))
+                # internally the command is called 'sub' to avoid
+                # ambiguity vs. 's' (repeat south) command
+                readies.append((m.group(2, 3), 'sub')) 
                 continue
 
             m = re.match(r'^(\d+)?(n|s|e|w|u|d|rotcw|rotccw|fliph|flipv|!)$', lt)

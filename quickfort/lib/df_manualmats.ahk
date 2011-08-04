@@ -29,7 +29,7 @@ HandleSelectMatKeycode(keycode)
   ; we now have our mat
   mat := MemorizedMats[matLabel]
 
-  ; pause a moment to give DF a chance to draw the mat menu fully
+  ; pause a moment to give DF a chance to catch up
   Sleep, %EmbeddedDelayDuration%
 
   ; Initial search for the desired mat.
@@ -59,7 +59,7 @@ HandleSelectMatKeycode(keycode)
     }
 
     ; Try to 'select all' on this mat and wait for DF to react
-    WaitForMenuAfterSending(KeySelectAll)
+    WaitForMenuAfterSending(KeySelectAll, EmbeddedDelayDuration)
 
     ; Look for fingerprint of mat onscreen now: if we successfully
     ; selected all of the mat, we won't find it any longer as we'll
@@ -210,10 +210,9 @@ PromptOnMissingMat(matLabel)
 {
   msg = 
   (
-The material you memorized for '%matLabel%' could not be found. 
-You might have run out of the material.
+You appear to have run out of material '%matLabel%', or you cancelled.
 
-Click OK to re-memorize material '%matLabel%'.
+Click OK to memorize a new material for '%matLabel%'.
 Click Cancel to abort playback.
   )
 
@@ -254,13 +253,14 @@ SearchForMat(mat)
       return false
     }
 
+    Sleep, %MatMenuSearchDelay%
+
     if (IsMatFingerprintVisible(mat))
     {
       return true ; mat found
     }
 
     Send, %KeyNextMenuItem%
-    Sleep, %MatMenuSearchDelay%
   }
 
   return false ; mat not found
@@ -296,9 +296,9 @@ HaveMatMenuCoordinates()
 ;; manual material selection (we use memorized pixel coordinates to locate the
 ;; menu onscreen). If no mat has been memorized we just do a regular {wait} after
 ;; sending keys.
-WaitForMenuAfterSending(keys)
+WaitForMenuAfterSending(keys, delay=1000)
 {
-  global MatMenuCoords, WaitForMatMenuMaxMS
+  global MatMenuCoords, MatMenuSearchDelay, EmbeddedDelayDuration
   
   if (!HaveMatMenuCoordinates()) ; don't know where DF's side menu is onscreen
   {
@@ -313,7 +313,8 @@ WaitForMenuAfterSending(keys)
   ActivateGameWin()
   WinGetPos, winLeft, winTop, winWidth, winHeight, A
   Tip("Waiting for DF menu after sending " keys "...")
-  if (!ScreenRegionWaitChange(MatMenuCoords.x1 - 1, winTop + 48, 32, Min(150, winHeight - winTop), keys, WaitForMatMenuMaxMS, 0))
+  Sleep, %MatMenuSearchDelay%
+  if (!ScreenRegionWaitChange(MatMenuCoords.x1 - 1, winTop + 48, 32, Min(150, winHeight - winTop), keys, delay, 0))
   {
     return false
   }

@@ -18,6 +18,8 @@ return
 #include lib/compile.ahk
 #include lib/convert.ahk
 #include lib/df.ahk
+#include lib/df_init_txt.ahk
+#include lib/df_manualmats.ahk
 #include lib/filepicker.ahk
 #include lib/hotkeys.ahk
 #include lib/init.ahk
