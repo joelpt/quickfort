@@ -7,10 +7,10 @@ mkdir release\config
 copy config\*.* release\config
 
 :%pythonexe% -OO setup.py py2exe
-cxfreeze -OO qfconvert.py
+call cxfreeze -OO qfconvert.py
 
 copy dist\*.* release
 rmdir /s /q dist
-rmdir /s /q build
+:rmdir /s /q build
 del *.pyc
 del *.pyo

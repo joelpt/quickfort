@@ -203,27 +203,28 @@ class Blueprint:
         """Plots a route through the blueprint, then does ztransforms."""
         buildconfig = BuildConfig(self.build_type)
         keys = []
-        start = self.start
+        cursor = self.start
         ks = None
 
         for layer in self.layers:
             grid = layer.grid
-            layer.start = start # first layer's start or last layer's exit pos
+            layer.start = cursor # first layer's start or last layer's exit pos
 
             plotter = AreaPlotter(grid, buildconfig, options.debugarea)
             plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
             plotter.discover_areas() # find contiguous areas
 
             layer.grid, layer.plots, end = plan_route(
-                plotter.grid, options.debugrouter, start)
+                plotter.grid, options.debugrouter, cursor)
 
             # generate key sequence to render this series of plots in game
             ks = Keystroker(grid, buildconfig)
-            keys += ks.plot(layer.plots, start) + layer.onexit
+            layerkeys, cursor = ks.plot(layer.plots, cursor) 
+            keys += layerkeys + layer.onexit
 
-            # move cursor back to start pos x, y, so start==end
-            keys += ks.move(end, self.start, 0)
-            #start = end
+        # move cursor back to start pos x, y, so start==end
+        keys += ks.move(cursor, self.start, 0)
+        #start = end
 
         if len(ztransforms) > 0:
             # do z-transforms directly on keys array (much faster than actually
@@ -258,7 +259,7 @@ class Blueprint:
                 # keys can playback without overlapping onto zlevels
                 # that we've already designated.
                 zdistance = dirsign * (-1 + 2 * (1 + (dirsign * -zdelta)))
-                zmove = ks.move(start, start, zdistance)
+                zmove = ks.move(cursor, cursor, zdistance)
 
                 # assemble repetition of z layers' keys
                 keys = ((keys + zmove) * (count - 1)) + keys

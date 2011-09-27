@@ -30,7 +30,8 @@ class Keystroker:
         Follows the route given by plots, generating the keys necessary
         to plot/designate those areas in DF.
 
-        Returns list of keycodes generated.
+        Returns list of keycodes generated and ending cursor position
+        as ([String], Point).
         """
 
         submenukeys = self.buildconfig.get('submenukeys')
@@ -158,7 +159,7 @@ class Keystroker:
 
         # append on-completed keys, if any
         keys.extend(completed)
-        return keys
+        return (keys, cursor)
 
     def move(self, start, end, zoffset=0, allowjumps=True):
         """

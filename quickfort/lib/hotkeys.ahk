@@ -1,7 +1,7 @@
 ;; Hotkey definitions.
 
 ;; ---------------------------------------------------------------------------
-;; Dynamically a few hotkeys that are controlled through options.txt
+;; Dynamically bind a few hotkeys that are associated through options.txt
 InitHotkeys()
 {
   global KeyMacroPlay, KeyMacroLoad, KeyMacroSave, KeyMacroRecord

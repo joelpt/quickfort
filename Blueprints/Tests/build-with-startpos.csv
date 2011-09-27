@@ -1,0 +1,8 @@
+#build start(2; 2; Center) Tests start position with multilevel #build print.,,
+Cw,Cw,Cw
+Cw,Cf,Cw
+Cw,Cw,Cw
+#>,,
+Cf,Cf,Cf
+Cf,Cw,Cf
+Cf,Cf,Cf

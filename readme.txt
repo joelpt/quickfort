@@ -1,4 +1,4 @@
-Quickfort 2.01 
+Quickfort 2.02
 ===============
 by joelpt <quickfort@joelpt.net>
 
@@ -70,8 +70,9 @@ Features                                                             {#features}
 * .CSV and multi-worksheet .XLS/.XLSX blueprint files supported
 * Intelligent designator minimizes keystrokes needed to designate blueprints
 * Designates fast: 10x faster than QF1.11 typical
+* Manual material selection allows you to specify construction materials used
 * Multi-Z-level blueprints
-* Blueprint transformation (rotate, flip, repeat in direction)
+* Blueprint transformation (rotate, replace, repeat in up to 3 dimensions)
 * Aliases to automate frequent keystroke combos
 * Minimalist (and optional) GUI for Windows
 * Simple "command line" entry mode in GUI
