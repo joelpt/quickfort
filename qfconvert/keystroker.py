@@ -161,6 +161,15 @@ class Keystroker:
         keys.extend(completed)
         return (keys, cursor)
 
+    @staticmethod
+    def get_z_moves(zoffset):
+        """ Get the apprioriate number of > or < chars reflecting zoffset. """
+        if zoffset > 0:
+            return ['>'] * zoffset
+        if zoffset < 0:
+            return ['<'] * abs(zoffset)
+        return []
+
     def move(self, start, end, zoffset=0, allowjumps=True):
         """
         Returns list of keycodes to move DF cursor from Point start
@@ -170,10 +179,7 @@ class Keystroker:
         keys = []
 
         # do z-moves first if needed
-        if zoffset > 0:
-            keys.extend(['>'] * zoffset)
-        elif zoffset < 0:
-            keys.extend(['<'] * abs(zoffset))
+        keys += Keystroker.get_z_moves(zoffset)
 
         # while there are moves left to make..
         allow_backtrack = True

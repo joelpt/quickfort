@@ -9,6 +9,7 @@ import exetest
 import router
 import util
 
+from copy import deepcopy
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
 from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_file, parse_command
@@ -135,8 +136,13 @@ def convert_blueprint(layers, details, options):
     bp = Blueprint('', layers, details)
 
     # get keys/macrocode to outline or plot the blueprint
+    keys = []
     if options.mode == 'csv':
         bp.analyze(options)
+        # perform any awaiting z-transforms
+        layers = bp.repeat_ztransforms(ztransforms, bp.layers, 
+            Blueprint.repeater_layers)
+        bp.layers = layers
         output = str(bp)
     else:
         if options.visualize:
@@ -238,45 +244,67 @@ class Blueprint:
         keys += ks.move(cursor, self.start, 0)
         #start = end
 
-        if len(ztransforms) > 0:
-            # do z-transforms directly on keys array (much faster than actually
-            # repeating and plotting those layers prior to generating keys)
-            
-            # relative z-layer-steps we have taken for the existing layers;
-            # for single-z-layer blueprints this is 0, for blueprints with 1+ #>
-            # it is >=1, and for blueprints with 1+ #< it is <=-1.
-            zdelta = GridLayer.zoffset(self.layers)
-
-            for t in ztransforms:
-                count, command = t
-                if count < 2:
-                    continue
-                
-                if command not in ('d', 'u'):
-                    raise Exception, 'Unrecognized ztransform ' + command
-                
-                # direction we want to move: 1=zdown, -1=zup
-                dirsign = 1 if command == 'd' else -1
-
-                # if we want to move in the same direction as the stack does,
-                # we only need to move 1 z-level in that direction
-                if dirsign * zdelta > 0: # if signs of dirsign and zdelta match
-                    zdelta = 0 # 'no z-change caused by stack'
-
-                # get keys needed to move desired number of z-levels
-                # in desired z-direction; for multilevel blueprints combined
-                # with a ztransform moving in the opposite direction we
-                # need to move twice the height of the blueprint-stack
-                # so that the subsequent repetition of the original blueprint's
-                # keys can playback without overlapping onto zlevels
-                # that we've already designated.
-                zdistance = dirsign * (-1 + 2 * (1 + (dirsign * -zdelta)))
-                zmove = ks.move(cursor, cursor, zdistance)
-
-                # assemble repetition of z layers' keys
-                keys = ((keys + zmove) * (count - 1)) + keys
+        # perform any awaiting z-transforms
+        keys = self.repeat_ztransforms(ztransforms, keys, self.repeater_keys)
 
         return keys
+
+    def repeat_ztransforms(self, ztransforms, data, repeatfn):
+        """
+        Performs ztransform repetitions given some ztransforms [('2', 'd'),..],
+        initial data, and a repeatfn (Function) to appply for each ztransform.
+        The output of each ztransform is fed as input to the next.
+        """
+        if len(ztransforms) == 0:
+            return data
+
+        zdelta = GridLayer.zoffset(self.layers)
+        for t in ztransforms:
+            count, command = t
+            if count < 2:
+                continue
+            
+            if command not in ('d', 'u'):
+                raise Exception, 'Unrecognized ztransform ' + command
+            
+            # direction we want to move: 1=zdown, -1=zup
+            dirsign = 1 if command == 'd' else -1
+
+            # if we want to move in the same direction as the stack does,
+            # we only need to move 1 z-level in that direction
+            if dirsign * zdelta > 0: # if signs of dirsign and zdelta match
+                zdelta = 0 # 'no z-change caused by stack'
+
+            # with a ztransform moving in the opposite direction we
+            # need to move twice the height of the blueprint-stack
+            # so that the subsequent repetition of the original blueprint's
+            # keys can playback without overlapping onto zlevels
+            # that we'll have already designated
+            zdistance = dirsign * (-1 + 2 * (1 + (dirsign * -zdelta)))
+
+            # apply fn given the z-distance required to travel
+            data = repeatfn(data, zdistance, count)
+            zdelta = ((zdelta + 1) * count) - 1
+
+        return data
+
+    @staticmethod
+    def repeater_keys(keys, zdistance, reps):
+        zmove = Keystroker.get_z_moves(zdistance)
+        # assemble repetition of z layers' keys
+        keys = ((keys + zmove) * (reps - 1)) + keys
+
+        return keys
+
+    @staticmethod
+    def repeater_layers(layers, zdistance, reps):
+        zmove = Keystroker.get_z_moves(zdistance)
+        newlayers = []
+        for x in range(1, reps):
+            newlayers += deepcopy(layers)
+            newlayers[-1].onexit = zmove
+        newlayers += deepcopy(layers)
+        return newlayers
 
     def trace_outline(self, options):
         """
@@ -388,11 +416,11 @@ class Blueprint:
             outrows += [Grid.str_csv(layer.grid)]
             width = layer.grid.width
             if layer.onexit:
-                footer = layer.onexit + (['#'] * width)
+                footer = [''.join(layer.onexit)] + (['#'] * width)
             else:
                 footer = ['#'] * (width + 1)
             outrows += [','.join(footer)]
-        
+
         return '\n'.join(outrows)
 
 
