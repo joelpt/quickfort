@@ -120,19 +120,6 @@ SendKeys(keystrokes)
       Sleep, 500
     }
 
-    ;if (EnableSafetyAbort)
-    ;{
-    ;  IfWinNotActive Dwarf Fortress
-    ;  {
-    ;    ; prevent mass sending keys to wrong window (no reliable way to make DF receive all keys in background; ControlSend is flaky w/ DF)
-    ;    Building := 0
-    ;    HideTip()
-    ;    msg := "Macro aborted!`n`nYou switched windows. The Dwarf Fortress window must be focused while Quickfort is running."
-    ;    MsgBox, %msg%
-    ;    break
-    ;  }
-    ;}
-
     ; actually send the keys!
     if (UseSafeMode)
     {
@@ -143,10 +130,9 @@ SendKeys(keystrokes)
       SetKeyDelay, 150, 25
       Send, %keys%
       SetKeyDelay, KeyDelay, KeyPressDuration
-      ;SetKeyDelay, KeyDelay, KeyPressDuration, Play
     }
     else if (SendMode = "SendPlay")
-      SendPlay %key%
+      SendPlay, %key%
     else if (SendMode = "SendInput")
       SendInput %key%
     else if (SendMode = "Send")

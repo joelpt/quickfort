@@ -92,7 +92,6 @@ SetDefaultOptions()
   SendMode := "ControlSend"
   ShowStartupTrayTip := 1
   ShowMouseTooltip := 1
-  EnableSafetyAbort := 1
   MouseTooltipUpdateMs := 15
   KeyMacroLoad = ^l
   KeyMacroHighlightLastMacro = {Up}

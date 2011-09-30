@@ -4,6 +4,7 @@ by joelpt <quickfort@joelpt.net>
 
 <http://sun2design.com/quickfort>
 
+
 User Manual
 ===========
 
@@ -25,7 +26,6 @@ See the [Links section](#links) for various tools that work with Quickfort.
 
 Table of Contents
 -----------------
-
 
 * [Features](#features)
 * [For the impatient](#impatient)
@@ -110,15 +110,17 @@ Quickfort 2.0 is a major rewrite of Quickfort 1.11.
 
 The new blueprint conversion engine 'qfconvert' has been rewritten in cross-
 platform Python, enabling non-Windows users to utilize the app via the command
-line. More importantly, the use of Python made possible a much more advanced
+line. More importantly, the use of Python makes possible a much more advanced
 implementation of how Quickfort does its job.
 
 The new conversion engine is much smarter about how it designates your
 blueprints. Instead of using the "typewriter" (line-by-line) approach of
-QF1.x, QF2 now tries to minimize the total number  of commands/keystrokes sent
-to Dwarf Fortress. It does this by designating the largest contiguous
-areas/"chunks" possible while minimizing the distance travelled between areas
-whilst designating.
+QF1.x, QF2 tries to minimize the total number of commands (keystrokes) sent to
+Dwarf Fortress. It does this by analyzing your blueprint, finding the largest
+contiguous areas that can possibly be designated with single DF commands; for
+example, a 10x10 room can be dug out with one 'd' command instead of 100
+single-tile designations. While designating these areas, QF2 also attempts to
+minimize the amount of cursor travel between areas.
 
 QF2 is smarter about designating objects of various sizes. For example,
 workshops can now be designated by filling a 3x3 area of a blueprint with 'wc'
@@ -126,14 +128,14 @@ instead of just a single 'wc' in the center of a 3x3 area. This makes some
 kinds of blueprints easier to create and read.
 
 The new engine also has a reworked blueprint transformation framework which
-supports things like blueprint rotation and tesselation.
+supports things like blueprint repetition, rotation, and in-cell modification.
 
-Lastly, QF2 supports outputting and executing DF macros instead of sending
-keystrokes to the DF window  (QF1.x style). This results in blueprint
-playbacks that are faster and more reliable vs. keysending. Since DF macros
-are native to DF, they can be used on any OS that runs Dwarf Fortress.
-Keysending is still used by the Windows-only Quickfort GUI for certain
-operations, i.e. Alt+V "visualize".
+QF2 supports outputting and executing DF macros instead of sending keystrokes
+to the DF window  (QF1.x style). This results in blueprint playbacks that are
+faster and more reliable vs. keysending. Since DF macros are native to DF,
+they can be used on any OS that runs Dwarf Fortress. Keysending is still used
+by the Windows-only Quickfort GUI for certain operations, i.e. Alt+V
+"visualize".
 
 Quickfort's minimalist Windows-only "GUI" is a partial rewrite of the
 AutoHotKey script that was Quickfort 1.x. It has seen a number of significant
@@ -182,6 +184,7 @@ A few things have changed in Quickfort's basic operation in the move from 1.0 to
 
 * BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
   playback will be slow.
+
 
 Windows Quick Start                                             {#winquickstart}
 -------------------
@@ -1375,7 +1378,7 @@ Todo/Future Ideas                                                        {#todo}
 * [COMPLETE] Support multiline entries in QF command line
 * Test/support every placeable DF object/command
 * Support top/repeatable middle/bottom multilevel blueprints
-* Support manual and automatic build material selection, similar to DFWall
+* [COMPLETE] Support manual and automatic build material selection
 * [COMPLETE] Rowwise large construction analysis (d,d\nd,d\n -> d(2x2))
 * Consider support for all build phases in one CSV (d;b;;r+)
 * Consider CSV 'stacks' - meta-blueprints acting as indexes to other CSVs
@@ -1386,6 +1389,27 @@ Todo/Future Ideas                                                        {#todo}
 
 Changelog                                                           {#changelog}
 ---------
+
+### 2.02 (2011 September 27) ###
+
+* (EXPERIMENTAL) Manual material selection added! Windows only. See user manual
+  for details, or just run Blueprints/Tests/manual-bullseye.csv in Quickfort
+* New transformation command: phase=... (changes blueprint build phase)
+* New transformation command: s/pat/repl/ (search-and-replace cells with regex)
+* On Windows, Quickfort will now check that [MACRO_MS:0] is set in the running 
+  DF's data/init/init.txt and offer to change it for the user if not
+* Fixed issue with multilevel #build blueprints not plotting right (GoingTharn)
+* Fixed issue with bridges and roads being given the wrong number of materials
+  (they use #Tiles / 4 + 1 mats rather than just #Tiles)
+* Switched to Python 2.7 and cxfreeze
+* Commented options/buildconfig.json and options/keys.json for those who wish
+  to modify them
+* Allow Alt+T commands to start with a #, e.g. #dig d,d,d
+* Added config/matselect-(1,2,3).wav used during manual mat selection; these
+  can be changed or removed
+* Dropped EnableSafetyAbort option/function; QF now just checks that the
+  DF window is focused before sending keystrokes, or waits until it is
+* Various smaller fixes and tweaks
 
 ### 2.01 (2011 July 4) ###
 

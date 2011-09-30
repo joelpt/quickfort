@@ -89,8 +89,3 @@ EmbeddedDelayDuration = 250
 # them to DF.
 # Details: http://www.autohotkey.com/docs/commands/SetKeyDelay.htm
 KeyPressDuration = -1
-
-# If set to 1, QF will abort building if the Dwarf Fortress window
-# becomes inactive, avoiding sending keystrokes intended for DF to
-# another program. Setting this to 0 will disable this feature.
-EnableSafetyAbort = 1

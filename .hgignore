@@ -25,3 +25,4 @@ glob:release/*
 glob:*.lnk
 glob:qfconvert/dist/*
 glob:quickfort/~qf*
+glob:quickfort/Quickfort.exe
