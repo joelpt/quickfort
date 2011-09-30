@@ -68,6 +68,9 @@ class Point:
             self.y + (other.y - self.y + 1) // 2
             )
 
+    def is_at_origin(self):
+        return self.x == 0 and self.y == 0
+
 
 DIRECTIONS = {
     'n':  { 'index': 0, 'delta': Point( 0, -1) },

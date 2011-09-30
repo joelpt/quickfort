@@ -6,6 +6,8 @@ import textwrap
 
 import buildconfig
 import exetest
+import router
+import util
 
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
@@ -13,8 +15,6 @@ from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_fi
 from geometry import Point, Direction
 from grid import GridLayer, Grid
 from keystroker import Keystroker, convert_keys
-from router import plan_route
-from util import flatten
 from transformer import Transformer, parse_transform_str
 from aliases import load_aliases, apply_aliases
 
@@ -135,12 +135,17 @@ def convert_blueprint(layers, details, options):
     bp = Blueprint('', layers, details)
 
     # get keys/macrocode to outline or plot the blueprint
-    if options.visualize:
-        keys = bp.trace_outline(options)
+    if options.mode == 'csv':
+        bp.analyze(options)
+        output = str(bp)
     else:
-        keys = bp.plot(ztransforms, options)
+        if options.visualize:
+            keys = bp.trace_outline(options)
+        else:
+            bp.analyze(options)
+            keys = bp.plot(ztransforms, options)
+        output = convert_keys(keys, options.mode, options.title)
 
-    output = convert_keys(keys, options.mode, options.title)
 
     if options.debugfile:
         print "<<<< END CONVERSION"
@@ -195,30 +200,37 @@ class Blueprint:
         self.name = name
         self.layers = layers
         self.build_type = details.build_type
+        self.build_config = BuildConfig(self.build_type)
         self.start = details.start
         self.start_comment = details.start_comment
         self.comment = details.comment
 
+    def analyze(self, options):
+        """Performs contiguous area expansion and discovery in the layers."""
+        for layer in self.layers:
+            plotter = AreaPlotter(layer.grid, self.build_config,
+                options.debugarea)
+            
+            plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
+            plotter.discover_areas() # find contiguous areas
+            
+            layer.grid = plotter.grid # update
+
     def plot(self, ztransforms, options):
         """Plots a route through the blueprint, then does ztransforms."""
-        buildconfig = BuildConfig(self.build_type)
         keys = []
         cursor = self.start
         ks = None
 
         for layer in self.layers:
-            grid = layer.grid
             layer.start = cursor # first layer's start or last layer's exit pos
 
-            plotter = AreaPlotter(grid, buildconfig, options.debugarea)
-            plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
-            plotter.discover_areas() # find contiguous areas
+            # plan the cursor's route to designate all the areas
+            layer.grid, layer.plots, end = router.plan_route(
+                layer.grid, options.debugrouter, cursor)
 
-            layer.grid, layer.plots, end = plan_route(
-                plotter.grid, options.debugrouter, cursor)
-
-            # generate key sequence to render this series of plots in game
-            ks = Keystroker(grid, buildconfig)
+            # generate key/macro sequence to render this series of plots in DF
+            ks = Keystroker(layer.grid, self.build_config)
             layerkeys, cursor = ks.plot(layer.plots, cursor) 
             keys += layerkeys + layer.onexit
 
@@ -304,7 +316,7 @@ class Blueprint:
 
     def get_info(self):
         """Retrieve various bits of info about the blueprint."""
-        cells = flatten(layer.grid.rows for layer in self.layers)
+        cells = util.flatten(layer.grid.rows for layer in self.layers)
         commands = [c.command for c in cells]
         cmdset = set(commands) # uniques
         if '' in cmdset:
@@ -315,7 +327,7 @@ class Blueprint:
         counts.sort(key=lambda x: x[1], reverse=True)
 
         # look for the manual-mat character anywhere in the commands
-        uses_manual_mats = is_substring_in_list(':', cmdset)
+        uses_manual_mats = util.is_substring_in_list(':', cmdset)
 
         # make a row of repeating numbers to annotate the blueprint with
         width = self.layers[0].grid.width
@@ -352,13 +364,36 @@ class Blueprint:
                         '\n#' + ''.join(layer.onexit)
                     for layer in self.layers
                 )
+        
+    def str_header(self):
+        """Output the header row for this blueprint definition."""
+        out = '#' + self.build_type
 
-def is_substring_in_list(needle, haystack):
-    """
-    Determine if any string in haystack:list contains the specified 
-    needle:string as a substring.
-    """
-    for e in haystack:
-        if needle in e:
-            return True
-    return False
+        if not self.start.is_at_origin():
+            out += ' start(%d; %d' % (self.start.x + 1, self.start.y + 1)
+            out += '; ' + self.start_comment if self.start_comment else ''
+            out += ')'
+        
+        if self.comment:
+            out += ' ' + self.comment
+        
+        return out
+
+    def __str__(self):
+        """Output as CSV format."""
+        
+        outrows = [self.str_header()]
+
+        for layer in self.layers:
+            outrows += [Grid.str_csv(layer.grid)]
+            width = layer.grid.width
+            if layer.onexit:
+                footer = layer.onexit + (['#'] * width)
+            else:
+                footer = ['#'] * (width + 1)
+            outrows += [','.join(footer)]
+        
+        return '\n'.join(outrows)
+
+
+

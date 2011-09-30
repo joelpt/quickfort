@@ -47,6 +47,17 @@ def uniquify(seq, idfun=None):
     return result
 
 
+def is_substring_in_list(needle, haystack):
+    """
+    Determine if any string in haystack:list contains the specified 
+    needle:string as a substring.
+    """
+    for e in haystack:
+        if needle in e:
+            return True
+    return False
+
+
 # Abstract struct class       
 class Struct:
     def __init__ (self, *argv, **argd):

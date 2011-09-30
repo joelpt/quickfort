@@ -27,7 +27,7 @@ def parse_options(argv):
                       help="transformation rules, e.g. 2e flipv 2s")
     parser.add_option("-m", "--mode",
                       dest="mode", default='macro',
-                      help="output mode: [one of: macro key keylist]")
+                      help="output mode: [one of: macro key keylist csv]")
     parser.add_option("-c", "--command",
                       dest='command',
                       help="Eval QF one-line command instead of input_file")
@@ -60,9 +60,9 @@ def parse_options(argv):
                       help="profile qfconvert performance")
     options, args = parser.parse_args(args=argv)
 
-    if options.mode not in ('key', 'macro', 'keylist'):
+    if options.mode not in ('key', 'macro', 'keylist', 'csv'):
         raise Exception, \
-            "Invalid mode '%s', must be one of: macro key keylist" % \
+            "Invalid mode '%s', must be one of: macro key keylist csv" % \
                 options.mode
 
     if options.command is not None:

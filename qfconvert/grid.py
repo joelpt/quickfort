@@ -180,7 +180,6 @@ class Grid:
         else:
             return True
 
-
     def is_corner(self, pos):
         """
         Returns True if pos's cell forms the corner of a contiguous area,
@@ -306,9 +305,17 @@ class Grid:
         return '\n'.join(rowstrings)
 
     @staticmethod
+    def str_csv(grid):
+        """Returns grid's command cells in csv format."""
+        rowstrings = [
+            ','.join([c.command for c in row] + ['#'])
+            for row in grid.rows]
+        return '\n'.join(rowstrings)
+
+    @staticmethod
     def str_commands(rows, colsep = '', annotate = False):
         """
-        Returns grid's commands as a string for display.
+        Returns grid's commands as a pretty formatted table for display.
             colsep: if provided, will be placed between cells on each row
             annotate: if True, simple numbering 'rulers' will be added 
         """
