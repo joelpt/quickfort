@@ -79,7 +79,7 @@ def extract_xlsx_lines(sheetrows, strings):
     return lines
 
 
-def read_xlsx_sheets(filename):
+def read_xlsx_sheet_names(filename):
     """Get a list of sheets and their ids from xlsx file."""
     try:
         zf = zipfile.ZipFile(filename)

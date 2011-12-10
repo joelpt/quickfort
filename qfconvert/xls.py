@@ -19,7 +19,7 @@ def read_xls_file(filename, sheetid):
     return lines
 
 
-def read_xls_sheets(filename):
+def read_xls_sheet_names(filename):
     """Get a list of sheets and their ids from xls file."""
 
     wb = xlrd.open_workbook(filename)

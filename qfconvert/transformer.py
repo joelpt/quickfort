@@ -3,12 +3,15 @@ Transforms/repeats blueprint layers based on a sequence of transformation
 commands.
 """
 
+from log import log_routine, logmsg, loglines
+
 from copy import deepcopy
 import re
 from geometry import Point
 from grid import Grid, GridLayer
 from filereader import FileLayer
 
+    
 def parse_transform_str(transform_str):
     """
     Converts space separated transform string e.g. '2e valign=top rotcw' 
@@ -19,22 +22,28 @@ def parse_transform_str(transform_str):
     Returns the conversion result as follows:
         ('newphase', (x/y transforms), (z-level transforms))
     """
+    if transform_str == '':
+        return (None, None, None)
+
     transforms = transform_str.strip().split(' ')
     readies = []
     newphase = None
     for t in transforms:
         lt = t.lower()
         try:
+            # matches halign=(left|middle|right) or 1 letter equiv. l|m|r
             m = re.match(r'^(halign)=(l|m|r)\w*$', lt)
             if m is not None:
                 readies.append(m.group(2, 1))
                 continue
             
+            # matches valign=(top|middle|bottom) or 1 letter equiv. t|m|b
             m = re.match(r'^(valign)=(t|m|b)\w*$', lt)
             if m is not None:
                 readies.append(m.group(2, 1))
                 continue
-
+            
+            # matches phase=(build|dig|place|query) or 1 letter equiv. b|d|p|q
             m = re.match(r'^(phase)=(b|d|p|q)\w*$', lt)
             if m is not None:
                 newphase = m.group(2)
@@ -47,7 +56,8 @@ def parse_transform_str(transform_str):
                 # ambiguity vs. 's' (repeat south) command
                 readies.append((m.group(2, 3), 'sub')) 
                 continue
-
+            
+            # matches #D repeaters, rotcw/rotccw, fliph/flipv, and ! sequence separator
             m = re.match(r'^(\d+)?(n|s|e|w|u|d|rotcw|rotccw|fliph|flipv|!)$', lt)
             if m is not None:
                 count = int(m.group(1)) if m.group(1) else 1
@@ -74,30 +84,25 @@ def parse_transform_str(transform_str):
 class Transformer:
     """Handles transformation of a blueprint based on a series of commands."""
 
-    def __init__(self, layers, start, debug):
+    def __init__(self, layers, start):
         self.layers = layers
         self.start = start
-        self.debug = debug
-        self.valign = 'b' # bottom default vertical alignment
-        self.halign = 'r' # right default horizontal alignment
+        self.valign = 'b' # bottom is default vertical alignment
+        self.halign = 'r' # right is default horizontal alignment
 
+    @log_routine('transform', 'TRANSFORMER')
     def transform(self, transforms):
         """Transforms start, layers using the given transforms."""
-
         layers = self.layers
         start = self.start
-
-        if self.debug:
-            print ">>>> BEGIN TRANSFORMATION"
 
         # loop through all single-layer transformations to all layers
         for i, layer in enumerate(layers):
             a = layer.rows # aka the memory bucket
             b = layer.rows # aka the current bucket
 
-            if self.debug:
-                print "#### Transformation buckets before transforming layer %d:" % i
-                self.print_buckets(a, b)
+            logmsg('transform', 'Transformation buckets before layer %d:' % i)
+            loglines('transform', lambda: self.str_buckets(a, b))
 
             left = transforms
             for t in transforms:
@@ -120,30 +125,26 @@ class Transformer:
                     elif cmd == 'w':
                         start += Point(layers[0].width() * (param - 1), 0)
 
-                if self.debug:
-                    if cmd in ('halign', 'valign'):
-                        print "#### Set %s=%s" % (t[1], t[0])
-                    else:
-                        print "#### Buckets after command %s%s:" % t
-                        self.print_buckets(a, b)
+                if cmd in ('halign', 'valign'):
+                    logmsg('transform', 'Set %s=%s' % (t[1], t[0]))
+                else:
+                    logmsg('transform', 'Buckets after command %s%s:' % t)
+                    loglines('transform', lambda: self.str_buckets(a, b))
 
                 # we'll return the result in b
                 layers[i].rows = b
 
         self.start, self.layers = start, layers
+        return
 
-        if self.debug:
-            print "<<<< END TRANSFORMATION"
-
-
-    def print_buckets(self, a, b):
-        """Print bucket contents A and B."""
-        print '---------------- BUCKET A ----------------'
-        print FileLayer.str_rows(a)
-        print '---------------- BUCKET B ----------------'
-        print FileLayer.str_rows(b)
-        print '------------------------------------------'
-
+    def str_buckets(self, a, b):
+        """Make a printable string showing bucket contents A and B."""
+        return '\n'.join([
+            '---------------- BUCKET A ----------------',
+            FileLayer.str_rows(a),
+            '---------------- BUCKET B ----------------',
+            FileLayer.str_rows(b),
+            '------------------------------------------'])
 
     def apply_transform(self, trans, a, b):
         """
@@ -160,9 +161,6 @@ class Transformer:
             # handle 'empty' patterns for the user by matching the empty string
             if pattern == '': pattern = '^$'
             elif pattern == '~': pattern = '~^$' # matches any non empty cell
-
-            print pattern
-            print replacement
 
             if len(pattern) > 0 and pattern[0] == '~': 
                 # "negate" the pattern - s/~d/x/ turns all non-d cells to x

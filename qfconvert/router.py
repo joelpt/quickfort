@@ -1,10 +1,12 @@
 """Handles route planning needed to move between areas and designate them."""
 
+from log import log_routine, logmsg, loglines
+
 from geometry import Direction, Point
 from grid import Grid
 
-
-def plan_route(grid, debug, cursor):
+@log_routine('router', 'ROUTE PLANNING')
+def plan_route(grid, cursor):
     """
     We assume the areas to be plotted are already loaded into grid.
     Starting from cursor, we locate the nearest area we can plot, 
@@ -15,9 +17,8 @@ def plan_route(grid, debug, cursor):
 
     grid.set_entire_grid_plottable(True)
 
-    if debug:
-        print Grid.str_area_labels(grid) + '\n'
-        print ">>>> BEGIN ROUTE PLANNING"
+    logmsg('router', 'Starting state:')
+    loglines('router', lambda: Grid.str_area_labels(grid))
 
     while (True):
         nearest_pos = get_nearest_plottable_area_from(grid, cursor)
@@ -34,22 +35,18 @@ def plan_route(grid, debug, cursor):
             area = cell.area
             grid.set_area_cells(area, False)
 
-            if debug:
-                print "#### Plotting area starting at %s, area %s" % (
-                    nearest_pos, area)
-                print Grid.str_plottable(grid) + '\n'
+            logmsg('router', 'Plotting area starting at %s, area %s' % \
+                (nearest_pos, area))
+            loglines('router', lambda: Grid.str_plottable(grid))
 
             # move cursor to the ending corner of the plotted area
             cursor = area.opposite_corner(nearest_pos)
 
-    if debug:
-        print Grid.str_plottable(grid) + '\n'
-        print "#### Plotted all areas"
-        print Grid.str_area_labels(grid)
-        print "Route replay sequence: %s" % \
-            ''.join([grid.get_cell(plot).label for plot in plots])
-        print "Cursor position now: %s" % cursor
-        print "<<<< END ROUTE PLANNING"
+    logmsg('router', 'Routed through all areas:')
+    loglines('router', lambda: Grid.str_area_labels(grid))
+    logmsg('router', 'Route replay sequence: %s' % \
+            ''.join([grid.get_cell(plot).label for plot in plots]))
+    logmsg('router', 'Cursor position now: %s' % cursor)
 
     return grid, plots, cursor
 

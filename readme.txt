@@ -24,7 +24,7 @@ or in [one RAR file](http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar).
 See the [Links section](#links) for various tools that work with Quickfort.
 
 
-Table of Contents
+Table of Contents                                                         {#toc}
 -----------------
 
 * [Features](#features)

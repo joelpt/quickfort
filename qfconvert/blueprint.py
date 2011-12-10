@@ -4,122 +4,149 @@ import os
 import re
 import textwrap
 
+import aliases
 import buildconfig
 import exetest
+import filereader
+import keystroker
 import router
+import transformer
 import util
 
 from copy import deepcopy
+
+from log import log_routine, logmsg, loglines
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
-from filereader import FileLayer, FileLayers_to_GridLayers, get_sheets, parse_file, parse_command
+from filereader import FileLayer, FileLayers_to_GridLayers
 from geometry import Point, Direction
 from grid import GridLayer, Grid
-from keystroker import Keystroker, convert_keys
-from transformer import Transformer, parse_transform_str
-from aliases import load_aliases, apply_aliases
+from keystroker import Keystroker
+from transformer import Transformer
 
-def get_blueprint_info(path):
-    """Returns information about the blueprint at path."""
-    sheets = get_sheets(path)
+def get_blueprint_info(path, transform_str):
+    """
+    Returns information about the blueprint at path. If transform_str
+    is given, blueprint will be transformed accordingly before returning.
+    """
+    sheets = filereader.get_sheet_names(path)
 
-    s = ''
+    newphase, transforms, ztransforms = \
+        transformer.parse_transform_str(transform_str)
+
+    result = ''
     for sheet in sheets:
         try:
-            (layers, details) = parse_file(path, sheet[1])
+            (layers, details) = filereader.parse_file(path, sheet[1])
+
+            # transform the blueprint
+            if transforms is not None:
+                logmsg('transform', 'Transforming with: %s' % transform_str)
+
+                if newphase is not None:
+                    details.build_type = buildconfig.get_full_build_type_name(newphase)
+
+                tran = Transformer(layers, details.start)
+                tran.transform(transforms) # do the x/y transformations
+                details.start = tran.start
+                layers = tran.layers
+
+                logmsg('transform', 'Results of transform:')
+                loglines('transform', lambda: FileLayer.str_layers(layers))
+            
             layers = FileLayers_to_GridLayers(layers)
             bp = Blueprint(sheet[0], layers, details)
-            s += '>>>> Sheet id %d\n' % sheet[1]
-            s += bp.get_info() + '\n'
+            
+            # perform any requested z-transforms
+            if ztransforms is not None:
+                layers = bp.repeat_ztransforms(ztransforms, bp.layers, 
+                    Blueprint.repeater_layers)
+                bp.layers = layers
+
+            # add this sheet's info to the result string
+            result += '>>>> Sheet id %d\n' % sheet[1]
+            result += bp.get_info() + '\n'
         except:
             continue # ignore blank/missing sheets
 
-    if s:
-        return s
+    if result:
+        return result
     else:
         raise Exception, "No valid blueprints found in '%s'." % path
 
-
-def process_blueprint_file(path, options):
+@log_routine('file', 'INPUT FILE SOURCE PROCESSING')
+def process_blueprint_file(path, sheetid, startpos, transform_str,
+    output_mode, output_title, visualize):
     """
     Parses a blueprint file and converts it to desired output.
     """
 
-    if options.debugfile:
-        print ">>>> BEGIN INPUT FILE PARSING"
-
     # parse sheetid
-    if options.sheetid is None:
+    if sheetid is None:
         sheetid = 0
-    elif re.match('^\d+$', str(options.sheetid)):
-        sheetid = options.sheetid
-    else:
-        sheetid = get_sheets(path)
+    elif not re.match('^\d+$', str(sheetid)):
+        # TODO Fix this so it works
+        sheetid = filereader.get_sheet_names(path)[1]
 
     # read in the blueprint
-    layers, details = parse_file(path, sheetid)
+    layers, details = filereader.parse_file(path, sheetid)
 
-    if options.debugfile:
-        print '#### Parsed %s' % path
-        print FileLayer.str_layers(layers)
-        print "<<<< END INPUT FILE PARSING"
+    logmsg('file', 'Parsed %s' % path)
+    loglines('file', lambda: FileLayer.str_layers(layers))
 
-    return convert_blueprint(layers, details, options)
+    return convert_blueprint(layers, details, startpos, transform_str,
+        output_mode, output_title, visualize)
 
-
-def process_blueprint_command(command, options):
+@log_routine('file', 'COMMAND LINE SOURCE PROCESSING')
+def process_blueprint_command(command, startpos, transform_str, output_mode,
+    output_title, visualize):
     """
     Parses a QF one-line command and converts it to the desired output.
     """
-    if options.debugfile:
-        print ">>>> BEGIN COMMAND LINE PARSING"    
 
-    layers, details = parse_command(command)
+    layers, details = filereader.parse_command(command)
 
-    if options.debugfile:
-        print '#### Parsed %s' % command
-        print FileLayer.str_layers(layers)
-        print "<<<< END COMMAND LINE PARSING"    
+    logmsg('file', 'Parsed %s' % command)
+    loglines('file', lambda: FileLayer.str_layers(layers))
 
-    return convert_blueprint(layers, details, options)
+    return convert_blueprint(layers, details, startpos, transform_str,
+        output_mode, output_title, visualize)
 
 
-def convert_blueprint(layers, details, options):
+@log_routine('file', 'BLUEPRINT CONVERSION')
+def convert_blueprint(layers, details, startpos, transform_str, 
+    output_mode, output_title, visualize):
     """
-    Transforms the provided layers if required by options, then renders
+    Transforms the provided layers if required by transform_str, then renders
     keystrokes/macros required to plot or visualize the blueprint specified
-    by layers and details and pursuant to options.
+    by layers and details and pursuant to args.
     """
-
-    if options.debugfile:
-        print ">>>> BEGIN CONVERSION"
 
     # apply aliases.txt to blueprint contents
-    aliases = load_aliases(
+    # TODO abstract this better
+    alii = aliases.load_aliases(
         os.path.join(exetest.get_main_dir(), 'config/aliases.txt'))
 
-    layers = apply_aliases(layers, aliases)
+    layers = aliases.apply_aliases(layers, alii)
 
     # transform the blueprint
     ztransforms = []
-    if options.transform:
-        if options.debugtransform:
-            print "#### Transforming with: %s" % options.transform
+    if transform_str:
+        logmsg('transform', 'Transforming with: %s' % transform_str)
 
         newphase, transforms, ztransforms = \
-            parse_transform_str(options.transform)
+            transformer.parse_transform_str(transform_str)
 
         if newphase is not None:
             details.build_type = buildconfig.get_full_build_type_name(newphase)
 
-        tran = Transformer(layers, details.start, options.debugtransform)
+        tran = Transformer(layers, details.start)
         tran.transform(transforms) # do the x/y transformations
         details.start = tran.start
         layers = tran.layers
 
-        if options.debugfile:
-            print "#### Results of transform:"
-            print FileLayer.str_layers(layers)
+        logmsg('file', 'Results of transform:')
+        loglines('file', lambda: FileLayer.str_layers(layers))
 
     layers = FileLayers_to_GridLayers(layers)
 
@@ -127,8 +154,8 @@ def convert_blueprint(layers, details, options):
         raise Exception, "Blueprint appears to be empty."
 
     # override starting position if startpos command line option was given
-    if options.startpos is not None:
-        details.start = parse_startpos(options.startpos,
+    if startpos is not None:
+        details.start = parse_startpos(startpos,
             layers[0].grid.width,
             layers[0].grid.height)
 
@@ -137,62 +164,69 @@ def convert_blueprint(layers, details, options):
 
     # get keys/macrocode to outline or plot the blueprint
     keys = []
-    if options.mode == 'csv':
-        bp.analyze(options)
+    if output_mode == 'csv':
+        bp.analyze()
         # perform any awaiting z-transforms
         layers = bp.repeat_ztransforms(ztransforms, bp.layers, 
             Blueprint.repeater_layers)
         bp.layers = layers
         output = str(bp)
     else:
-        if options.visualize:
-            keys = bp.trace_outline(options)
+        if visualize:
+            keys = bp.trace_outline()
         else:
-            bp.analyze(options)
-            keys = bp.plot(ztransforms, options)
-        output = convert_keys(keys, options.mode, options.title)
+            bp.analyze()
+            keys = bp.plot(ztransforms)
+        output = keystroker.convert_keys(keys, output_mode, output_title)
 
-
-    if options.debugfile:
-        print "<<<< END CONVERSION"
-
-    if options.debugsummary:
-        print ">>>> BEGIN SUMMARY"
-        print "---- Layers:"
-        for i, layer in enumerate(bp.layers):
-            print "=" * 20 + ' Layer %d ' % i + '=' * 20
-            print "Entering cursor position: %s" % layer.start
-            print "\n#### Commands:"
-            print str(layer.grid) + '\n'
-            print "#### Area labels:"
-            print Grid.str_area_labels(layer.grid) + '\n'
-            print "Route order: %s" % ''.join(
-                [layer.grid.get_cell(plot).label
-                    for plot in layer.plots]
-                )
-            print "Layer onexit keys: %s\n" % layer.onexit
-        print "---- Overall:"
-        print "Total key cost: %d" % len(keys)
-        print "<<<< END SUMMARY"
+    loglines('summary', lambda:str_summary(bp, keys))
 
     return output
 
+def str_summary(bp, keys):
+    s = ">>>> BEGIN SUMMARY\n"
+    s += "---- Layers:\n"
+    for i, layer in enumerate(bp.layers):
+        s += '\n'.join([
+            "=" * 20 + ' Layer %d ' % i + '=' * 20,
+            "Entering cursor position: %s" % layer.start,
+            "#### Commands:",
+            str(layer.grid),
+            "#### Area labels:",
+            Grid.str_area_labels(layer.grid),
+            "Route order: %s" % ''.join(
+                [layer.grid.get_cell(plot).label
+                    for plot in layer.plots]
+                ),
+            "Layer onexit keys: %s" % layer.onexit
+            ])
+    s += "\n---- Overall:\n"
+    s += "Total key cost: %d" % len(keys) + '\n'
+    s += "<<<< END SUMMARY"
+    return s
 
 def parse_startpos(start, width, height):
     """Transform startpos string like (1,1) or nw to corresponding Point."""
+    
+    # try (#,#) type syntax
     m = re.match(r'\(?(\d+)[,;](\d+)\)?', start)
     if m is not None:
-        new = Point( int(m.group(1)), int(m.group(2)) )
-    else:
-        m = re.match(r'(ne|nw|se|sw)', start.lower())
-        if m is not None:
-            newcorner = Direction(m.group(1)).delta()
-            new = Point(newcorner.x, newcorner.y)
-            new.x = max(0, new.x) * (width - 1)
-            new.y = max(0, new.y) * (height - 1)
-        else:
-            raise Exception, "Invalid --position parameter '%s'" % start
-    return new
+        return Point( int(m.group(1)), int(m.group(2)) )
+    
+    # try corner-coordinate syntax    
+    m = re.match(r'(ne|nw|se|sw)', start.lower())
+    if m is not None:
+        # convert corner String -> Direction -> Point
+        corner = Direction(m.group(1)).delta()
+        pt = Point(corner.x, corner.y)
+
+        # magnify Point by width and height to get the corner coordinate we want
+        pt.x = max(0, corner.x) * (width - 1)
+        pt.y = max(0, corner.y) * (height - 1)
+
+        return pt
+
+    raise Exception, "Invalid --position parameter '%s'" % start
 
 
 class Blueprint:
@@ -211,18 +245,17 @@ class Blueprint:
         self.start_comment = details.start_comment
         self.comment = details.comment
 
-    def analyze(self, options):
+    def analyze(self):
         """Performs contiguous area expansion and discovery in the layers."""
         for layer in self.layers:
-            plotter = AreaPlotter(layer.grid, self.build_config,
-                options.debugarea)
+            plotter = AreaPlotter(layer.grid, self.build_config)
             
             plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
             plotter.discover_areas() # find contiguous areas
             
             layer.grid = plotter.grid # update
 
-    def plot(self, ztransforms, options):
+    def plot(self, ztransforms):
         """Plots a route through the blueprint, then does ztransforms."""
         keys = []
         cursor = self.start
@@ -233,7 +266,7 @@ class Blueprint:
 
             # plan the cursor's route to designate all the areas
             layer.grid, layer.plots, end = router.plan_route(
-                layer.grid, options.debugrouter, cursor)
+                layer.grid, cursor)
 
             # generate key/macro sequence to render this series of plots in DF
             ks = Keystroker(layer.grid, self.build_config)
@@ -249,10 +282,10 @@ class Blueprint:
 
         return keys
 
-    def repeat_ztransforms(self, ztransforms, data, repeatfn):
+    def repeat_ztransforms(self, ztransforms, data, repeatfun):
         """
         Performs ztransform repetitions given some ztransforms [('2', 'd'),..],
-        initial data, and a repeatfn (Function) to appply for each ztransform.
+        initial data, and a repeatfun (Function) to appply for each ztransform.
         The output of each ztransform is fed as input to the next.
         """
         if len(ztransforms) == 0:
@@ -283,7 +316,7 @@ class Blueprint:
             zdistance = dirsign * (-1 + 2 * (1 + (dirsign * -zdelta)))
 
             # apply fn given the z-distance required to travel
-            data = repeatfn(data, zdistance, count)
+            data = repeatfun(data, zdistance, count)
             zdelta = ((zdelta + 1) * count) - 1
 
         return data
@@ -306,7 +339,7 @@ class Blueprint:
         newlayers += deepcopy(layers)
         return newlayers
 
-    def trace_outline(self, options):
+    def trace_outline(self):
         """
         Moves the cursor to the northwest corner, then clockwise to each
         other corner, before returning to the starting position.
@@ -314,7 +347,7 @@ class Blueprint:
         buildconfig = BuildConfig('dig')
         grid = self.layers[0].grid
 
-        plotter = AreaPlotter(grid, buildconfig, options.debugarea)
+        plotter = AreaPlotter(grid, buildconfig)
         plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
 
         ks = Keystroker(grid, buildconfig)
@@ -354,8 +387,11 @@ class Blueprint:
         counts = [(c, commands.count(c)) for c in cmdset]
         counts.sort(key=lambda x: x[1], reverse=True)
 
-        # look for the manual-mat character anywhere in the commands
-        uses_manual_mats = util.is_substring_in_list(':', cmdset)
+        # look for the manual-mat character anywhere in the commands,
+        # and check that phase=build (the only mode that we'll support
+        # manual material selection with right now)
+        uses_manual_mats = util.is_substring_in_list(':', cmdset) and \
+            self.build_type == 'build'
 
         # make a row of repeating numbers to annotate the blueprint with
         width = self.layers[0].grid.width

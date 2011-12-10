@@ -382,7 +382,6 @@ def convert_to_macro(keycodes, title):
     output = [title] # first line of macro is macro title
 
     for key in keycodes:
-        print key
         if key == '':
             continue # empty keycode, output nothing
         elif keybinds.get(key) is None:

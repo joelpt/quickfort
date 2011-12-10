@@ -9,13 +9,14 @@ import traceback
 import cProfile
 
 import blueprint
+import log
 
-version = '2.02'
+VERSION = '2.02'
 
 def parse_options(argv):
     """Read options and args from argv (the command line parameters)."""
     usage = "usage: %prog [options] [input_file] [output_file]"
-    parser = OptionParser(usage=usage, version="%prog " + version)
+    parser = OptionParser(usage=usage, version="%prog " + VERSION)
     parser.add_option("-s", "--sheetid",
                       dest="sheetid", default=None,
                       help="worksheet index for xls/xlsx files [default: 0]")
@@ -23,8 +24,8 @@ def parse_options(argv):
                       dest="startpos", default=None,
                       help="starting position [one of: (x,y) ne nw se sw]")
     parser.add_option("-t", "--transform",
-                      dest="transform", default=False,
-                      help="transformation rules, e.g. 2e flipv 2s")
+                      dest="transform", default='',
+                      help="transformation rules, e.g. -t \"2e flipv 2s\"")
     parser.add_option("-m", "--mode",
                       dest="mode", default='macro',
                       help="output mode: [one of: macro key keylist csv]")
@@ -58,6 +59,7 @@ def parse_options(argv):
     parser.add_option("-P", "--profile",
                       action="store_true", dest="profile", default=False,
                       help="profile qfconvert performance")
+
     options, args = parser.parse_args(args=argv)
 
     if options.mode not in ('key', 'macro', 'keylist', 'csv'):
@@ -87,17 +89,21 @@ def parse_options(argv):
     return options
 
 
-def run():
+def run(options):
     """Perform filereading/conversion work and output result."""
-    global options
 
     try:
         if options.command:
-            output = blueprint.process_blueprint_command(options.command, options)
+            output = blueprint.process_blueprint_command(
+              options.command, options.startpos, options.transform,
+              options.mode, options.title, options.visualize)
         elif options.info:
-            output = blueprint.get_blueprint_info(options.infile)
+            output = blueprint.get_blueprint_info(options.infile, 
+              options.transform)
         else:
-            output = blueprint.process_blueprint_file(options.infile, options)
+            output = blueprint.process_blueprint_file(options.infile, 
+              options.sheetid, options.startpos, options.transform,
+              options.mode, options.title, options.visualize)
 
         if options.outfile:
             with open(options.outfile, 'w') as outf:
@@ -112,20 +118,29 @@ def run():
     return
 
 
+def configure_logging(options):
+  if options.debugtransform: log.set_log_level('transform')
+  if options.debugfile:      log.set_log_level('file')
+  if options.debugarea:      log.set_log_level('area')
+  if options.debugrouter:    log.set_log_level('router')
+  if options.debugsummary:   log.set_log_level('summary')
+  return
+
 def main(argv=sys.argv[1:]):
     """Parse options file, parse and convert blueprint, and output result."""
-    global options
 
     try:
         options = parse_options(argv)
 
-        if options is None:
+        if options is None: # no command line parameters; nothing to do
             return
 
-        if options.profile:
-            cProfile.run('run()')
+        configure_logging(options)
+
+        if options.profile: # profile running code for performance metrics
+            cProfile.runctx('run(options)', globals(), {'options': options})
         else:
-            run()
+            run(options)
     except Exception as ex:
         print 'Error: ' + str(ex)
 

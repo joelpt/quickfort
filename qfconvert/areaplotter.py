@@ -1,5 +1,7 @@
 """Handles discovery of areas to be plotted by someone else."""
 
+from log import log_routine, logmsg, loglines
+
 from geometry import Point, Direction, Area
 from grid import Grid
 import util
@@ -9,9 +11,8 @@ import re
 class AreaPlotter:
     """Handles discovery of largest plottable areas."""
 
-    def __init__(self, grid, buildconfig, debug):
+    def __init__(self, grid, buildconfig):
         self.grid = grid
-        self.debug = debug
         self.buildconfig = buildconfig
         self.label = '0'
 
@@ -26,14 +27,13 @@ class AreaPlotter:
         # 25%+ while increasing final keystroke count by ~10-45%
         #self.dir_pairs = [ [Direction('s'), Direction('e')] ]
 
+    @log_routine('area', 'AREA EXPANSION')
     def expand_fixed_size_areas(self):
         """
         Expand cell commands of the form 'd(20x20)' to their corresponding
         areas (in this example a 20x20 designation of d's) and mark those
         areas as plotted.
         """
-        if self.debug: print ">>>> BEGIN AREA EXPANSION"
-
         label = self.label
         for y, row in enumerate(self.grid.rows):
             for x, cell in enumerate(row):
@@ -58,21 +58,16 @@ class AreaPlotter:
                         cornercell = self.grid.get_cell(corner)
                         cornercell.command = command
                         cornercell.area = area
-
-        if self.debug:
-            print Grid.str_area_labels(self.grid) + '\n'
-            print "<<<< END AREA EXPANSION"
         self.label = label
+        loglines('area', lambda: Grid.str_area_labels(self.grid))
         return
 
+    @log_routine('area', 'AREA DISCOVERY')
     def discover_areas(self):
         """
         Repeatedly plot the largest contiguous areas possible until
         there are no more areas left to plot.
         """
-
-        if self.debug:
-            print ">>>> BEGIN AREA DISCOVERY"
 
         testarea = Area(
             Point(0,0),
@@ -80,18 +75,16 @@ class AreaPlotter:
             )
 
         while True:
-            if self.debug:
-                print Grid.str_area_labels(self.grid) + '\n'
-                print '#### Marking largest plottable areas starting ' + \
-                    'with label %s' % self.label
+            loglines('area', lambda: Grid.str_area_labels(self.grid))
+            logmsg('area', 'Marking largest plottable areas starting ' + \
+                'with label %s' % self.label)
 
             self.label = self.mark_largest_plottable_areas(self.label)
 
+            # if every single cell is non-plottable (already plotted)..
             if not self.grid.is_area_plottable(testarea, True):
-                if self.debug:
-                    print Grid.str_area_labels(self.grid) + '\n'
-                    print "#### Grid is completely plotted"
-                    print "<<<< END AREA DISCOVERY"
+                logmsg('area', 'All areas discovered:')
+                loglines('area', lambda: Grid.str_area_labels(self.grid))
                 return
 
         raise Exception, "Unable to plot all areas for unknown reason"

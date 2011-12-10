@@ -6,9 +6,8 @@ import os.path
 import csv
 
 import buildconfig
-
-from xls import read_xls_file, read_xls_sheets
-from xlsx import read_xlsx_file, read_xlsx_sheets
+import xls
+import xlsx
 
 from geometry import Point
 from grid import Grid, GridLayer
@@ -116,19 +115,20 @@ def FileLayers_to_GridLayers(file_layers):
     return layers
 
 
-def get_sheets(filename):
+def get_sheet_names(filename):
     """
     Return list of sheets in file specified. For csv, just returns
     the csv as the only sheet.
+    Returned as [(name, index), ...]
     """
     ext = os.path.splitext(filename)[1].lower()
     name = os.path.basename(filename)
     if ext == '.csv':
         return [(name, 0)]
     elif ext == '.xls':
-        return read_xls_sheets(filename)
+        return xls.read_xls_sheet_names(filename)
     elif ext == '.xlsx':
-        return read_xlsx_sheets(filename)
+        return xlsx.read_xlsx_sheet_names(filename)
     else:
         raise NameError
 
@@ -210,9 +210,9 @@ def read_sheet(filename, sheetid):
     if ext == '.csv':
         lines = read_csv_file(filename)
     elif ext == '.xls':
-        lines = read_xls_file(filename, sheetid)
+        lines = xls.read_xls_file(filename, sheetid)
     elif ext == '.xlsx':
-        lines = read_xlsx_file(filename, sheetid)
+        lines = xlsx.read_xlsx_file(filename, sheetid)
     else:
         raise Exception, "Invalid file type '%s' (csv, xls, xlsx accepted)" \
             % ext
