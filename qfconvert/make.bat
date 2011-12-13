@@ -12,5 +12,5 @@ call cxfreeze -OO qfconvert.py
 copy dist\*.* release
 rmdir /s /q dist
 :rmdir /s /q build
-del *.pyc
-del *.pyo
+del *.pyc 2> nul:
+del *.pyo 2> nul:

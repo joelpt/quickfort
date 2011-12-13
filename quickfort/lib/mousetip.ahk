@@ -87,10 +87,11 @@ UpdateTip()
   {
     header := "Quickfort " Version "`n`nPick a blueprint file with Alt+F.`nAlt+T for command line."
   }
-  else {
+  else 
+  {
     if (CommandLineMode)
     {
-      header := "Alt+T: #" EvalMode " " SubStr(EvalCommands, 1, 30)
+      header := "ALT+T: #" EvalMode " " SubStr(EvalCommands, 1, 30)
       if (StrLen(EvalCommands) > 30)
         header := header . "..."
     }

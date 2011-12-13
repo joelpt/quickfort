@@ -1390,10 +1390,10 @@ Todo/Future Ideas                                                        {#todo}
 Changelog                                                           {#changelog}
 ---------
 
-### 2.02 (2011 September 27) ###
+### 2.02 (2011 December 12) ###
 
 * (EXPERIMENTAL) Manual material selection added! Windows only. See user manual
-  for details, or just run Blueprints/Tests/manual-bullseye.csv in Quickfort
+  for details, or try Blueprints/Tests/manual-bullseye.csv in Quickfort
 * New transformation command: phase=... (changes blueprint build phase)
 * New transformation command: s/pat/repl/ (search-and-replace cells with regex)
 * On Windows, Quickfort will now check that [MACRO_MS:0] is set in the running 
@@ -1403,7 +1403,7 @@ Changelog                                                           {#changelog}
   (they use #Tiles / 4 + 1 mats rather than just #Tiles)
 * Switched to Python 2.7 and cxfreeze
 * Commented options/buildconfig.json and options/keys.json for those who wish
-  to modify them
+  to read or modify these files
 * Allow Alt+T commands to start with a #, e.g. #dig d,d,d
 * Added config/matselect-(1,2,3).wav used during manual mat selection; these
   can be changed or removed

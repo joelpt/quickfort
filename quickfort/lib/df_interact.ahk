@@ -7,28 +7,22 @@ PlayMacro(delay)
   global KeyMacroLoad, KeyMacroHighlightLastMacro, KeyMacroSelectMacro, KeyMacroPlay
   global LastMacroSentToWinID
 
-  ;if (delay < 500)
-  ;  delay := 500
-  ;else if (delay > 10000)
-  ;  delay := 10000
-
   ActivateGameWin()
   ReleaseModifierKeys()
 
-  ; Check if we have already played a macro to this DF instance; if not
-  ; we wait an extra long time for the first macro playback to avoid DF
-  ; throwing a macro I/O load error
   winID := WinActive()
   if (LastMacroSentToWinID != winID)
   {
+    ; this isn't really used anywhere at present but we'll still track it
+    ; for possible future use; it tells us whether we've sent a macro
+    ; to THIS DF instance yet
     LastMacroSentToWinID := winID
-    Sleep, 3000
   }
 
   Send %KeyMacroLoad% ;; show load macro menu
   Send %KeyMacroHighlightLastMacro%  ;; highlight last macro in the list
   Send %KeyMacroSelectMacro% ;; select macro
-  ;Sleep %delay%
+  Sleep %delay%
   Send %KeyMacroPlay% ;; play it after delay
   return
 }
