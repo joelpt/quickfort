@@ -138,7 +138,7 @@
     "query": { // set building/task prefs
         "init": null,
         "completed": null,
-        "designate": ["moveto", "cmd", "setsize"],
+        "designate": ["moveto", "cmd", "setsize", "&"],
         "samecmd": ["cmd"],
         "diffcmd": ["cmd"],
         "submenukeys": "",

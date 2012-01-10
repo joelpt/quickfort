@@ -1,4 +1,4 @@
-Quickfort 2.02
+Quickfort 2.03
 ===============
 by joelpt <quickfort@joelpt.net>
 
@@ -1390,6 +1390,10 @@ Todo/Future Ideas                                                        {#todo}
 Changelog                                                           {#changelog}
 ---------
 
+### 2.03 (2012 January 10) ###
+
+* Fixed problem with #query blueprints not playing back correctly
+
 ### 2.02 (2011 December 12) ###
 
 * (EXPERIMENTAL) Manual material selection added! Windows only. See user manual
@@ -1401,6 +1405,7 @@ Changelog                                                           {#changelog}
 * Fixed issue with multilevel #build blueprints not plotting right (GoingTharn)
 * Fixed issue with bridges and roads being given the wrong number of materials
   (they use #Tiles / 4 + 1 mats rather than just #Tiles)
+* Added `qfconvert.py --mode=csv` output mode, to transform CSV files into new CSV files
 * Switched to Python 2.7 and cxfreeze
 * Commented options/buildconfig.json and options/keys.json for those who wish
   to read or modify these files

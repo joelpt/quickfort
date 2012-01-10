@@ -11,7 +11,7 @@ import cProfile
 import blueprint
 import log
 
-VERSION = '2.02'
+VERSION = '2.03'
 
 def parse_options(argv):
     """Read options and args from argv (the command line parameters)."""
