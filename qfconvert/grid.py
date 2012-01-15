@@ -1,13 +1,12 @@
 """Main storage classes for blueprint data used throughout qfconvert."""
 
-from copy import deepcopy
-
 from geometry import Point, Direction
+
 
 class CommandCell:
     """CommandCell is the container used for cell info in Grid."""
 
-    def __init__(self, command, label = None):
+    def __init__(self, command, label=None):
         self.command = command
         self.area = None
         self.plottable = True if command else False
@@ -122,7 +121,7 @@ class Grid:
                 for y in range(height - self.height)
             ]
             self.height = height
-        
+
         # add empty columns to right if required
         if width > self.width:
             self.rows = [
@@ -138,8 +137,8 @@ class Grid:
         Set plottable, label and/or command values for all cells that are
         within the bounds of given area.
         """
-        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
-            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
+        for x in range(area.corners[0].x, area.corners[1].x + 1):  # NW->NE
+            for y in range(area.corners[0].y, area.corners[3].y + 1):  # NW->SW
                 cell = self.get_cell(Point(x, y))
                 if plottable is not None:
                     cell.plottable = plottable
@@ -165,8 +164,8 @@ class Grid:
             else:
                 returns True only if *every* cell is plottable in area
         """
-        for x in range(area.corners[0].x, area.corners[1].x + 1): # NW->NE
-            for y in range(area.corners[0].y, area.corners[3].y + 1): # NW->SW
+        for x in range(area.corners[0].x, area.corners[1].x + 1):  # NW->NE
+            for y in range(area.corners[0].y, area.corners[3].y + 1):  # NW->SW
                 pos = Point(x, y)
                 if any_plottable:
                     if self.get_cell(pos).plottable:
@@ -313,11 +312,11 @@ class Grid:
         return '\n'.join(rowstrings)
 
     @staticmethod
-    def str_commands(rows, colsep = '', annotate = False):
+    def str_commands(rows, colsep='', annotate=False):
         """
         Returns grid's commands as a pretty formatted table for display.
             colsep: if provided, will be placed between cells on each row
-            annotate: if True, simple numbering 'rulers' will be added 
+            annotate: if True, simple numbering 'rulers' will be added
         """
         rowstrings = []
 
@@ -327,12 +326,11 @@ class Grid:
             rowstrings += ['  ' + ('1234567890' * (1 + width // 10))[0:width]]
             edgebar = [' +' + ('-' * width) + '+']
             rowstrings += edgebar
-                
 
         rowstrings += [
             colsep.join(
                 ['' if not annotate else str(int(str(n + 1)[-1]) % 10) + '|'] +
-                ['.' if c.command == '' else c.command[0] for c in row]) + '|' 
+                ['.' if c.command == '' else c.command[0] for c in row]) + '|'
             for n, row in enumerate(rows)
         ]
 
@@ -340,4 +338,3 @@ class Grid:
             rowstrings += edgebar
 
         return '\n'.join(rowstrings)
-

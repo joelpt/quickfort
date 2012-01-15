@@ -11,7 +11,12 @@ import xlsx
 
 from geometry import Point
 from grid import Grid, GridLayer
+from qfconvert import ParametersError
 from util import Struct
+
+
+class FileError(Exception):
+    """Base class for file parsing related errors."""
 
 
 def read_csv_file(filename):
@@ -27,9 +32,10 @@ def load_json(filename):
     """Loads a JSON document at filename and returns the decoded result."""
     with open(filename) as f:
         stripped = ""
-        for line in f: # naively strip single line comments prefixed with //
+        for line in f:  # naively strip single line comments prefixed with //
             stripped += re.sub(r'//.*$', '', line)
         return json.loads(stripped)
+
 
 class FileLayer:
     """
@@ -65,9 +71,9 @@ class FileLayer:
         # Find max width and trim off unwanted crap
         for i, cells in enumerate(self.rows):
             try:
-                endat = cells.index('#') # find first # (row ender) in any
+                endat = cells.index('#')  # find first # (row ender) in any
                 if endat == 0:
-                    raise Exception, "Blueprint has '#' in unexpected cell."
+                    raise FileError("Blueprint has '#' in unexpected cell.")
                 else:
                     # trim off stuff from the found # to the right
                     cells = cells[0:endat]
@@ -82,16 +88,16 @@ class FileLayer:
             maxwidth = max(maxwidth, endat)
 
         if maxwidth == 0:
-            raise Exception, "Blueprint appears to be empty or zero-width."
+            raise FileError("Blueprint appears to be empty or zero-width.")
 
         # Conform all rows to the same width
         for row in self.rows:
             if len(row) < maxwidth:
-                row.extend( ['' for x in range(maxwidth - len(row))] )
+                row.extend(['' for x in range(maxwidth - len(row))])
         return
 
     @staticmethod
-    def str_rows(rows, colsep = ''):
+    def str_rows(rows, colsep=''):
         """Returns a pretty-formatted string showing the given rows."""
         rowstrings = [colsep.join(['.' if c == '' else c[0] for c in row]) + \
             '|' for row in rows]
@@ -164,9 +170,9 @@ def parse_command(command):
     Parse the given one-line QF command analogously to parse_file().
     """
     m = re.match(r'^\#?([bdpq]|build|dig|place|query)\s+(.+)', command)
-        
+
     if m is None:
-        raise Exception, "Invalid command format '%s'." % command
+        raise ParametersError("Invalid command format '%s'." % command)
 
     # set up details object
     details = SheetDetails()
@@ -177,11 +183,11 @@ def parse_command(command):
     details.comment = ''
 
     # break apart lines by # and cells by ,
-    lines = [[cell.strip() for cell in line.split(',')] 
-        for line 
+    lines = [[cell.strip() for cell in line.split(',')]
+        for line
         in m.group(2).split('#')
     ]
-    
+
     # break up lines into z-layers separated by #> or #<
     # TODO: actually support this properly, right now we are just
     # calling this to do conversion to FileLayers for us
@@ -203,7 +209,7 @@ def read_sheet(filename, sheetid):
 
     # verify file exists
     if not os.path.isfile(filename):
-        raise Exception, 'File not found "%s"' % filename
+        raise FileError('File not found "%s"' % filename)
 
     # read contents of the file into lines
     ext = os.path.splitext(filename)[1].lower()
@@ -214,8 +220,8 @@ def read_sheet(filename, sheetid):
     elif ext == '.xlsx':
         lines = xlsx.read_xlsx_file(filename, sheetid)
     else:
-        raise Exception, "Invalid file type '%s' (csv, xls, xlsx accepted)" \
-            % ext
+        raise FileError("Invalid file type '%s' (csv, xls, xlsx accepted)" \
+            % ext)
 
     # if there's a line that starts with #, treat it as the last line of
     # the blueprint and trim off everything from there to the end of lines
@@ -299,7 +305,6 @@ def split_zlayers(lines):
             zlayer.append(cells)
 
     if len(zlayer) > 0:
-        filelayers.append( FileLayer( [], zlayer ) )
+        filelayers.append(FileLayer([], zlayer))
 
     return filelayers
-

@@ -38,6 +38,7 @@ class BuildConfig:
         # return standard config value of this build type
         return self.config.get(label)
 
+
 def get_full_build_type_name(build_type):
     if build_type == 'd':
         return 'dig'

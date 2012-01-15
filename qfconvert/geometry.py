@@ -30,9 +30,9 @@ class Point:
         return Point(self.x + other.x, self.y + other.y)
 
     def __mul__(self, other):
-        if isinstance(other, Point): # multiply two Points' coords together
+        if isinstance(other, Point):    # multiply two Points' coords together
             return Point(self.x * other.x, self.y * other.y)
-        elif isinstance(other, int): # multiply self coords by other int
+        elif isinstance(other, int):    # multiply self coords by other int
             return Point(self.x * other, self.y * other)
         else:
             raise
@@ -56,7 +56,7 @@ class Point:
 
     def distance_to(self, other):
         """Returns straight-line distance between self and other."""
-        return sqrt( (other.x - self.x)**2 + (other.y - self.y)**2  )
+        return sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
 
     def midpoint(self, other):
         """
@@ -73,17 +73,18 @@ class Point:
 
 
 DIRECTIONS = {
-    'n':  { 'index': 0, 'delta': Point( 0, -1) },
-    'ne': { 'index': 1, 'delta': Point( 1, -1) },
-    'e':  { 'index': 2, 'delta': Point( 1,  0) },
-    'se': { 'index': 3, 'delta': Point( 1,  1) },
-    's':  { 'index': 4, 'delta': Point( 0,  1) },
-    'sw': { 'index': 5, 'delta': Point(-1,  1) },
-    'w':  { 'index': 6, 'delta': Point(-1,  0) },
-    'nw': { 'index': 7, 'delta': Point(-1, -1) }
+    'n':  {'index': 0, 'delta': Point(0, -1)},
+    'ne': {'index': 1, 'delta': Point(1, -1)},
+    'e':  {'index': 2, 'delta': Point(1,  0)},
+    'se': {'index': 3, 'delta': Point(1,  1)},
+    's':  {'index': 4, 'delta': Point(0,  1)},
+    'sw': {'index': 5, 'delta': Point(-1,  1)},
+    'w':  {'index': 6, 'delta': Point(-1,  0)},
+    'nw': {'index': 7, 'delta': Point(-1, -1)}
     }
 
 DIRECTIONS_ORDERED = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+
 
 class Direction:
     """Direction represents one of the 8 compass directions: n, ne, e, .."""
@@ -204,7 +205,7 @@ class Area:
 
     def diagonal_length(self):
         """Returns corner-to-opposite-corner distance of area."""
-        return sqrt(self.width()**2 + self.height()**2)
+        return sqrt(self.width() ** 2 + self.height() ** 2)
 
     def opposite_corner(self, corner):
         """Returns the opposite corner of area given param `corner`."""
@@ -212,5 +213,3 @@ class Area:
             if corner == self.corners[i]:
                 return self.corners[(i + 2) % 4]
         return None
-
-

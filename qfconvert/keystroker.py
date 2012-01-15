@@ -14,6 +14,11 @@ import util
 # load global KEY_LIST which is used liberally below and would be inefficient to constantly reload
 KEY_LIST = load_json(os.path.join(exetest.get_main_dir(), "config/keys.json"))
 
+
+class KeystrokerError(Exception):
+    """Base class for keystroker errors."""
+
+
 class Keystroker:
     """
     Computes keycodes needed to go through route and transforms those keycodes
@@ -70,8 +75,8 @@ class Keystroker:
             if ':' in command:
                 match = re.search(r'(.+):([\w]+)$', command)
                 if match is None:
-                    raise Exception, \
-                        'Invalid characters in material label: ' + command
+                    raise KeystrokerError(
+                        'Invalid characters in material label: ' + command)
 
                 # split command:mat_label into command and mat_label
                 command = match.group(1)
@@ -98,8 +103,8 @@ class Keystroker:
                         last_submenu = submenu
                     elif last_submenu != submenu:
                         # switching from one submenu to another
-                        subs['exitmenu'] = ['^'] # exit previous submenu
-                        subs['menu'] = submenu # enter new menu
+                        subs['exitmenu'] = ['^']  # exit previous submenu
+                        subs['menu'] = submenu    # enter new menu
                         last_submenu = submenu
                     else:
                         # same submenu
@@ -191,9 +196,9 @@ class Keystroker:
             dy = abs(start.y - end.y)
 
             if dx == 0:
-                steps = dy # moving on y axis only
+                steps = dy  # moving on y axis only
             elif dy == 0:
-                steps = dx # moving on x axis only
+                steps = dx  # moving on x axis only
             else:
                 # determine max diagonal steps we can take
                 # in this direction without going too far
@@ -302,9 +307,9 @@ class Keystroker:
         """
         # generic mat selection
         if manual_label is None:
-            keys = ['&', '%'] # {Enter}{Wait}
+            keys = ['&', '%']  # {Enter}{Wait}
             if areasize == 1:
-                keys += ['@'] # shift-enter
+                keys += ['@']  # shift-enter
                 return keys
 
             # Tries to avoid running out of a given material type by blithely
@@ -313,10 +318,10 @@ class Keystroker:
             # be good enough most of the time.
             reps = 1 if areasize == 1 else 1 + 2 * int(sqrt(areasize))
             keys += ['@', '{menudown}'] * (reps - 1)
-            keys += ['%'] # {Wait} at the end
+            keys += ['%']  # {Wait} at the end
 
             return keys
-        
+
         # Manually assisted material selection: enter materials menu and
         # wait for that region of the screen to change, then select manually
         # chosen material.
@@ -349,12 +354,12 @@ def convert_keys(keys, mode, title):
     elif mode == 'keylist':
         return ','.join(keys)
 
-    raise Exception, 'Unknown Keystroker.render() mode "%s"' % mode
+    raise KeystrokerError('Unknown Keystroker.render() mode "%s"' % mode)
 
 
 def translate_keycodes(keycodes, mode):
     """Translate keycodes based on given output mode."""
-    return util.flatten( [ translate_keycode(k, mode) for k in keycodes ] )
+    return util.flatten([translate_keycode(k, mode) for k in keycodes])
 
 
 def translate_keycode(keycode, mode):
@@ -366,29 +371,29 @@ def translate_keycode(keycode, mode):
     translated = KEY_LIST[mode].get(keycode.lower())
 
     if translated is None:
-        return keycode # no translation available, so pass it through as is
+        return keycode  # no translation available, so pass it through as is
 
-    return translated # translation made
+    return translated   # translation made
 
 
 def convert_to_macro(keycodes, title):
     """Convert keycodes to DF macro syntax (complete macro file contents)."""
     keybinds = parse_interface_txt(
-        os.path.join(exetest.get_main_dir(), 'config/interface.txt') )
+        os.path.join(exetest.get_main_dir(), 'config/interface.txt'))
 
-    if not title: # make up a macro title if one is not provided to us
+    if not title:  # make up a macro title if one is not provided to us
         title = '~qf' + str(random.randrange(0, 999999999))
 
-    output = [title] # first line of macro is macro title
+    output = [title]  # first line of macro is macro title
 
     for key in keycodes:
         if key == '':
-            continue # empty keycode, output nothing
+            continue  # empty keycode, output nothing
         elif keybinds.get(key) is None:
-            raise Exception, \
-                "Key '%s' not bound in config/interface.txt" % key
+            raise KeystrokerError(
+                "Key '%s' not bound in config/interface.txt" % key)
         if key == '^':
-            output.append('\t\tLEAVESCREEN') # escape menu key
+            output.append('\t\tLEAVESCREEN')  # escape menu key
         else:
             output.extend(keybinds[key])
         output.append('\tEnd of group')
@@ -406,15 +411,15 @@ def split_keystring_into_keycodes(keystring):
     cmdedit = keystring
     # separate tokens with | chars...
     cmdedit = re.sub(r'\+\{Enter\}', '|@|', cmdedit)
-    cmdedit = re.sub(r'\{', '|{', cmdedit) 
+    cmdedit = re.sub(r'\{', '|{', cmdedit)
     cmdedit = re.sub(r'\}', '}|', cmdedit)
     cmdedit = re.sub(r'\+\&', '|+&|', cmdedit)
     cmdedit = re.sub(r'\&', '|&|', cmdedit)
     cmdedit = re.sub(r'\^', '|^|', cmdedit)
     cmdedit = re.sub(r'\+(\w)', '|1:\\1|', cmdedit)
     cmdedit = re.sub(r'\!(\w)', '|4:\\1|', cmdedit)
-    cmdedit = re.sub(r'\%wait\%', '|{wait}|', cmdedit) # support QF1.x's %wait%
-    cmdsplit = re.split(r'\|+', cmdedit) # ...and split tokens at | chars.
+    cmdedit = re.sub(r'\%wait\%', '|{wait}|', cmdedit)  # support QF1.x's %wait%
+    cmdsplit = re.split(r'\|+', cmdedit)  # ...and split tokens at | chars.
 
     # break into individual keycodes
     codes = []
@@ -426,21 +431,21 @@ def split_keystring_into_keycodes(keystring):
             # check for keycodes like {Right 5}
             match = re.match(r'\{(\w+) (\d+)\}', k)
             if match is None:
-                codes.append(k) # preserve whole key-combos
+                codes.append(k)  # preserve whole key-combos
             else:
                 # repeat the specified keycode the specified number of times
                 codes.extend(['{' + match.group(1) + '}'] * int(match.group(2)))
             continue
 
         if k[0:2] in ('1:', '4:'):
-            codes.append(k) # preserve Alt/Shift combos as distinct keycodes
+            codes.append(k)  # preserve Alt/Shift combos as distinct keycodes
             continue
 
         if k[0] in ('&', '^', '+', '%', '!'):
-            codes.append(k) # preserve these as distinct keycodes
+            codes.append(k)  # preserve these as distinct keycodes
             continue
 
-        codes.extend(k) # just separate a series of individual keystrokes
+        codes.extend(k)  # just separate a series of individual keystrokes
 
     return codes
 
@@ -463,8 +468,7 @@ def parse_interface_txt(path):
             continue
 
         bind = re.sub(r'(\w+):.+', r'\1', kb[0])
-        keys = [re.sub(r'\[(KEY:|SYM:)(.+?)\]', r'\2', k)
-            for k in kb[1:] ]
+        keys = [re.sub(r'\[(KEY:|SYM:)(.+?)\]', r'\2', k) for k in kb[1:]]
 
         for k in keys:
             if k == '':

@@ -3,6 +3,7 @@
 import re
 import util
 
+
 def load_aliases(filename):
     """
     Loads aliases.txt-formatted file and returns a dict.
@@ -16,7 +17,7 @@ def load_aliases(filename):
     # load the file contents
     with open(filename) as f:
         data = f.read()
-    
+
     data = util.convert_line_endings(data)
     lines = data.split('\n')
 
@@ -30,6 +31,7 @@ def load_aliases(filename):
             aliases[match.group(1)] = match.group(3)
 
     return aliases
+
 
 def apply_aliases(layers, aliases):
     """
@@ -45,7 +47,6 @@ def apply_aliases(layers, aliases):
         for r, row in enumerate(layer.rows):
             for c, cell in enumerate(row):
                 for alias in aliases.iterkeys():
-                    if cell == alias: # alias match
+                    if cell == alias:  # alias match
                         layer.rows[r][c] = aliases[alias]
     return layers
-

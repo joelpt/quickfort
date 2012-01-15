@@ -8,6 +8,10 @@ import util
 import re
 
 
+class AreaPlotterError(Exception):
+    """Base class for areaplotter errors."""
+
+
 class AreaPlotter:
     """Handles discovery of largest plottable areas."""
 
@@ -70,8 +74,8 @@ class AreaPlotter:
         """
 
         testarea = Area(
-            Point(0,0),
-            Point(self.grid.width-1, self.grid.height-1)
+            Point(0, 0),
+            Point(self.grid.width - 1, self.grid.height - 1)
             )
 
         while True:
@@ -87,7 +91,7 @@ class AreaPlotter:
                 loglines('area', lambda: Grid.str_area_labels(self.grid))
                 return
 
-        raise Exception, "Unable to plot all areas for unknown reason"
+        raise AreaPlotterError("Unable to plot all areas for unknown reason")
 
     def mark_largest_plottable_areas(self, label):
         """
@@ -115,7 +119,6 @@ class AreaPlotter:
         # return our label when we plotted at least 1 new area
         return label
 
-
     def find_largest_areas(self):
         """
         Finds the largest areas that can *currently* be built from each
@@ -138,7 +141,6 @@ class AreaPlotter:
             lambda area: ''.join([str(c) for c in area.corners]))
 
         return areas
-
 
     def find_largest_area_from(self, pos):
         """
@@ -184,7 +186,7 @@ class AreaPlotter:
 
         # Get the min/max size that this area may be, based on the command
         sizebounds = self.buildconfig.get('sizebounds', command) \
-            or (1, 1000, 1, 1000) # default sizebounds are very large
+            or (1, 1000, 1, 1000)  # default sizebounds are very large
 
         # Get the max width of this area on the axis defined by
         # pos and dir1 direction, and max width from
@@ -211,14 +213,14 @@ class AreaPlotter:
             maxheight = sizebounds[3]
 
         if maxwidth * maxheight < bestarea.size():
-            return None # couldn't be larger than the best one yet found
+            return None  # couldn't be larger than the best one yet found
 
         if maxheight == 1 and maxwidth == 1:
             # 1x1 area, just return it
             return Area(pos, pos)
 
         # (width x 1) sized area
-        bestarea = Area( pos, pos + (dir1.delta() * (maxwidth - 1)) )
+        bestarea = Area(pos, pos + (dir1.delta() * (maxwidth - 1)))
 
         for ydelta in range(1, maxheight):
             check_point = pos + (dir2.delta() * ydelta)
@@ -235,7 +237,7 @@ class AreaPlotter:
 
             if width * height > bestarea.size():
                 bestarea = Area(
-                    pos, check_point + ( dir1.delta() * (width - 1)) )
+                    pos, check_point + (dir1.delta() * (width - 1)))
             else:
                 continue
 
@@ -247,4 +249,4 @@ def next_label(label):
     Returns the next label char by cycling through ASCII chars
     '0' through '}'.
     """
-    return chr( ((ord(label) - 48 + 1) % 78) + 48 )
+    return chr(((ord(label) - 48 + 1) % 78) + 48)

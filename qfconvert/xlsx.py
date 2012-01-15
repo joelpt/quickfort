@@ -3,6 +3,7 @@
 import re
 import zipfile
 
+from filereader import FileError
 from xml2obj import xml2obj
 
 
@@ -17,7 +18,7 @@ def read_xlsx_file(filename, sheetid):
     if sheetid is None:
         sheetid = 1
     else:
-        sheetid += 1 # sheets are numbered starting from 1 in xlsx files
+        sheetid += 1  # sheets are numbered starting from 1 in xlsx files
 
     # Get cell data from specified worksheet.
     try:
@@ -26,8 +27,8 @@ def read_xlsx_file(filename, sheetid):
         xml = xml2obj(sheetdata)
         rows = xml.sheetData.row
     except:
-        raise Exception, "Could not read xlsx file %s, worksheet id %s" % (
-            filename, sheetid-1)
+        raise FileError("Could not read xlsx file %s, worksheet id %s" % (
+            filename, sheetid - 1))
 
     # Get shared strings xml. Cell values are given as ordinal index
     # references into sharedStrings.xml:ssi.si elements, whose string-value
@@ -37,7 +38,7 @@ def read_xlsx_file(filename, sheetid):
         xml = xml2obj(stringdata)
         strings = xml.si
     except:
-        raise Exception, "Could not parse sharedStrings.xml of xlsx file"
+        raise FileError("Could not parse sharedStrings.xml of xlsx file")
 
     # Map strings to row values and return result
     return extract_xlsx_lines(rows, strings)
@@ -55,7 +56,7 @@ def extract_xlsx_lines(sheetrows, strings):
     lastrownum = 0
     for row in sheetrows:
         rownum = int(row.r)
-        if rownum > lastrownum + 1: # interpolate missing rows
+        if rownum > lastrownum + 1:  # interpolate missing rows
             lines.extend([[]] * (rownum - lastrownum - 1))
         lastrownum = rownum
         cells = row.c
@@ -67,7 +68,7 @@ def extract_xlsx_lines(sheetrows, strings):
             colcode = re.match('^([A-Z]+)', str(c.r)).group(1)
             colnum = colcode_to_colnum(colcode)
 
-            if colnum > lastcolnum + 1: # interpolate missing columns
+            if colnum > lastcolnum + 1:  # interpolate missing columns
                 line.extend([''] * (colnum - lastcolnum - 1))
 
             lastcolnum = colnum
@@ -87,14 +88,14 @@ def read_xlsx_sheet_names(filename):
         xml = xml2obj(sheetsdata)
         sheets = xml.sheets.sheet
     except:
-        raise Exception, "Could not open '%s' for sheet listing." % filename
+        raise FileError("Could not open '%s' for sheet listing." % filename)
 
     output = []
     for sheet in sheets:
         m = re.match('rId(\d+)', sheet.r_id)
         if not m:
-            raise Exception, "Could not read list of xlsx's worksheets."
-        output.append( ( sheet.name, int(m.group(1)) - 1 ) )
+            raise FileError("Could not read list of xlsx's worksheets.")
+        output.append((sheet.name, int(m.group(1)) - 1))
     return output
 
 

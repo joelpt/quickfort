@@ -23,6 +23,12 @@ from geometry import Point, Direction
 from grid import GridLayer, Grid
 from keystroker import Keystroker
 from transformer import Transformer
+from qfconvert import ParametersError
+
+
+class BlueprintError(Exception):
+    """Base class for errors in the blueprint package."""
+
 
 def get_blueprint_info(path, transform_str):
     """
@@ -47,19 +53,19 @@ def get_blueprint_info(path, transform_str):
                     details.build_type = buildconfig.get_full_build_type_name(newphase)
 
                 tran = Transformer(layers, details.start)
-                tran.transform(transforms) # do the x/y transformations
+                tran.transform(transforms)  # do the x/y transformations
                 details.start = tran.start
                 layers = tran.layers
 
                 logmsg('transform', 'Results of transform:')
                 loglines('transform', lambda: FileLayer.str_layers(layers))
-            
+
             layers = FileLayers_to_GridLayers(layers)
             bp = Blueprint(sheet[0], layers, details)
-            
+
             # perform any requested z-transforms
             if ztransforms is not None:
-                layers = bp.repeat_ztransforms(ztransforms, bp.layers, 
+                layers = bp.repeat_ztransforms(ztransforms, bp.layers,
                     Blueprint.repeater_layers)
                 bp.layers = layers
 
@@ -67,12 +73,13 @@ def get_blueprint_info(path, transform_str):
             result += '>>>> Sheet id %d\n' % sheet[1]
             result += bp.get_info() + '\n'
         except:
-            continue # ignore blank/missing sheets
+            continue    # ignore blank/missing sheets
 
     if result:
         return result
     else:
-        raise Exception, "No valid blueprints found in '%s'." % path
+        raise BlueprintError("No valid blueprints found in '%s'." % path)
+
 
 @log_routine('file', 'INPUT FILE SOURCE PROCESSING')
 def process_blueprint_file(path, sheetid, startpos, transform_str,
@@ -97,6 +104,7 @@ def process_blueprint_file(path, sheetid, startpos, transform_str,
     return convert_blueprint(layers, details, startpos, transform_str,
         output_mode, output_title, visualize)
 
+
 @log_routine('file', 'COMMAND LINE SOURCE PROCESSING')
 def process_blueprint_command(command, startpos, transform_str, output_mode,
     output_title, visualize):
@@ -114,7 +122,7 @@ def process_blueprint_command(command, startpos, transform_str, output_mode,
 
 
 @log_routine('file', 'BLUEPRINT CONVERSION')
-def convert_blueprint(layers, details, startpos, transform_str, 
+def convert_blueprint(layers, details, startpos, transform_str,
     output_mode, output_title, visualize):
     """
     Transforms the provided layers if required by transform_str, then renders
@@ -141,7 +149,7 @@ def convert_blueprint(layers, details, startpos, transform_str,
             details.build_type = buildconfig.get_full_build_type_name(newphase)
 
         tran = Transformer(layers, details.start)
-        tran.transform(transforms) # do the x/y transformations
+        tran.transform(transforms)  # do the x/y transformations
         details.start = tran.start
         layers = tran.layers
 
@@ -150,8 +158,8 @@ def convert_blueprint(layers, details, startpos, transform_str,
 
     layers = FileLayers_to_GridLayers(layers)
 
-    if not layers: # empty blueprint handling
-        raise Exception, "Blueprint appears to be empty."
+    if not layers:  # empty blueprint handling
+        raise BlueprintError("Blueprint appears to be empty.")
 
     # override starting position if startpos command line option was given
     if startpos is not None:
@@ -167,7 +175,7 @@ def convert_blueprint(layers, details, startpos, transform_str,
     if output_mode == 'csv':
         bp.analyze()
         # perform any awaiting z-transforms
-        layers = bp.repeat_ztransforms(ztransforms, bp.layers, 
+        layers = bp.repeat_ztransforms(ztransforms, bp.layers,
             Blueprint.repeater_layers)
         bp.layers = layers
         output = str(bp)
@@ -179,9 +187,10 @@ def convert_blueprint(layers, details, startpos, transform_str,
             keys = bp.plot(ztransforms)
         output = keystroker.convert_keys(keys, output_mode, output_title)
 
-    loglines('summary', lambda:str_summary(bp, keys))
+    loglines('summary', lambda: str_summary(bp, keys))
 
     return output
+
 
 def str_summary(bp, keys):
     s = ">>>> BEGIN SUMMARY\n"
@@ -205,15 +214,16 @@ def str_summary(bp, keys):
     s += "<<<< END SUMMARY"
     return s
 
+
 def parse_startpos(start, width, height):
     """Transform startpos string like (1,1) or nw to corresponding Point."""
-    
+
     # try (#,#) type syntax
     m = re.match(r'\(?(\d+)[,;](\d+)\)?', start)
     if m is not None:
-        return Point( int(m.group(1)), int(m.group(2)) )
-    
-    # try corner-coordinate syntax    
+        return Point(int(m.group(1)), int(m.group(2)))
+
+    # try corner-coordinate syntax
     m = re.match(r'(ne|nw|se|sw)', start.lower())
     if m is not None:
         # convert corner String -> Direction -> Point
@@ -226,7 +236,7 @@ def parse_startpos(start, width, height):
 
         return pt
 
-    raise Exception, "Invalid --position parameter '%s'" % start
+    raise ParametersError("Invalid --position parameter '%s'" % start)
 
 
 class Blueprint:
@@ -249,11 +259,11 @@ class Blueprint:
         """Performs contiguous area expansion and discovery in the layers."""
         for layer in self.layers:
             plotter = AreaPlotter(layer.grid, self.build_config)
-            
-            plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
-            plotter.discover_areas() # find contiguous areas
-            
-            layer.grid = plotter.grid # update
+
+            plotter.expand_fixed_size_areas()   # plot cells of d(5x5) format
+            plotter.discover_areas()            # find contiguous areas
+
+            layer.grid = plotter.grid           # update
 
     def plot(self, ztransforms):
         """Plots a route through the blueprint, then does ztransforms."""
@@ -262,7 +272,7 @@ class Blueprint:
         ks = None
 
         for layer in self.layers:
-            layer.start = cursor # first layer's start or last layer's exit pos
+            layer.start = cursor  # first layer's start or last layer's exit pos
 
             # plan the cursor's route to designate all the areas
             layer.grid, layer.plots, end = router.plan_route(
@@ -270,7 +280,7 @@ class Blueprint:
 
             # generate key/macro sequence to render this series of plots in DF
             ks = Keystroker(layer.grid, self.build_config)
-            layerkeys, cursor = ks.plot(layer.plots, cursor) 
+            layerkeys, cursor = ks.plot(layer.plots, cursor)
             keys += layerkeys + layer.onexit
 
         # move cursor back to start pos x, y, so start==end
@@ -296,17 +306,17 @@ class Blueprint:
             count, command = t
             if count < 2:
                 continue
-            
+
             if command not in ('d', 'u'):
-                raise Exception, 'Unrecognized ztransform ' + command
-            
+                raise ParametersError('Unrecognized ztransform ' + command)
+
             # direction we want to move: 1=zdown, -1=zup
             dirsign = 1 if command == 'd' else -1
 
             # if we want to move in the same direction as the stack does,
             # we only need to move 1 z-level in that direction
-            if dirsign * zdelta > 0: # if signs of dirsign and zdelta match
-                zdelta = 0 # 'no z-change caused by stack'
+            if dirsign * zdelta > 0:  # if signs of dirsign and zdelta match...
+                zdelta = 0  # 'no z-change caused by stack'
 
             # with a ztransform moving in the opposite direction we
             # need to move twice the height of the blueprint-stack
@@ -348,7 +358,7 @@ class Blueprint:
         grid = self.layers[0].grid
 
         plotter = AreaPlotter(grid, buildconfig)
-        plotter.expand_fixed_size_areas()  #  plot cells of d(5x5) format
+        plotter.expand_fixed_size_areas()  # plot cells of d(5x5) format
 
         ks = Keystroker(grid, buildconfig)
         keys = []
@@ -356,8 +366,7 @@ class Blueprint:
         # move to each corner beginning with NW, going clockwise, and wait
         # at each one
         lastpos = self.start
-        for cornerdir in [Direction(d) for d in
-                ['nw', 'ne', 'se', 'sw', 'nw'] ]:
+        for cornerdir in [Direction(d) for d in ['nw', 'ne', 'se', 'sw', 'nw']]:
             newpos = Point(
                 max(0, cornerdir.delta().x) * (grid.width - 1),
                 max(0, cornerdir.delta().y) * (grid.height - 1)
@@ -379,7 +388,7 @@ class Blueprint:
         """Retrieve various bits of info about the blueprint."""
         cells = util.flatten(layer.grid.rows for layer in self.layers)
         commands = [c.command for c in cells]
-        cmdset = set(commands) # uniques
+        cmdset = set(commands)  # uniques
         if '' in cmdset:
             cmdset.remove('')
 
@@ -395,10 +404,8 @@ class Blueprint:
 
         # make a row of repeating numbers to annotate the blueprint with
         width = self.layers[0].grid.width
-        numbering_row = '  ' + ('1234567890' * (width // 10))[0:width]
 
         # build the blueprint preview
-        preview = numbering_row
         return textwrap.dedent("""
             Blueprint name: %s
             Build type: %s
@@ -428,7 +435,7 @@ class Blueprint:
                         '\n#' + ''.join(layer.onexit)
                     for layer in self.layers
                 )
-        
+
     def str_header(self):
         """Output the header row for this blueprint definition."""
         out = '#' + self.build_type
@@ -437,15 +444,15 @@ class Blueprint:
             out += ' start(%d; %d' % (self.start.x + 1, self.start.y + 1)
             out += '; ' + self.start_comment if self.start_comment else ''
             out += ')'
-        
+
         if self.comment:
             out += ' ' + self.comment
-        
+
         return out
 
     def __str__(self):
         """Output as CSV format."""
-        
+
         outrows = [self.str_header()]
 
         for layer in self.layers:
@@ -458,6 +465,3 @@ class Blueprint:
             outrows += [','.join(footer)]
 
         return '\n'.join(outrows)
-
-
-

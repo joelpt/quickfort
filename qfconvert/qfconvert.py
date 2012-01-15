@@ -13,6 +13,11 @@ import log
 
 VERSION = '2.03'
 
+
+class ParametersError(Exception):
+    """Base class for errors related to command line parameters."""
+
+
 def parse_options(argv):
     """Read options and args from argv (the command line parameters)."""
     usage = "usage: %prog [options] [input_file] [output_file]"
@@ -63,9 +68,9 @@ def parse_options(argv):
     options, args = parser.parse_args(args=argv)
 
     if options.mode not in ('key', 'macro', 'keylist', 'csv'):
-        raise Exception, \
+        raise ParametersError(
             "Invalid mode '%s', must be one of: macro key keylist csv" % \
-                options.mode
+                options.mode)
 
     if options.command is not None:
         options.infile = None
@@ -83,8 +88,8 @@ def parse_options(argv):
         try:
             options.sheetid = int(options.sheetid)
         except:
-            raise Exception, "sheetid must be numeric, not '%s'" % \
-                options.sheetid
+            raise ParametersError("sheetid must be numeric, not '%s'" % \
+                options.sheetid)
 
     return options
 
@@ -98,10 +103,10 @@ def run(options):
               options.command, options.startpos, options.transform,
               options.mode, options.title, options.visualize)
         elif options.info:
-            output = blueprint.get_blueprint_info(options.infile, 
+            output = blueprint.get_blueprint_info(options.infile,
               options.transform)
         else:
-            output = blueprint.process_blueprint_file(options.infile, 
+            output = blueprint.process_blueprint_file(options.infile,
               options.sheetid, options.startpos, options.transform,
               options.mode, options.title, options.visualize)
 
@@ -119,12 +124,18 @@ def run(options):
 
 
 def configure_logging(options):
-  if options.debugtransform: log.set_log_level('transform')
-  if options.debugfile:      log.set_log_level('file')
-  if options.debugarea:      log.set_log_level('area')
-  if options.debugrouter:    log.set_log_level('router')
-  if options.debugsummary:   log.set_log_level('summary')
-  return
+    if options.debugtransform:
+        log.set_log_level('transform')
+    if options.debugfile:
+        log.set_log_level('file')
+    if options.debugarea:
+        log.set_log_level('area')
+    if options.debugrouter:
+        log.set_log_level('router')
+    if options.debugsummary:
+        log.set_log_level('summary')
+    return
+
 
 def main(argv=sys.argv[1:]):
     """Parse options file, parse and convert blueprint, and output result."""
@@ -132,16 +143,16 @@ def main(argv=sys.argv[1:]):
     try:
         options = parse_options(argv)
 
-        if options is None: # no command line parameters; nothing to do
+        if options is None:   # no command line parameters; nothing to do
             return
 
         configure_logging(options)
 
-        if options.profile: # profile running code for performance metrics
+        if options.profile:   # profile running code for performance metrics
             cProfile.runctx('run(options)', globals(), {'options': options})
         else:
             run(options)
-    except Exception as ex:
+    except Exception as ex:   # top level exception catcher/displayer
         print 'Error: ' + str(ex)
 
 

@@ -2,6 +2,7 @@
 
 import string
 
+
 def convert_line_endings(temp, mode=0):
     """
     Convert line endings to desired OS dialect (mode).
@@ -49,7 +50,7 @@ def uniquify(seq, idfun=None):
 
 def is_substring_in_list(needle, haystack):
     """
-    Determine if any string in haystack:list contains the specified 
+    Determine if any string in haystack:list contains the specified
     needle:string as a substring.
     """
     for e in haystack:
@@ -58,14 +59,14 @@ def is_substring_in_list(needle, haystack):
     return False
 
 
-# Abstract struct class       
+# Abstract struct class
 class Struct:
-    def __init__ (self, *argv, **argd):
+    def __init__(self, *argv, **argd):
         if len(argd):
             # Update by dictionary
-            self.__dict__.update (argd)
+            self.__dict__.update(argd)
         else:
             # Update by position
-            attrs = filter (lambda x: x[0:2] != "__", dir(self))
+            attrs = filter(lambda x: x[0:2] != "__", dir(self))
             for n in range(len(argv)):
                 setattr(self, attrs[n], argv[n])

@@ -5,11 +5,12 @@ from log import log_routine, logmsg, loglines
 from geometry import Direction, Point
 from grid import Grid
 
+
 @log_routine('router', 'ROUTE PLANNING')
 def plan_route(grid, cursor):
     """
     We assume the areas to be plotted are already loaded into grid.
-    Starting from cursor, we locate the nearest area we can plot, 
+    Starting from cursor, we locate the nearest area we can plot,
     and we plot it. Repeat until all areas are plotted.
     """
 
@@ -71,11 +72,11 @@ def get_nearest_plottable_area_from(grid, start):
         pos = start + Point(-ring, -ring)
 
         for direction in (Direction(d) for d in ['e', 's', 'w', 'n']):
-            for _ in xrange(0, 2*ring):
-                pos += direction.delta() # step once in direction
+            for _ in xrange(0, 2 * ring):
+                pos += direction.delta()  # step once in direction
 
                 if grid.is_out_of_bounds(pos):
-                    continue # outside grid bounds
+                    continue  # outside grid bounds
 
                 corner = grid.get_cell(pos)
 
@@ -85,5 +86,3 @@ def get_nearest_plottable_area_from(grid, start):
 
     # found no position with an area we can plot
     return None
-
-
