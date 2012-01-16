@@ -11,11 +11,9 @@ import cProfile
 import blueprint
 import log
 
+from errors import ParametersError
+
 VERSION = '2.03'
-
-
-class ParametersError(Exception):
-    """Base class for errors related to command line parameters."""
 
 
 def parse_options(argv):

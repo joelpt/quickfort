@@ -7,9 +7,7 @@ from grid import Grid
 import util
 import re
 
-
-class AreaPlotterError(Exception):
-    """Base class for areaplotter errors."""
+from errors import AreaPlotterError
 
 
 class AreaPlotter:

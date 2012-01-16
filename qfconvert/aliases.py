@@ -3,6 +3,8 @@
 import re
 import util
 
+from errors import FileError
+
 
 def load_aliases(filename):
     """
@@ -15,8 +17,11 @@ def load_aliases(filename):
     aliases = {}
 
     # load the file contents
-    with open(filename) as f:
-        data = f.read()
+    try:
+        with open(filename) as f:
+            data = f.read()
+    except:
+        raise FileError("Could not open aliases file " + filename)
 
     data = util.convert_line_endings(data)
     lines = data.split('\n')

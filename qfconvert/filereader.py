@@ -11,12 +11,9 @@ import xlsx
 
 from geometry import Point
 from grid import Grid, GridLayer
-from qfconvert import ParametersError
 from util import Struct
 
-
-class FileError(Exception):
-    """Base class for file parsing related errors."""
+from errors import FileError, ParametersError
 
 
 def read_csv_file(filename):

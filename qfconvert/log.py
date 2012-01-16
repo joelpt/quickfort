@@ -1,11 +1,9 @@
 import functools
 import types
 
+from errors import LogError
+
 __LOG_LEVELS = []
-
-
-class LogError(Exception):
-    """Base class for errors occurring within logger."""
 
 
 def set_log_level(level):

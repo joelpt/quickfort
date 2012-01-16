@@ -3,13 +3,15 @@ Transforms/repeats blueprint layers based on a sequence of transformation
 commands.
 """
 
-from log import log_routine, logmsg, loglines
-
-from copy import deepcopy
 import re
+from copy import deepcopy
+
+from log import log_routine, logmsg, loglines
 from geometry import Point
 from filereader import FileLayer
-from qfconvert import ParametersError
+
+from errors import ParametersError
+
 
 def parse_transform_str(transform_str):
     """

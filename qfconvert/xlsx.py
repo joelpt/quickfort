@@ -3,8 +3,9 @@
 import re
 import zipfile
 
-from filereader import FileError
 from xml2obj import xml2obj
+
+from errors import FileError
 
 
 def read_xlsx_file(filename, sheetid):

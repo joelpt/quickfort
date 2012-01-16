@@ -25,9 +25,7 @@ from keystroker import Keystroker
 from transformer import Transformer
 from qfconvert import ParametersError
 
-
-class BlueprintError(Exception):
-    """Base class for errors in the blueprint package."""
+from errors import BlueprintError
 
 
 def get_blueprint_info(path, transform_str):
