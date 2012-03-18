@@ -23,9 +23,8 @@ from geometry import Point, Direction
 from grid import GridLayer, Grid
 from keystroker import Keystroker
 from transformer import Transformer
-from qfconvert import ParametersError
 
-from errors import BlueprintError
+from errors import BlueprintError, ParametersError
 
 
 def get_blueprint_info(path, transform_str):

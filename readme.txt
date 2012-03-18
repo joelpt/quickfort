@@ -2,7 +2,7 @@ Quickfort 2.03
 ===============
 by joelpt <quickfort@joelpt.net>
 
-<http://sun2design.com/quickfort>
+<http://joelpt.net/quickfort>
 
 
 User Manual
@@ -18,7 +18,7 @@ stockpiles, and making adjustments).
 Original idea and initial codebase from Valdemar's designator.ahk script
 <http://www.bay12games.com/forum/index.php?topic=1428.0>.
 
-User contributed blueprints can be found [here](http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/) 
+User contributed blueprints can be found [here](http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/)
 or in [one RAR file](http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar).
 
 See the [Links section](#links) for various tools that work with Quickfort.
@@ -90,7 +90,7 @@ macro playback performance.
 Windows users: Run Quickfort.exe for the GUI interface.
 
 Linux/OSX users: Run the command line conversion tool via python:
-    
+
     > cd src/qfconvert
     > python ./qfconvert.py
 
@@ -150,14 +150,14 @@ A list of the shiny new bits:
 * Intelligent designator: ~25% as many DF commands required as QF1.x for the
   same tasks (no more "typewriter" style playback)
 * DF macros support: faster, more reliable, works cross-platform
-* XLS/XLSX (Excel) workbooks support makes it easy to bundle multi-phase 
+* XLS/XLSX (Excel) workbooks support makes it easy to bundle multi-phase
   blueprints
 * Improved Windows GUI, including enhanced blueprint info/select GUI and
   shrinkable mousetip
-* Alt-R repeat syntax expanded to support basic transformations, 
+* Alt-R repeat syntax expanded to support basic transformations,
   e.g. `fliph flipv 2e`
 * Alt-T command line supports multi-row entry, e.g. `dig d,d#d,d`
-* Multi-cell buildings can be plotted in multiple cells instead of from the 
+* Multi-cell buildings can be plotted in multiple cells instead of from the
   'center' tile
 * Build logic and keystroke/macro mappings configurable via config files
 
@@ -178,9 +178,9 @@ A few things have changed in Quickfort's basic operation in the move from 1.0 to
   to work a bit like a "stamp" tool, but may be disconcerting to experienced
   QF1 users at first.
 
-* QF2 now outputs DF macros by default. This is faster and more reliable than 
+* QF2 now outputs DF macros by default. This is faster and more reliable than
   QF1's key-sending approach, though that approach is still supported; use Alt+K
-  to toggle modes. 
+  to toggle modes.
 
 * BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
   playback will be slow.
@@ -193,10 +193,10 @@ BEFORE YOU BEGIN: QF2 uses DF macros to designate your blueprints in Dwarf
 Fortress. To ensure your experience doesn't suck:
 
 * Quit Dwarf Fortress if it is running.
-* Edit your DF's `data/init/init.txt` file and set the `MACRO_MS` option 
+* Edit your DF's `data/init/init.txt` file and set the `MACRO_MS` option
   to `[MACRO_MS:0]`.
 
-Failing to do so will result in painfully slow macro playback. 
+Failing to do so will result in painfully slow macro playback.
 
 ### First time usage ###
 
@@ -209,9 +209,9 @@ Failing to do so will result in painfully slow macro playback.
    OK to continue.
 7. Follow Quickfort's tooltip instructions to switch to Designate mode and
    select an empty underground z-level.
-8. Press Alt+V to see the outline of where the blueprint will be placed. The 
+8. Press Alt+V to see the outline of where the blueprint will be placed. The
    entire area should be clear.
-9. If you are satisfied (start at least 3 cells from the map edge), press Alt+D 
+9. If you are satisfied (start at least 3 cells from the map edge), press Alt+D
    to designate.
 10. Wait a few seconds while the blueprint is designated.
 
@@ -222,7 +222,7 @@ Linux/OSX Quick Start                                         {#linuxquickstart}
 You must have Python 2.6.4 installed.
 
 Run the command line conversion tool via python:
-    
+
     > cd src/qfconvert
     > python ./qfconvert.py
 
@@ -232,7 +232,7 @@ Examples:
 
     > python ./qfconvert.py --info myblueprint.xls
       (..information about myblueprint.xls..)
-  
+
     > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/foo.mak
 
 ... then play mymacro.mak in DF with Ctrl+L, select foo, Ctrl+P.
@@ -253,7 +253,7 @@ Start Dwarf Fortress (windowed mode recommended). Run Quickfort.exe.
 
 Use Alt+F to select a CSV file to execute. There are some samples in the
 Blueprints folder. Quickfort will give instructions in the mouse tooltip for
-positioning the in-game cursor. 
+positioning the in-game cursor.
 
 Once positioned, use Alt+D to begin designating your blueprint in game.
 Quickfort will send the commands necessary to DF to dig, build, place, or
@@ -268,7 +268,7 @@ the [Specifying a starting position section](#startpos) for more details.
 Alt+R can be used to repeat a blueprint any number of times to the north, south,
 east, west, up, and down. This can be useful for digging multilevel
 staircases/shafts, repeating room complexes, etc. Alt+R can also be used to
-rotate, flip, and tesselate blueprints: see the 
+rotate, flip, and tesselate blueprints: see the
 [Transformations section](#transforms) for more details.
 
 Alt+T opens the Quickfort command line. Here you can enter a single-line
@@ -324,7 +324,7 @@ separators here):
     # # # # #
 
 Note the # symbols at the right end of each row and below the last row. These
-are completely optional, but can be helpful for layout purposes. 
+are completely optional, but can be helpful for layout purposes.
 
 If you run into problems (e.g. Excel saving 'blank' cells and rows
 unnecessarily), use `#` symbols as shown above to clearly delineate the area.
@@ -558,7 +558,7 @@ Multiple build phases                                              {#multiphase}
 
 A complete QF specification for a floor of your fortress may contain 4 or more
 separate blueprints, one for each "phase" of construction (dig/designate,
-build, place stockpiles, building adjustments). 
+build, place stockpiles, building adjustments).
 
 Starting with Quickfort 2.0, all phases and even variations can be kept in a
 single .XLS or .XLSX file using multiple worksheets. Tools like Excel make it
@@ -621,7 +621,7 @@ to use for cells with that label. There are three steps to memorize a material:
 3. Click to the RIGHT of the LAST letter of the highlighted material
 
 Quickfort uses onscreen prompts and sound notifications to take you through
-these steps. 
+these steps.
 
 The process lets Quickfort take a screen-clipping of the region between your
 mouse-clicks. This clipping of the highlighted material's row is then used by
@@ -665,13 +665,13 @@ how to handle your commands properly:
 
     // Dig a row of 4 cells
     Alt+T -> dig d,d,d,d
-  
+
     // Build a big bridge
     Alt+T -> build ga(10x10)
-  
+
     // Aliases
     Alt+T -> query booze
-  
+
     // Build phase may be abbreviated
     Alt+T -> q booze
 
@@ -720,7 +720,7 @@ Transformations: Simple repetition                                 {#repetition}
 ----------------------------------
 
 A blueprint can be repeated in any direction: north, south, east, west, up-z,
-and down-z. 
+and down-z.
 
 It can be repeated any number of times and repetitions can be
 performed in 1, 2 or 3 dimensions.
@@ -736,7 +736,7 @@ the first letter of the direction you want to repeat in.
 
     Alt+R -> 2e 2s 2d
     Repeats the blueprint in a 2x2x2 cube pattern (multi-z-level)
-  
+
 
 Transformations: Simple transformation                         {#transformation}
 --------------------------------------
@@ -767,7 +767,7 @@ effects. To get the effect you want, however, you need to understand how
 Quickfort 2.0's transformation engine works.
 
 QF keeps track of two *transformation buckets* during transformation. We will
-call these buckets the **Memory bucket**, or bucket A, and the 
+call these buckets the **Memory bucket**, or bucket A, and the
 **Working bucket**, or bucket B.
 
 Let's follow an example and observe how the buckets change as we execute the
@@ -813,7 +813,7 @@ buckets in series as the result: ABA.
 
         d d d . d d d d d    d d d . d d d d d
         d . . . . d d . .    d . . . . d d . .
-        . . . . . d . . .    . . . . . d . . . 
+        . . . . . d . . .    . . . . . d . . .
         --------A--------    --------B--------
 
 Once all transformations in the sequence have been performed, the contents of
@@ -827,12 +827,12 @@ see the result:
 
         d d d . d d d d d    . . . . . d . . .
         d . . . . d d . .    d . . . . d d . .
-        . . . . . d . . .    d d d . d d d d d 
+        . . . . . d . . .    d d d . d d d d d
         --------A--------    --------B--------
 
     After 2s (AB):
 
-        d d d . d d d d d    d d d . d d d d d    
+        d d d . d d d d d    d d d . d d d d d
         d . . . . d d . .    d . . . . d d . .
         . . . . . d . . .    . . . . . d . . .
         . . . . . d . . .    . . . . . d . . .
@@ -850,8 +850,8 @@ see the result:
         d d d . d d d d d    . . . . . .
         --------A--------    d . . . . d
                              d . . . . d
-                             d d . . d d 
-                             -----B----- 
+                             d d . . d d
+                             -----B-----
 
     Returning B as finished result:
 
@@ -867,7 +867,7 @@ see the result:
         -----------
 
 Making sense yet? To get a better handle on how this all works, the best approach
-is probably to just start experimenting with the Alt+R command. Also see 
+is probably to just start experimenting with the Alt+R command. Also see
 [transformation debugging](#debugging).
 
 While it may seem unintuitive at first, this approach for transformation was
@@ -894,8 +894,8 @@ result in the preceding example:
     d d d . d d d d d    . . . . . .
     --------A--------    d . . . . d
                          d . . . . d
-                         d d . . d d 
-                         -----B----- 
+                         d d . . d d
+                         -----B-----
 
 
 Suppose we add a 2e onto the end of that transformation sequence:
@@ -997,7 +997,7 @@ intended).
     d ` ` #
     ` ` i #
     # # # #
-  
+
 You might expect that you could do it this way:
 
     Alt+R -> rotcw 2e rotcw 2s
@@ -1032,9 +1032,9 @@ symmetrical mirror image of A) below (south of) it.
     d d . d d d   }
     -----------
 
-Voila. 
+Voila.
 
-Formula for the whirlpool pattern: 
+Formula for the whirlpool pattern:
 
     Alt+R -> rotcw 2e fliph flipv 2s
 
@@ -1084,7 +1084,7 @@ Compare the output of the two transformation sequences below:
 
     d d d . d d
     d . . . . d
-    . . i i . d    
+    . . i i . d
     -----------
 
     Alt+R -> rotcw ! 2e
@@ -1158,7 +1158,7 @@ you want, either put the `s/foo/bar` commands *after* other transformation
 commands, or follow it with a `!` command.
 
 A few more examples:
-  
+
     Alt+R -> s/Cw/Cw:foo/
     Adds manual material label `:foo` to all `Cw` cells
 
@@ -1243,7 +1243,7 @@ Troubleshooting                                               {#troubleshooting}
 * Always check QF's mousetip instructions before hitting Alt+D to begin a
   blueprint. Being in the wrong menu is a common cause of wacky behavior.
 
-* During DF macro playback, don't move the mouse into or out of the DF window 
+* During DF macro playback, don't move the mouse into or out of the DF window
   (including ONTO the QF mousetip). Doing so will cause DF to stop playing
   your macro. It is usually safe to move the mouse (not too quickly) around
   the DF window itself.
@@ -1266,7 +1266,7 @@ Troubleshooting                                               {#troubleshooting}
   materials can help here.
 
 * If a #build blueprint goes off the rails due to e.g. lack of mats, you
-  can use the secret Alt+X hotkey while in DF's q menu. This causes QF to send x 30 
+  can use the secret Alt+X hotkey while in DF's q menu. This causes QF to send x 30
   times to DF - an easy way to remove a large region of buildings quickly.
 
 * Objects such as screw pumps and towers take special consideration in QF-based
@@ -1329,41 +1329,41 @@ Links                                                                   {#links}
 
 ### Quickfort official links ###
 
-* Quickfort homepage: <http://sun2design.com/quickfort>
+* Quickfort homepage: <http://joelpt.net/quickfort>
 * Quickfort forum thread: <http://www.bay12forums.com/smf/index.php?topic=35931.0>
 * Quickfort 2 issue/source tracker: <http://code.google.com/p/quickfort/issues/list>
 
 ### Quickfort community submitted blueprints ###
 
-* http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar
-* http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/
+* <http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar>
+* <http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/>
 
 ### Visual designers for Quickfort ###
 
 The following tools allow you to lay out multiple phases of a blueprint
 visually, and output Quickfort compatible blueprint files.
 
-* DF Designer: http://www.bay12games.com/forum/index.php?topic=45433.0
-* DFDrawCSV: http://www.bay12forums.com/smf/index.php?topic=80666.0
-* Quickfort Assist: http://www.bay12forums.com/smf/index.php?topic=66755.0
-* Quickfort Mapping Tool: http://www.nickskvarla.com/dwarf/
-* WebFort: http://www.bay12forums.com/smf/index.php?topic=70957.0
+* DF Designer: <http://www.bay12games.com/forum/index.php?topic=45433.0>
+* DFDrawCSV: <http://www.bay12forums.com/smf/index.php?topic=80666.0>
+* Quickfort Assist: <http://www.bay12forums.com/smf/index.php?topic=66755.0>
+* Quickfort Mapping Tool: <http://www.nickskvarla.com/dwarf/>
+* WebFort: <http://www.bay12forums.com/smf/index.php?topic=70957.0>
 
 ### Image-to-blueprint converters ###
 
 The following tools convert image files (e.g. BMP) into Quickfort CSV files.
 
-* ChromaFort: http://www.bay12forums.com/smf/index.php?topic=55025.0
-* image2qf: http://www.bay12forums.com/smf/index.php?topic=86813.0
-* DF Architect: http://www.bay12forums.com/smf/index.php?topic=64723.0
+* ChromaFort: <http://www.bay12forums.com/smf/index.php?topic=55025.0>
+* image2qf: <http://www.bay12forums.com/smf/index.php?topic=86813.0>
+* DF Architect: <http://www.bay12forums.com/smf/index.php?topic=64723.0>
 
 ### Similar utilities to Quickfort ###
 
 The following tools work similarly to Quickfort, operating on CSV blueprint
 files.
 
-* LinDesignator: http://www.bay12forums.com/smf/index.php?topic=36928.0
-* designator.ahk: http://www.bay12games.com/forum/index.php?topic=1428.0
+* LinDesignator: <http://www.bay12forums.com/smf/index.php?topic=36928.0>
+* designator.ahk: <http://www.bay12games.com/forum/index.php?topic=1428.0>
 
 If you look hard you can still find a few remnants of designator.ahk in the
 latest Quickfort.ahk source file!
@@ -1400,7 +1400,7 @@ Changelog                                                           {#changelog}
   for details, or try Blueprints/Tests/manual-bullseye.csv in Quickfort
 * New transformation command: phase=... (changes blueprint build phase)
 * New transformation command: s/pat/repl/ (search-and-replace cells with regex)
-* On Windows, Quickfort will now check that [MACRO_MS:0] is set in the running 
+* On Windows, Quickfort will now check that [MACRO_MS:0] is set in the running
   DF's data/init/init.txt and offer to change it for the user if not
 * Fixed issue with multilevel #build blueprints not plotting right (GoingTharn)
 * Fixed issue with bridges and roads being given the wrong number of materials
@@ -1423,8 +1423,8 @@ Changelog                                                           {#changelog}
 * Macros produced by Alt+D will now be added to the bottom of DF's Ctrl-L list
   instead of the top, and include helpful titles
 * Single-line QF command support for qfconvert.py via --command="dig d,d#d,d"
-* Found that DF 0.31.25 will stop playing back any macro if you move your 
-  mouse pointer off the DF window (including ONTO Quickfort's mouse-tip). 
+* Found that DF 0.31.25 will stop playing back any macro if you move your
+  mouse pointer off the DF window (including ONTO Quickfort's mouse-tip).
   Warnings added to troubleshooting section and the QF GUI on-playback mousetip.
 * qfconvert.py/exe will now find its config/ files regardless of working dir
 * 2d/2u style z-repetitions are now performed after plotting/routing rather than
@@ -1647,9 +1647,9 @@ Copyright 2011 Joel Thornton
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
