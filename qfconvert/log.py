@@ -6,10 +6,15 @@ from errors import LogError
 __LOG_LEVELS = []
 
 
-def set_log_level(level):
+def set_log_levels(levels):
     global __LOG_LEVELS
-    if level not in __LOG_LEVELS:
-        __LOG_LEVELS += [level]
+
+    if levels is None:
+        return
+
+    for level in list(levels):
+        if level not in __LOG_LEVELS:
+            __LOG_LEVELS += [level]
 
 
 def unset_log_level(level):

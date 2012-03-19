@@ -45,19 +45,19 @@ def parse_options(argv):
                       action="store_true", dest="visualize", default=False,
                       help="just moves cursor around blueprint's perimeter")
     parser.add_option("-C", "--show-csv-parse",
-                      action="store_true", dest="debugfile", default=False,
+                      action="append_const", dest="loglevels", const="file",
                       help="show blueprint parsing steps on stdout")
     parser.add_option("-X", "--show-transforms",
-                      action="store_true", dest="debugtransform", default=False,
+                      action="append_const", dest="loglevels", const="transform",
                       help="show transform steps on stdout")
     parser.add_option("-A", "--show-area",
-                      action="store_true", dest="debugarea", default=False,
+                      action="append_const", dest="loglevels", const="area",
                       help="show area-discovery steps on stdout")
     parser.add_option("-R", "--show-route",
-                      action="store_true", dest="debugrouter", default=False,
+                      action="append_const", dest="loglevels", const="router",
                       help="show route-planning steps on stdout")
     parser.add_option("-S", "--show-summary",
-                      action="store_true", dest="debugsummary", default=False,
+                      action="append_const", dest="loglevels", const="summary",
                       help="show summary output")
     parser.add_option("-P", "--profile",
                       action="store_true", dest="profile", default=False,
@@ -121,20 +121,6 @@ def run(options):
     return
 
 
-def configure_logging(options):
-    if options.debugtransform:
-        log.set_log_level('transform')
-    if options.debugfile:
-        log.set_log_level('file')
-    if options.debugarea:
-        log.set_log_level('area')
-    if options.debugrouter:
-        log.set_log_level('router')
-    if options.debugsummary:
-        log.set_log_level('summary')
-    return
-
-
 def main(argv=sys.argv[1:]):
     """Parse options file, parse and convert blueprint, and output result."""
 
@@ -144,7 +130,7 @@ def main(argv=sys.argv[1:]):
         if options is None:   # no command line parameters; nothing to do
             return
 
-        configure_logging(options)
+        log.set_log_levels(options.loglevels)
 
         if options.profile:   # profile running code for performance metrics
             cProfile.runctx('run(options)', globals(), {'options': options})
