@@ -7,7 +7,7 @@ import re
 import random
 
 from filereader import load_json
-from geometry import Area, Direction
+from geometry import Area, Direction, add_points, scale_point
 import exetest
 import util
 
@@ -48,7 +48,7 @@ class Keystroker:
         # construct the list of keystrokes required to move to each
         # successive area and build it
         for pos in plots:
-            cell = self.grid.get_cell(pos)
+            cell = self.grid.get_cell(*pos)
             command = cell.command
             endpos = cell.area.opposite_corner(pos)
             subs = {}
@@ -175,10 +175,10 @@ class Keystroker:
             return ['<'] * abs(zoffset)
         return []
 
-    def move(self, start, end, zoffset=0, allowjumps=True):
+    def move(self, (x1, y1), (x2, y2), zoffset=0, allowjumps=True):
         """
-        Returns list of keycodes to move DF cursor from Point start
-        to Point end, as well as adjust z-level by zoffset if provided.
+        Returns list of keycodes needed to move DF cursor from (x1, y1)
+        to (x2, y2) and adjust z-level by zoffset if provided.
         """
 
         keys = []
@@ -186,14 +186,13 @@ class Keystroker:
         # do z-moves first if needed
         keys += Keystroker.get_z_moves(zoffset)
 
-        # while there are moves left to make..
-        allow_backtrack = True
-        while start != end:
-            direction = Direction.get_direction(start, end)
+        allow_overshoot = True  # whether we may overshoot the target coords
+        while x1 != x2 or y1 != y2:  # while there are moves left to make..
+            direction = Direction.get_direction((x1, y1), (x2, y2))
 
             # Get x and y component of distance between start and end
-            dx = abs(start.x - end.x)
-            dy = abs(start.y - end.y)
+            dx = abs(x2 - x1)
+            dy = abs(y2 - y1)
 
             if dx == 0:
                 steps = dy  # moving on y axis only
@@ -207,46 +206,45 @@ class Keystroker:
             keycode = ['[' + direction.compass + ']']
             jumpkeycode = ['[+' + direction.compass + ']']
             move = direction.delta()
-            if not allowjumps or steps < 8 or not allow_backtrack:
+            if not allowjumps or steps < 8 or not allow_overshoot:
                 # render single movement keys
                 keys.extend(keycode * steps)
-                start = start + (move * steps)
-                allow_backtrack = True
+                (x1, y1) = add_points((x1, y1), scale_point(move, steps))
+                allow_overshoot = True
             else:
                 # use DF's move-by-10-units commands
                 jumps = (steps // 10)
                 leftover = steps % 10
-                jumpmove = move * 10
+                jumpmove = scale_point(move, 10)
 
                 # backtracking optimization
                 if leftover >= 8:
                     # test if jumping an extra 10-unit step
                     # would put us outside of the bounds of
                     # the blueprint (want to prevent)
-                    test = start + (jumpmove * (jumps + 1))
+                    (xt, yt) = add_points((x1, y1), scale_point(jumpmove, (jumps + 1)))
 
-                    if self.grid.is_out_of_bounds(test):
+                    if self.grid.is_out_of_bounds(xt, yt):
                         # just move there normally
                         keys.extend(keycode * leftover)
-                        start = start + (move * steps)
+                        (x1, y1) = add_points((x1, y1), scale_point(move, steps))
                         # don't try to do this next iteration
-                        allow_backtrack = False
+                        allow_overshoot = False
                     else:
                         # permit overjump/backtracking movement
                         jumps += 1
-                        start = start + (jumpmove * jumps)
-                        allow_backtrack = True
+                        (x1, y1) = add_points((x1, y1), scale_point(jumpmove, jumps))
+                        allow_overshoot = True
                 else:
                     # move the last few cells needed when using
                     # jumpmoves to land on the right spot
                     keys.extend(keycode * leftover)
                     # keys.append('%')
-                    start = start + (move * steps)
-                    allow_backtrack = True
+                    (x1, y1) = add_points((x1, y1), scale_point(move, steps))
+                    allow_overshoot = True
 
                 if jumps > 0:
                     keys.extend(jumpkeycode * jumps)
-
         return keys
 
     def setsize_standard(self, start, end):

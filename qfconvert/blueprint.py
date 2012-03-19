@@ -19,7 +19,7 @@ from log import log_routine, logmsg, loglines
 from areaplotter import AreaPlotter
 from buildconfig import BuildConfig
 from filereader import FileLayer, FileLayers_to_GridLayers
-from geometry import Point, Direction
+from geometry import Direction, add_points
 from grid import GridLayer, Grid
 from keystroker import Keystroker
 from transformer import Transformer
@@ -47,11 +47,11 @@ def get_blueprint_info(path, transform_str):
                 logmsg('transform', 'Transforming with: %s' % transform_str)
 
                 if newphase is not None:
-                    details.build_type = buildconfig.get_full_build_type_name(newphase)
+                    details['build_type'] = buildconfig.get_full_build_type_name(newphase)
 
-                tran = Transformer(layers, details.start)
+                tran = Transformer(layers, details['start'])
                 tran.transform(transforms)  # do the x/y transformations
-                details.start = tran.start
+                details['start'] = tran.start
                 layers = tran.layers
 
                 logmsg('transform', 'Results of transform:')
@@ -143,11 +143,11 @@ def convert_blueprint(layers, details, startpos, transform_str,
             transformer.parse_transform_str(transform_str)
 
         if newphase is not None:
-            details.build_type = buildconfig.get_full_build_type_name(newphase)
+            details['build_type'] = buildconfig.get_full_build_type_name(newphase)
 
-        tran = Transformer(layers, details.start)
+        tran = Transformer(layers, details['start'])
         tran.transform(transforms)  # do the x/y transformations
-        details.start = tran.start
+        details['start'] = tran.start
         layers = tran.layers
 
         logmsg('file', 'Results of transform:')
@@ -160,7 +160,7 @@ def convert_blueprint(layers, details, startpos, transform_str,
 
     # override starting position if startpos command line option was given
     if startpos is not None:
-        details.start = parse_startpos(startpos,
+        details['start'] = parse_startpos(startpos,
             layers[0].grid.width,
             layers[0].grid.height)
 
@@ -195,14 +195,14 @@ def str_summary(bp, keys):
     for i, layer in enumerate(bp.layers):
         s += '\n'.join([
             "=" * 20 + ' Layer %d ' % i + '=' * 20,
-            "Entering cursor position: %s" % layer.start,
+            "Entering cursor position: %s" % str(layer.start),
             "#### Commands:",
             str(layer.grid),
             "#### Area labels:",
             Grid.str_area_labels(layer.grid),
             "Route order: %s" % ''.join(
-                [layer.grid.get_cell(plot).label
-                    for plot in layer.plots]
+                [layer.grid.get_cell(x, y).label
+                    for x, y in layer.plots]
                 ),
             "Layer onexit keys: %s" % layer.onexit
             ])
@@ -218,20 +218,20 @@ def parse_startpos(start, width, height):
     # try (#,#) type syntax
     m = re.match(r'\(?(\d+)[,;](\d+)\)?', start)
     if m is not None:
-        return Point(int(m.group(1)), int(m.group(2)))
+        return (int(m.group(1)), int(m.group(2)))
 
     # try corner-coordinate syntax
     m = re.match(r'(ne|nw|se|sw)', start.lower())
     if m is not None:
-        # convert corner String -> Direction -> Point
-        corner = Direction(m.group(1)).delta()
-        pt = Point(corner.x, corner.y)
+        # convert corner String -> Direction -> (x, y) then magnify (x, y)
+        # by width and height to get the corner coordinate we want
+        (x, y) = Direction(m.group(1)).delta()
+        point = (
+            max(0, x) * (width - 1),
+            max(0, y) * (height - 1)
+        )
 
-        # magnify Point by width and height to get the corner coordinate we want
-        pt.x = max(0, corner.x) * (width - 1)
-        pt.y = max(0, corner.y) * (height - 1)
-
-        return pt
+        return point
 
     raise ParametersError("Invalid --position parameter '%s'" % start)
 
@@ -246,11 +246,11 @@ class Blueprint:
     def __init__(self, name, layers, details):
         self.name = name
         self.layers = layers
-        self.build_type = details.build_type
+        self.build_type = details['build_type']
         self.build_config = BuildConfig(self.build_type)
-        self.start = details.start
-        self.start_comment = details.start_comment
-        self.comment = details.comment
+        self.start = details['start']
+        self.start_comment = details['start_comment']
+        self.comment = details['comment']
 
     def analyze(self):
         """Performs contiguous area expansion and discovery in the layers."""
@@ -364,10 +364,11 @@ class Blueprint:
         # at each one
         lastpos = self.start
         for cornerdir in [Direction(d) for d in ['nw', 'ne', 'se', 'sw', 'nw']]:
-            newpos = Point(
-                max(0, cornerdir.delta().x) * (grid.width - 1),
-                max(0, cornerdir.delta().y) * (grid.height - 1)
-                )
+            (x, y) = cornerdir.delta()
+            newpos = (
+                max(0, x) * (grid.width - 1),
+                max(0, y) * (grid.height - 1)
+            )
 
             keys += ks.move(lastpos, newpos, allowjumps=False) + ['%']
             lastpos = newpos
@@ -418,7 +419,7 @@ class Blueprint:
                 self.name,
                 self.build_type,
                 self.comment or '',
-                Point(self.start.x + 1, self.start.y + 1),
+                add_points(self.start, (1, 1)),
                 self.start_comment or '',
                 width,
                 self.layers[0].grid.height,
@@ -437,8 +438,8 @@ class Blueprint:
         """Output the header row for this blueprint definition."""
         out = '#' + self.build_type
 
-        if not self.start.is_at_origin():
-            out += ' start(%d; %d' % (self.start.x + 1, self.start.y + 1)
+        if self.start != (0, 0):
+            out += ' start(%d; %d' % (self.start[0] + 1, self.start[1] + 1)
             out += '; ' + self.start_comment if self.start_comment else ''
             out += ')'
 

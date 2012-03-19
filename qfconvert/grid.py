@@ -1,6 +1,7 @@
 """Main storage classes for blueprint data used throughout qfconvert."""
 
-from geometry import Point, Direction
+from geometry import Direction, add_points, get_coord_crossing_axis, get_coord_along_axis
+from operator import itemgetter
 
 
 class CommandCell:
@@ -19,7 +20,7 @@ class GridLayer:
         self.onexit = onexit
         self.grid = grid or Grid()
         self.plots = plots or []
-        self.start = start or Point(0, 0)
+        self.start = start or (0, 0)
 
     @staticmethod
     def zoffset(layers):
@@ -52,32 +53,29 @@ class Grid:
     def __str__(self):
         return Grid.str_commands(self.rows, '')
 
-    def get_cell(self, pos):
-        """Returns the CommandCell at pos or an empty one if out of bounds."""
-        if self.is_out_of_bounds(pos):
+    def get_cell(self, x, y):
+        """Returns the CommandCell at (x, y) or an empty one if out of bounds."""
+        if self.is_out_of_bounds(x, y):
             return CommandCell('')
         else:
-            return self.rows[pos.y][pos.x]
+            return self.rows[y][x]
 
-    def get_command(self, pos):
-        """Returns .command at pos or '' if out of bounds/empty."""
-        cell = self.get_cell(pos)
+    def get_command(self, x, y):
+        """Returns .command at (x, y) or '' if out of bounds/empty."""
+        cell = self.get_cell(x, y)
         if cell is None:
             return ''
         else:
             return cell.command
 
-    def is_plottable(self, pos):
-        """Returns .plottable at pos or None if out of bounds/empty."""
-        cell = self.get_cell(pos)
+    def is_plottable(self, x, y):
+        """Returns .plottable at (x, y) or None if out of bounds/empty."""
+        cell = self.get_cell(x, y)
         return False if cell is None else cell.plottable
 
-    def is_out_of_bounds(self, point):
-        """Returns True if point is outside the bounds of grid, else False."""
-        if point.x < 0 or \
-            point.y < 0 or \
-            point.x >= self.width or \
-            point.y >= self.height:
+    def is_out_of_bounds(self, x, y):
+        """Returns True if (x, y) is outside the bounds of grid, else False."""
+        if x < 0 or y < 0 or x >= self.width or y >= self.height:
             return True
         else:
             return False
@@ -88,7 +86,8 @@ class Grid:
 
     def get_col(self, x):
         """Returns the column with index x from the grid."""
-        return [row[x] for row in self.rows]
+        f = itemgetter(x)
+        return map(f, self.rows)
 
     def get_axis(self, index, direction):
         """
@@ -137,9 +136,9 @@ class Grid:
         Set plottable, label and/or command values for all cells that are
         within the bounds of given area.
         """
-        for x in range(area.corners[0].x, area.corners[1].x + 1):  # NW->NE
-            for y in range(area.corners[0].y, area.corners[3].y + 1):  # NW->SW
-                cell = self.get_cell(Point(x, y))
+        for x in range(area.corners[0][0], area.corners[1][0] + 1):  # NW->NE
+            for y in range(area.corners[0][1], area.corners[3][1] + 1):  # NW->SW
+                cell = self.get_cell(x, y)
                 if plottable is not None:
                     cell.plottable = plottable
                 if label is not None:
@@ -152,7 +151,7 @@ class Grid:
         """Set the plottable flag for all cells in the grid."""
         for x in range(0, self.width):
             for y in range(0, self.height):
-                self.get_cell(Point(x, y)).plottable = plottable
+                self.get_cell(x, y).plottable = plottable
         return
 
     def is_area_plottable(self, area, any_plottable):
@@ -164,14 +163,13 @@ class Grid:
             else:
                 returns True only if *every* cell is plottable in area
         """
-        for x in range(area.corners[0].x, area.corners[1].x + 1):  # NW->NE
-            for y in range(area.corners[0].y, area.corners[3].y + 1):  # NW->SW
-                pos = Point(x, y)
+        for x in range(area.corners[0][0], area.corners[1][0] + 1):  # NW->NE
+            for y in range(area.corners[0][1], area.corners[3][1] + 1):  # NW->SW
                 if any_plottable:
-                    if self.get_cell(pos).plottable:
+                    if self.get_cell(x, y).plottable:
                         return True
                 else:
-                    if not self.get_cell(pos).plottable:
+                    if not self.get_cell(x, y).plottable:
                         return False
 
         if any_plottable:
@@ -179,83 +177,49 @@ class Grid:
         else:
             return True
 
-    def is_corner(self, pos):
+    def is_corner(self, x, y):
         """
-        Returns True if pos's cell forms the corner of a contiguous area,
-        including just a 1x1 area.
+        Returns True if (x, y)'s cell forms the corner of a contiguous area,
+        including just a 1x1 area. This is just a heuristic test and is not
+        really accurate, but a more accurate test proved to be overall more
+        expensive.
         """
-        cell = self.get_cell(pos)
+        cell = self.get_cell(x, y)
         if cell is None:
             return False
 
         command = cell.command
-
-        """
-        The below code is commented out after determining it makes essentially
-        no difference to final keystroke count while hurting performance
-        a bit. It is preserved here for a conceptual understanding of the
-        intent behind is_corner().
-
-        if command == '':
-            return False # empty cell; not a part of any area
-
-        pridirs = (Direction(d) for d in ('n', 's', 'e', 'w'))
-        secdirs = (Direction(d) for d in ('ne', 'nw', 'se', 'sw'))
-
-        primatches = sum(
-            c.plottable and command == c.command
-            for c in (self.get_cell(pos + d.delta()) for d in pridirs)
-            )
-
-        secmatches = sum(
-            c.plottable and command == c.command
-            for c in (self.get_cell(pos + d.delta()) for d in secdirs)
-            )
-
-        if primatches == 0:
-            # cell can't extend from any of nsew so it's an independent
-            # 1 x 1 area and thus constitutes a 'corner' cell
-            return True
-        elif primatches == 4 and secmatches == 0:
-             # at intersection, will necessarily be a part of some other
-             # rectangle
-             return False
-        elif primatches == 4 and secmatches == 4:
-            # interior point, will necessarily be a part of some other
-            # rectangle
-            return False
-        """
 
         # See if this cell can be extended along either axis in both
         # directions. If so we assume this will be a non-corner cell
         # of a larger area.
         dirs = (Direction(d) for d in ['n', 'e'])
         for d in dirs:
-            corner = self.get_cell(pos + d.delta())
-            opp = self.get_cell(pos + d.opposite().delta())
+            corner = self.get_cell(*add_points((x, y), d.delta()))
+            opp = self.get_cell(*add_points((x, y), d.opposite().delta()))
             if command == corner.command and corner.plottable \
                 and command == opp.command and opp.plottable:
                 return False
 
-        # it's not an intersection, interior point, edge, or empty cell, so
-        # it must be a corner
+        # it *might* be a corner
         return True
 
-    def count_contiguous_cells(self, pos, direction):
+    def count_contiguous_cells(self, x, y, direction):
         """
-        Starting from pos, counts the number of cells whose commands match
-        pos's cell command.
+        Starting from (x, y), counts the number of cells whose commands match
+        (x, y)'s cell command.
         Returns count of contiguous cells.
         """
 
-        command = self.get_cell(pos).command
-        start = pos.get_coord_crossing_axis(direction)
+        command = self.get_cell(x, y).command
+        point = (x, y)
+        start = get_coord_crossing_axis(point, direction)
 
         # determine sign of direction to move in for testing
-        step = direction.delta().get_coord_crossing_axis(direction)
+        step = get_coord_crossing_axis(direction.delta(), direction)
 
         # Get the row|col (determined by direction) which pos is on
-        axis = self.get_axis(pos.get_coord_of_axis(direction), direction)
+        axis = self.get_axis(get_coord_along_axis(point, direction), direction)
 
         # get just the segment of the axis we want, ordered in the dir we want
         if step == 1:

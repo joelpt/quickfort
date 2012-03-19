@@ -7,8 +7,8 @@ import re
 from copy import deepcopy
 
 from log import log_routine, logmsg, loglines
-from geometry import Point
 from filereader import FileLayer
+from geometry import add_points
 
 from errors import ParametersError
 
@@ -118,15 +118,15 @@ class Transformer:
                     self.valign = param
                 elif cmd == '!':
                     # The ! command just updates A to match B
-                    a = deepcopy(b)
+                    a = b
                 else:
                     a, b = self.apply_transform(t, a, b)  # do the transform
 
                     # adjust start pos for 'n' and 'w' commands
                     if cmd == 'n':
-                        start += Point(0, layers[0].height() * (param - 1))
+                        start = add_points(start, (0, layers[0].height() * (param - 1)))
                     elif cmd == 'w':
-                        start += Point(layers[0].width() * (param - 1), 0)
+                        start = add_points(start, (layers[0].width() * (param - 1), 0))
 
                 if cmd in ('halign', 'valign'):
                     logmsg('transform', 'Set %s=%s' % (t[1], t[0]))
@@ -154,7 +154,7 @@ class Transformer:
         Apply the requested transformation to 2D lists [[]] a and possibly b,
         and return the result.
         """
-        b = deepcopy(b)  # ensure a and b are different objects
+        #b = deepcopy(b)  # ensure a and b are different objects
         count, action = trans
 
         if action == 'sub':
@@ -241,7 +241,7 @@ class Transformer:
                     for s in r:
                         newrow.extend(s)
                     out.append(newrow)
-            return out, deepcopy(out)  # must be treated as two different objects
+            return out, out  # must be treated as two different objects
 
         raise ParametersError('Unknown transformation type: %d %s' % trans)
 

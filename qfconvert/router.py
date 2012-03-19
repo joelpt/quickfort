@@ -2,7 +2,7 @@
 
 from log import log_routine, logmsg, loglines
 
-from geometry import Direction, Point
+from geometry import Direction, add_points
 from grid import Grid
 
 
@@ -32,7 +32,7 @@ def plan_route(grid, cursor):
             plots.append(nearest_pos)
 
             # mark the plot on the grid
-            cell = grid.get_cell(nearest_pos)
+            cell = grid.get_cell(*nearest_pos)
             area = cell.area
             grid.set_area_cells(area, False)
 
@@ -46,8 +46,8 @@ def plan_route(grid, cursor):
     logmsg('router', 'Routed through all areas:')
     loglines('router', lambda: Grid.str_area_labels(grid))
     logmsg('router', 'Route replay sequence: %s' % \
-            ''.join([grid.get_cell(plot).label for plot in plots]))
-    logmsg('router', 'Cursor position now: %s' % cursor)
+            ''.join([grid.get_cell(*plot).label for plot in plots]))
+    logmsg('router', 'Cursor position now: %s' % str(cursor))
 
     return grid, plots, cursor
 
@@ -60,7 +60,7 @@ def get_nearest_plottable_area_from(grid, start):
 
     # check the cell we started in: if it is plottable, it becomes our
     # starting cheapest_area
-    cell = grid.get_cell(start)
+    cell = grid.get_cell(*start)
 
     if cell.plottable and cell.area:
         return start
@@ -69,16 +69,16 @@ def get_nearest_plottable_area_from(grid, start):
     # expand outward ring by ring
     for ring in xrange(1, 1 + max([grid.width, grid.height])):
         # starting position in this ring (=NW corner cell of ring)
-        pos = start + Point(-ring, -ring)
+        pos = add_points(start, (-ring, -ring))
 
         for direction in (Direction(d) for d in ['e', 's', 'w', 'n']):
             for _ in xrange(0, 2 * ring):
-                pos += direction.delta()  # step once in direction
+                pos = add_points(pos, direction.delta())  # step once in direction
 
-                if grid.is_out_of_bounds(pos):
+                if grid.is_out_of_bounds(*pos):
                     continue  # outside grid bounds
 
-                corner = grid.get_cell(pos)
+                corner = grid.get_cell(*pos)
 
                 if corner.plottable and corner.area:
                     # cell has an area that can be plotted, return it

@@ -9,9 +9,7 @@ import buildconfig
 import xls
 import xlsx
 
-from geometry import Point
 from grid import Grid, GridLayer
-from util import Struct
 
 from errors import FileError, ParametersError
 
@@ -171,13 +169,13 @@ def parse_command(command):
     if m is None:
         raise ParametersError("Invalid command format '%s'." % command)
 
-    # set up details object
-    details = SheetDetails()
-
-    details.build_type = buildconfig.get_full_build_type_name(m.group(1))
-    details.start = Point(0, 0)
-    details.start_comment = ''
-    details.comment = ''
+    # set up details dict
+    details = {
+        'build_type': buildconfig.get_full_build_type_name(m.group(1)),
+        'start': (0, 0),
+        'start_comment': '',
+        'comment': ''
+    }
 
     # break apart lines by # and cells by ,
     lines = [[cell.strip() for cell in line.split(',')]
@@ -229,14 +227,6 @@ def read_sheet(filename, sheetid):
     return lines
 
 
-class SheetDetails(Struct):
-    """ Struct to store top line details returned from parse_sheet_details(). """
-    build_type = None
-    start = None
-    start_comment = None
-    comment = None
-
-
 def parse_sheet_details(top_line):
     """
     Parses out build type, start pos/comment, and general comment
@@ -251,7 +241,6 @@ def parse_sheet_details(top_line):
         top_line)
 
     (build_type, start_command, comment) = m.group(1, 2, 3)
-
     build_type = build_type.lower()
 
     # break down start_command if given
@@ -260,12 +249,10 @@ def parse_sheet_details(top_line):
         m = re.match(r" +start\( *(\d+) *; *(\d+) *;? *(.+)? *\)",
             start_command)
 
-        (start, start_comment) = (
-            Point(int(m.group(1)) - 1, int(m.group(2)) - 1),
-            m.group(3)
-            )
+        start = (int(m.group(1)) - 1, int(m.group(2)) - 1)
+        start_comment = m.group(3)
     else:
-        start = Point(0, 0)
+        start = (0, 0)
         start_comment = ''
 
     # clean up comment
@@ -276,8 +263,12 @@ def parse_sheet_details(top_line):
     else:
         comment = ''
 
-    return SheetDetails(build_type=build_type, start=start,
-        start_comment=start_comment, comment=comment)
+    return {
+        'build_type': build_type,
+        'start': start,
+        'start_comment': start_comment,
+        'comment': comment
+    }
 
 
 def split_zlayers(lines):

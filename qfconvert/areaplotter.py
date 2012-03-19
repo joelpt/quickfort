@@ -2,7 +2,7 @@
 
 from log import log_routine, logmsg, loglines
 
-from geometry import Point, Direction, Area
+from geometry import Direction, Area, add_points, scale_point
 from grid import Grid
 import util
 import re
@@ -45,8 +45,7 @@ class AreaPlotter:
                     command = m.group(1)
                     width, height = (int(c) for c in m.group(2, 3))
 
-                    area = Area(Point(x, y),
-                        Point(x + width - 1, y + height - 1))
+                    area = Area((x, y), (x + width - 1, y + height - 1))
 
                     # ensure the grid is large enough to accept the expansion
                     self.grid.expand_dimensions(x + width, y + height)
@@ -71,10 +70,7 @@ class AreaPlotter:
         there are no more areas left to plot.
         """
 
-        testarea = Area(
-            Point(0, 0),
-            Point(self.grid.width - 1, self.grid.height - 1)
-            )
+        testarea = Area((0, 0), (self.grid.width - 1, self.grid.height - 1))
 
         while True:
             loglines('area', lambda: Grid.str_area_labels(self.grid))
@@ -112,7 +108,7 @@ class AreaPlotter:
 
                 # store area in grid cell for each of the area's corners
                 for corner in area.corners:
-                    self.grid.get_cell(corner).area = area
+                    self.grid.get_cell(*corner).area = area
 
         # return our label when we plotted at least 1 new area
         return label
@@ -127,22 +123,21 @@ class AreaPlotter:
 
         for ypos in range(0, self.grid.height):
             for xpos in range(0, self.grid.width):
-                pos = Point(xpos, ypos)
-                cell = self.grid.get_cell(pos)
+                cell = self.grid.get_cell(xpos, ypos)
                 # Removing the is_corner() check below reduces final
                 # keystroke count by ~3% but makes the routine ~12x slower
                 if cell.plottable \
-                    and self.grid.is_corner(pos):
-                    areas.append(self.find_largest_area_from(pos))
+                    and self.grid.is_corner(xpos, ypos):
+                    areas.append(self.find_largest_area_from(xpos, ypos))
 
         areas = util.uniquify(areas,
             lambda area: ''.join([str(c) for c in area.corners]))
 
         return areas
 
-    def find_largest_area_from(self, pos):
+    def find_largest_area_from(self, x, y):
         """
-        Find the largest area that can be drawn with pos as one of its corners.
+        Find the largest area that can be drawn with (x, y) as one of its corners.
         Returns the Area found, which will be at least 1x1 in size.
         """
 
@@ -156,21 +151,21 @@ class AreaPlotter:
         # SE & ES is one such quad pair. Each quad overlaps at pos;
         # similarly, each quad shares two of its edges with adjacent quads.
 
-        bestarea = Area(pos, pos)
+        bestarea = Area((x, y), (x, y))
 
         # find the biggest area(s) formable from each dir_pair quad
         for dirs in self.dir_pairs:
             area = self.find_largest_area_in_quad(
-                pos, dirs[0], dirs[1], bestarea)
+                x, y, dirs[0], dirs[1], bestarea)
             if area is not None:
                 bestarea = area
 
         return bestarea
 
-    def find_largest_area_in_quad(self, pos, dir1, dir2, bestarea):
+    def find_largest_area_in_quad(self, x, y, dir1, dir2, bestarea):
         """
-        Given the quad starting at pos and formed by dir1 and dir2
-        (treated as rays with pos as origin), we find the max
+        Given the quad starting at (x, y) and formed by dir1 and dir2
+        (treated as rays with (x, y) as origin), we find the max
         contiguous-cell distance along dir1, then for each position
         along dir1, we find the max contiguous-cell distance along
         dir2. This allows us to find the largest contiguous area
@@ -180,7 +175,7 @@ class AreaPlotter:
         Returns the largest area found.
         """
 
-        command = self.grid.get_cell(pos).command
+        command = self.grid.get_cell(x, y).command
 
         # Get the min/max size that this area may be, based on the command
         sizebounds = self.buildconfig.get('sizebounds', command) \
@@ -191,8 +186,8 @@ class AreaPlotter:
         # the dir2.
         # width and height are conceptually aligned to an
         # east(dir1) x south(dir2) quad below.
-        maxwidth = self.grid.count_contiguous_cells(pos, dir1)
-        maxheight = self.grid.count_contiguous_cells(pos, dir2)
+        maxwidth = self.grid.count_contiguous_cells(x, y, dir1)
+        maxheight = self.grid.count_contiguous_cells(x, y, dir2)
 
         if maxwidth < sizebounds[0]:
             # constructions narrower than the minimum width for this
@@ -215,16 +210,24 @@ class AreaPlotter:
 
         if maxheight == 1 and maxwidth == 1:
             # 1x1 area, just return it
-            return Area(pos, pos)
+            return Area((x, y), (x, y))
 
         # (width x 1) sized area
-        bestarea = Area(pos, pos + (dir1.delta() * (maxwidth - 1)))
+        bestarea = Area((x, y),
+            add_points(
+                (x, y),
+                scale_point(dir1.delta(), maxwidth - 1)
+            )
+        )
 
         for ydelta in range(1, maxheight):
-            check_point = pos + (dir2.delta() * ydelta)
+            (xt, yt) = add_points(
+                (x, y),
+                scale_point(dir2.delta(), ydelta)
+            )
 
             height = ydelta + 1
-            width = self.grid.count_contiguous_cells(check_point, dir1)
+            width = self.grid.count_contiguous_cells(xt, yt, dir1)
 
             if width > maxwidth:
                 # this row can't be wider than previous rows
@@ -234,8 +237,12 @@ class AreaPlotter:
                 maxwidth = width
 
             if width * height > bestarea.size():
-                bestarea = Area(
-                    pos, check_point + (dir1.delta() * (width - 1)))
+                bestarea = Area((x, y),
+                    add_points(
+                        (xt, yt),
+                        scale_point(dir1.delta(), width - 1)
+                    )
+                )
             else:
                 continue
 
