@@ -15,8 +15,7 @@ commands are supported through the use of multiple files/worksheets, each
 describing a different phase of DF construction (designation, building,
 stockpiles, and making adjustments).
 
-Original idea and initial codebase from Valdemar's designator.ahk script
-<http://www.bay12games.com/forum/index.php?topic=1428.0>.
+Original idea and 1.0 codebase from [Valdemar's designator.ahk script](http://www.bay12games.com/forum/index.php?topic=1428.0).
 
 User contributed blueprints can be found [here](http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/)
 or in [one RAR file](http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar).
