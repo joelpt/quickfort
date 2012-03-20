@@ -56,7 +56,7 @@ class Grid:
         return Grid.str_commands(self.rows, '')
 
     def get_cell(self, x, y):
-        Lets us retrieve a single cell using [x, y] syntax.
+        """Returns the CommandCell from the Grid in row x, col y."""
         return self.rows[y, x]
 
     def is_out_of_bounds(self, x, y):
