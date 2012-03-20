@@ -57,7 +57,7 @@ class Grid:
 
     def __getitem__(self, key):
         """
-        Lets us retrieve a single cell using [x, y] syntax.
+        Lets us retrieve a single cell using [x, y] "point notation" syntax.
         Slicing, etc. not supported.
         """
         x, y = key
