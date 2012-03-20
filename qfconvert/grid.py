@@ -1,8 +1,10 @@
 """Main storage classes for blueprint data used throughout qfconvert."""
 
+import numpy
+
 from geometry import Direction, add_points, get_coord_crossing_axis, get_coord_along_axis
 from operator import itemgetter
-import numpy
+
 
 class CommandCell:
     """CommandCell is the container used for cell info in Grid."""
@@ -28,9 +30,9 @@ class GridLayer:
         return sum(
             sum(1 if x == '>' else -1 if x == '<' else 0
                 for x in layer.onexit
-                )
-            for layer in layers
             )
+            for layer in layers
+        )
 
 
 class Grid:
@@ -54,7 +56,7 @@ class Grid:
         return Grid.str_commands(self.rows, '')
 
     def get_cell(self, x, y):
-        """Returns the CommandCell at (x, y) or an empty one if out of bounds."""
+        Lets us retrieve a single cell using [x, y] syntax.
         return self.rows[y, x]
 
     def is_out_of_bounds(self, x, y):
