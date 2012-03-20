@@ -1,5 +1,7 @@
 """Main storage classes for blueprint data used throughout qfconvert."""
 
+import numpy
+
 from geometry import Direction, add_points, get_coord_crossing_axis, get_coord_along_axis
 from operator import itemgetter
 
@@ -28,9 +30,9 @@ class GridLayer:
         return sum(
             sum(1 if x == '>' else -1 if x == '<' else 0
                 for x in layer.onexit
-                )
-            for layer in layers
             )
+            for layer in layers
+        )
 
 
 class Grid:
@@ -46,7 +48,7 @@ class Grid:
             self.rows = []
             self.width, self.height = 0, 0
         else:
-            self.rows = [[CommandCell(c) for c in row] for row in rows]
+            self.rows = numpy.array([[CommandCell(c) for c in row] for row in rows])
             self.width = len(rows[0])
             self.height = len(rows)
 
@@ -59,7 +61,7 @@ class Grid:
         Slicing, etc. not supported.
         """
         x, y = key
-        return self.rows[y][x]
+        return self.rows[y, x]
 
     def is_out_of_bounds(self, x, y):
         """Returns True if (x, y) is outside the bounds of grid, else False."""
@@ -70,12 +72,10 @@ class Grid:
 
     def get_row(self, y):
         """Returns the row with index y from the grid."""
-        return self.rows[y]
+        return
 
     def get_col(self, x):
         """Returns the column with index x from the grid."""
-        f = itemgetter(x)
-        return map(f, self.rows)
 
     def get_axis(self, index, direction):
         """
@@ -84,9 +84,9 @@ class Grid:
         """
 
         if direction.axis() == 'y':
-            return self.get_col(index)
+            return self.rows[:, index]  # get col
         else:
-            return self.get_row(index)
+            return self.rows[index]     # get row
 
     def get_length_of_axis(self, direction):
         """
@@ -103,18 +103,18 @@ class Grid:
         """
         # add empty rows to bottom if required
         if height > self.height:
-            self.rows = self.rows + [
+            self.rows = numpy.vstack(self.rows, [
                 [CommandCell('') for x in range(self.width)]
                 for y in range(height - self.height)
-            ]
+            ])
             self.height = height
 
         # add empty columns to right if required
         if width > self.width:
-            self.rows = [
-                row + [CommandCell('') for x in range(width - self.width)]
+            self.rows = numpy.hstack(self.rows,
+                [[CommandCell('')] for x in range(width - self.width)
                 for row in self.rows
-            ]
+            ])
             self.width = width
 
         return
