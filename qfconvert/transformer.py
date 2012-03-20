@@ -20,12 +20,17 @@ def parse_transform_str(transform_str):
 
     Transforms of format s/pat/repl/ are stored as (('pat', 'repl'), 'sub')
 
+    Commit sequences of the form 'rotcw ! 2e' can be entered as 'rotcw; 2e'
+    and will be translated to the former form here.
+
     Returns the conversion result as follows:
         ('newphase', (x/y transforms), (z-level transforms))
     """
     if transform_str == '':
         return (None, None, None)
 
+    transform_str = re.sub('\s*;\s*', ' ! ', transform_str)  # 2e;2e -> 2e ! 2e
+    transform_str = re.sub('\s+', ' ', transform_str)        # cleanup spaces
     transforms = transform_str.strip().split(' ')
     readies = []
     newphase = None
