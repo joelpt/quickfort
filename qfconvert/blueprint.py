@@ -201,8 +201,9 @@ def str_summary(bp, keys):
             "#### Area labels:",
             Grid.str_area_labels(layer.grid),
             "Route order: %s" % ''.join(
-                [layer.grid[x, y].label for x, y in layer.plots]
-            ),
+                [layer.grid.get_cell(x, y).label
+                    for x, y in layer.plots]
+                ),
             "Layer onexit keys: %s" % layer.onexit
             ])
     s += "\n---- Overall:\n"

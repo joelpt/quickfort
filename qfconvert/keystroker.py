@@ -7,7 +7,7 @@ import re
 import random
 
 from filereader import load_json
-from geometry import Area, Direction, add_points, scale_point, midpoint
+from geometry import Area, Direction, add_points, scale_point
 import exetest
 import util
 
@@ -48,7 +48,7 @@ class Keystroker:
         # construct the list of keystrokes required to move to each
         # successive area and build it
         for pos in plots:
-            cell = self.grid[pos]
+            cell = self.grid.get_cell(*pos)
             command = cell.command
             endpos = cell.area.opposite_corner(pos)
             subs = {}
@@ -264,15 +264,15 @@ class Keystroker:
             pos is where the cursor ends up after sizing the area
         """
         # move cursor halfway to end from start
-        mid = midpoint(start, end)
-        keys = self.move(start, mid)
+        midpoint = start.midpoint(end)
+        keys = self.move(start, midpoint)
 
         # resize construction
         area = Area(start, end)
         keys += ['{widen}'] * (area.width() - 1)
         keys += ['{heighten}'] * (area.height() - 1)
 
-        return keys, mid
+        return keys, midpoint
 
     def setsize_fixed(self, start, end):
         """
@@ -285,10 +285,10 @@ class Keystroker:
             pos is where the cursor ends up after sizing the area
         """
         # move cursor halfway to end from start
-        mid = midpoint(start, end)
-        keys = self.move(start, mid)
+        midpoint = start.midpoint(end)
+        keys = self.move(start, midpoint)
 
-        return keys, mid
+        return keys, midpoint
 
     def setmats_build(self, areasize, manual_label):
         """

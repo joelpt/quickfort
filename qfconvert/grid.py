@@ -2,7 +2,7 @@
 
 from geometry import Direction, add_points, get_coord_crossing_axis, get_coord_along_axis
 from operator import itemgetter
-
+import numpy
 
 class CommandCell:
     """CommandCell is the container used for cell info in Grid."""
@@ -46,20 +46,16 @@ class Grid:
             self.rows = []
             self.width, self.height = 0, 0
         else:
-            self.rows = [[CommandCell(c) for c in row] for row in rows]
+            self.rows = numpy.array([[CommandCell(c) for c in row] for row in rows])
             self.width = len(rows[0])
             self.height = len(rows)
 
     def __str__(self):
         return Grid.str_commands(self.rows, '')
 
-    def __getitem__(self, key):
-        """
-        Lets us retrieve a single cell using [x, y] syntax.
-        Slicing, etc. not supported.
-        """
-        x, y = key
-        return self.rows[y][x]
+    def get_cell(self, x, y):
+        """Returns the CommandCell at (x, y) or an empty one if out of bounds."""
+        return self.rows[y, x]
 
     def is_out_of_bounds(self, x, y):
         """Returns True if (x, y) is outside the bounds of grid, else False."""
@@ -74,8 +70,7 @@ class Grid:
 
     def get_col(self, x):
         """Returns the column with index x from the grid."""
-        f = itemgetter(x)
-        return map(f, self.rows)
+        return self.rows[:, x]
 
     def get_axis(self, index, direction):
         """
@@ -103,18 +98,18 @@ class Grid:
         """
         # add empty rows to bottom if required
         if height > self.height:
-            self.rows = self.rows + [
+            self.rows = numpy.vstack(self.rows, [
                 [CommandCell('') for x in range(self.width)]
                 for y in range(height - self.height)
-            ]
+            ])
             self.height = height
 
         # add empty columns to right if required
         if width > self.width:
-            self.rows = [
-                row + [CommandCell('') for x in range(width - self.width)]
+            self.rows = numpy.hstack(self.rows,
+                [[CommandCell('')] for x in range(width - self.width)
                 for row in self.rows
-            ]
+            ])
             self.width = width
 
         return
@@ -126,7 +121,7 @@ class Grid:
         """
         for x in range(area.corners[0][0], area.corners[1][0] + 1):  # NW->NE
             for y in range(area.corners[0][1], area.corners[3][1] + 1):  # NW->SW
-                cell = self[x, y]
+                cell = self.get_cell(x, y)
                 if plottable is not None:
                     cell.plottable = plottable
                 if label is not None:
@@ -139,7 +134,7 @@ class Grid:
         """Set the plottable flag for all cells in the grid."""
         for x in range(0, self.width):
             for y in range(0, self.height):
-                self[x, y].plottable = plottable
+                self.get_cell(x, y).plottable = plottable
         return
 
     def is_area_plottable(self, area, any_plottable):
@@ -154,10 +149,10 @@ class Grid:
         for x in range(area.corners[0][0], area.corners[1][0] + 1):  # NW->NE
             for y in range(area.corners[0][1], area.corners[3][1] + 1):  # NW->SW
                 if any_plottable:
-                    if self[x, y].plottable:
+                    if self.get_cell(x, y).plottable:
                         return True
                 else:
-                    if not self[x, y].plottable:
+                    if not self.get_cell(x, y).plottable:
                         return False
 
         if any_plottable:
@@ -167,31 +162,24 @@ class Grid:
 
     def is_corner(self, x, y):
         """
-        Returns True if (x, y)'s cell forms the corner of a contiguous area,
-        including just a 1x1 area. This is just a heuristic test and is not
-        really accurate, but a more accurate test proved to be overall more
-        expensive.
+        Returns True if (x, y)'s cell *could* be the corner of a larger
+        rectangle. This is just a quick heuristic test and is definitely
+        not fully accurate. A more comprehensive test could be done here,
+        which would be likely to slow things down but produce a better
+        (fewer-keystroke) final result by Quickfort (in fact, this test
+        used to be quite accurate but also quite slow).
         """
-
-        # See if the adjacent cells to the north and to the east can
-        # be plotted and are of the same command as this cell; if so,
-        # we assume that this cell is not a corner cell but is the interior
-        # or a larger rectangle
-        for d in map(Direction, ('n', 'e')):
-            try:
-                corner = self[add_points((x, y), d.delta())]
-                opposite_corner = self[add_points((x, y), d.opposite().delta())]
-            except IndexError:
-                return True  # (x, y) appears to be at an edge of the grid
-
-            command = self[x, y].command
-            if command == corner.command \
-                and corner.plottable \
-                and command == opposite_corner.command \
-                and opposite_corner.plottable:
+        command = self.get_cell(x, y).command
+        if x > 0:
+            test = self.get_cell(x - 1, y)
+            if test.plottable and test.command == command:
                 return False
 
-        # it *might* be a corner
+        if y > 0:
+            test = self.get_cell(x, y - 1)
+            if test.plottable and test.command == command:
+                return False
+
         return True
 
     def count_contiguous_cells(self, x, y, direction):
@@ -201,7 +189,7 @@ class Grid:
         Returns count of contiguous cells.
         """
 
-        command = self[x, y].command
+        command = self.get_cell(x, y).command
         point = (x, y)
         start = get_coord_crossing_axis(point, direction)
 
