@@ -56,7 +56,7 @@ class AreaPlotter:
 
                     # set each corner's area variable
                     for corner in area.corners:
-                        cornercell = self.grid.get_cell(corner)
+                        cornercell = self.grid[corner]
                         cornercell.command = command
                         cornercell.area = area
         self.label = label
@@ -108,7 +108,7 @@ class AreaPlotter:
 
                 # store area in grid cell for each of the area's corners
                 for corner in area.corners:
-                    self.grid.get_cell(*corner).area = area
+                    self.grid[corner].area = area
 
         # return our label when we plotted at least 1 new area
         return label
@@ -123,7 +123,7 @@ class AreaPlotter:
 
         for ypos in range(0, self.grid.height):
             for xpos in range(0, self.grid.width):
-                cell = self.grid.get_cell(xpos, ypos)
+                cell = self.grid[xpos, ypos]
                 # Removing the is_corner() check below reduces final
                 # keystroke count by ~3% but makes the routine ~12x slower
                 if cell.plottable \
@@ -175,7 +175,7 @@ class AreaPlotter:
         Returns the largest area found.
         """
 
-        command = self.grid.get_cell(x, y).command
+        command = self.grid[x, y].command
 
         # Get the min/max size that this area may be, based on the command
         sizebounds = self.buildconfig.get('sizebounds', command) \

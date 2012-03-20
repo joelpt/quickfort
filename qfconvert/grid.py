@@ -53,25 +53,13 @@ class Grid:
     def __str__(self):
         return Grid.str_commands(self.rows, '')
 
-    def get_cell(self, x, y):
-        """Returns the CommandCell at (x, y) or an empty one if out of bounds."""
-        if self.is_out_of_bounds(x, y):
-            return CommandCell('')
-        else:
-            return self.rows[y][x]
-
-    def get_command(self, x, y):
-        """Returns .command at (x, y) or '' if out of bounds/empty."""
-        cell = self.get_cell(x, y)
-        if cell is None:
-            return ''
-        else:
-            return cell.command
-
-    def is_plottable(self, x, y):
-        """Returns .plottable at (x, y) or None if out of bounds/empty."""
-        cell = self.get_cell(x, y)
-        return False if cell is None else cell.plottable
+    def __getitem__(self, key):
+        """
+        Lets us retrieve a single cell using [x, y] syntax.
+        Slicing, etc. not supported.
+        """
+        x, y = key
+        return self.rows[y][x]
 
     def is_out_of_bounds(self, x, y):
         """Returns True if (x, y) is outside the bounds of grid, else False."""
@@ -138,7 +126,7 @@ class Grid:
         """
         for x in range(area.corners[0][0], area.corners[1][0] + 1):  # NW->NE
             for y in range(area.corners[0][1], area.corners[3][1] + 1):  # NW->SW
-                cell = self.get_cell(x, y)
+                cell = self[x, y]
                 if plottable is not None:
                     cell.plottable = plottable
                 if label is not None:
@@ -151,7 +139,7 @@ class Grid:
         """Set the plottable flag for all cells in the grid."""
         for x in range(0, self.width):
             for y in range(0, self.height):
-                self.get_cell(x, y).plottable = plottable
+                self[x, y].plottable = plottable
         return
 
     def is_area_plottable(self, area, any_plottable):
@@ -166,10 +154,10 @@ class Grid:
         for x in range(area.corners[0][0], area.corners[1][0] + 1):  # NW->NE
             for y in range(area.corners[0][1], area.corners[3][1] + 1):  # NW->SW
                 if any_plottable:
-                    if self.get_cell(x, y).plottable:
+                    if self[x, y].plottable:
                         return True
                 else:
-                    if not self.get_cell(x, y).plottable:
+                    if not self[x, y].plottable:
                         return False
 
         if any_plottable:
@@ -184,21 +172,23 @@ class Grid:
         really accurate, but a more accurate test proved to be overall more
         expensive.
         """
-        cell = self.get_cell(x, y)
-        if cell is None:
-            return False
 
-        command = cell.command
+        # See if the adjacent cells to the north and to the east can
+        # be plotted and are of the same command as this cell; if so,
+        # we assume that this cell is not a corner cell but is the interior
+        # or a larger rectangle
+        for d in map(Direction, ('n', 'e')):
+            try:
+                corner = self[add_points((x, y), d.delta())]
+                opposite_corner = self[add_points((x, y), d.opposite().delta())]
+            except IndexError:
+                return True  # (x, y) appears to be at an edge of the grid
 
-        # See if this cell can be extended along either axis in both
-        # directions. If so we assume this will be a non-corner cell
-        # of a larger area.
-        dirs = (Direction(d) for d in ['n', 'e'])
-        for d in dirs:
-            corner = self.get_cell(*add_points((x, y), d.delta()))
-            opp = self.get_cell(*add_points((x, y), d.opposite().delta()))
-            if command == corner.command and corner.plottable \
-                and command == opp.command and opp.plottable:
+            command = self[x, y].command
+            if command == corner.command \
+                and corner.plottable \
+                and command == opposite_corner.command \
+                and opposite_corner.plottable:
                 return False
 
         # it *might* be a corner
@@ -211,7 +201,7 @@ class Grid:
         Returns count of contiguous cells.
         """
 
-        command = self.get_cell(x, y).command
+        command = self[x, y].command
         point = (x, y)
         start = get_coord_crossing_axis(point, direction)
 

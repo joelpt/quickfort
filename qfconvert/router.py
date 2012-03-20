@@ -32,7 +32,7 @@ def plan_route(grid, cursor):
             plots.append(nearest_pos)
 
             # mark the plot on the grid
-            cell = grid.get_cell(*nearest_pos)
+            cell = grid[nearest_pos]
             area = cell.area
             grid.set_area_cells(area, False)
 
@@ -46,7 +46,7 @@ def plan_route(grid, cursor):
     logmsg('router', 'Routed through all areas:')
     loglines('router', lambda: Grid.str_area_labels(grid))
     logmsg('router', 'Route replay sequence: %s' % \
-            ''.join([grid.get_cell(*plot).label for plot in plots]))
+            ''.join([grid[p].label for p in plots]))
     logmsg('router', 'Cursor position now: %s' % str(cursor))
 
     return grid, plots, cursor
@@ -60,7 +60,7 @@ def get_nearest_plottable_area_from(grid, start):
 
     # check the cell we started in: if it is plottable, it becomes our
     # starting cheapest_area
-    cell = grid.get_cell(*start)
+    cell = grid[start]
 
     if cell.plottable and cell.area:
         return start
@@ -78,7 +78,7 @@ def get_nearest_plottable_area_from(grid, start):
                 if grid.is_out_of_bounds(*pos):
                     continue  # outside grid bounds
 
-                corner = grid.get_cell(*pos)
+                corner = grid[pos]
 
                 if corner.plottable and corner.area:
                     # cell has an area that can be plotted, return it
