@@ -12,7 +12,7 @@ def set_log_levels(levels):
     if levels is None:
         return
 
-    for level in list(levels):
+    for level in levels:
         if level not in __LOG_LEVELS:
             __LOG_LEVELS += [level]
 
