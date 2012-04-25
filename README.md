@@ -53,7 +53,7 @@ Table of Contents
     * [Advanced transformations: debugging](#advanced-transformations-debugging)
 * [Stupid dwarf tricks](#stupid-dwarf-tricks)
 * [Troubleshooting](#troubleshooting)
-* [Create an Excel macro to size all columns to a uniform narrow width](#create-an-excel-macro-to-size-all-columns-to-a-uniform narrow width)
+* [Create an Excel macro to size all columns to a uniform narrow width](#create-an-excel-macro-to-size-all-columns-to-a-uniform-narrow-width)
 * [Other Excel tips](#other-excel-tips)
 * [Links](#links)
 * [Todo/Future Ideas](#todofuture-ideas)
