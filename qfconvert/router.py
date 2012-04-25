@@ -58,6 +58,10 @@ def get_nearest_plottable_area_from(grid, start):
     Returns coordinate of nearest plottable area corner.
     """
 
+    # if start is out of bounds for grid, expand dimensions of grid
+    if grid.is_out_of_bounds(*start):
+        grid.expand_dimensions(start[0] + 1, start[1] + 1)
+
     # check the cell we started in: if it is plottable, it becomes our
     # starting cheapest_area
     cell = grid.get_cell(*start)
