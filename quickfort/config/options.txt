@@ -51,7 +51,7 @@ MouseTooltipUpdateMs = 3
 # materials menu to appear after QF sends Enter to show it
 WaitForMatMenuMaxMS = 15000
 
-# Max # of times Quickfort should step through the materials 
+# Max # of times Quickfort should step through the materials
 # menu looking for a memorized material before giving up
 MaxMatSearchChecks = 200
 
@@ -69,7 +69,7 @@ MatMenuSearchDelay = 50
 # when using Alt+V 'visualize', and when using manual material
 # selection e.g. #dig Cw:granite
 
-# Determines key-sending method, one of: 
+# Determines key-sending method, one of:
 #   Send SendEvent SendInput SendPlay ControlSend
 # Details: http://www.autohotkey.com/docs/commands/Send.htm
 SendMode = Send
