@@ -27,10 +27,10 @@ Table of Contents
 
 * [Features](#features)
 * [For the impatient](#for-the-impatient)
-* [Quickfort 2.0: What's new](#quickfort-20-what's-new)
+* [Quickfort 2.0: What's new](#quickfort-20-whats-new)
 * [For users of Quickfort 1.x](#for-users-of-quickfort-1x)
 * [Windows Quick Start](#windows-quick-start)
-* [Linux/OSX Quick Start](#linux/osx-quick-start)
+* [Linux/OSX Quick Start](#linuxosx-quick-start)
 * [Windows Basic Usage](#windows-basic-usage)
 * [Editing Blueprints](#editing-blueprints)
   * [Area expansion syntax](#area-expansion-syntax)
@@ -56,7 +56,7 @@ Table of Contents
 * [Create an Excel macro to size all columns to a uniform narrow width](#create-an-excel-macro-to-size-all-columns-to-a-uniform narrow width)
 * [Other Excel tips](#other-excel-tips)
 * [Links](#links)
-* [Todo/Future Ideas](#todo/future-ideas)
+* [Todo/Future Ideas](#todofuture-ideas)
 * [Changelog](#changelog)
 * [Credits and License](#credits-and-license)
 
