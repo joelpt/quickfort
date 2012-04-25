@@ -66,10 +66,12 @@ def get_blueprint_info(path, transform_str):
                     Blueprint.repeater_layers)
                 bp.layers = layers
 
+            formatted = bp.get_info()
+
             # add this sheet's info to the result string
             result += '>>>> Sheet id %d\n' % sheet[1]
-            result += bp.get_info() + '\n'
-        except:
+            result += formatted + '\n'
+        except BlueprintError as ex:
             continue    # ignore blank/missing sheets
 
     if result:
@@ -204,7 +206,8 @@ def str_summary(bp, keys):
                 [layer.grid.get_cell(x, y).label
                     for x, y in layer.plots]
                 ),
-            "Layer onexit keys: %s" % layer.onexit
+            "Layer onexit keys: %s" % layer.onexit,
+            ""
             ])
     s += "\n---- Overall:\n"
     s += "Total key cost: %d" % len(keys) + '\n'
@@ -384,8 +387,11 @@ class Blueprint:
 
     def get_info(self):
         """Retrieve various bits of info about the blueprint."""
-        cells = util.flatten(layer.grid.rows for layer in self.layers)
-        commands = [c.command for c in cells]
+        rowsets = [layer.grid.rows for layer in self.layers]
+        cells = map(lambda r: r.flatten(), rowsets)
+        if len(cells) == 0:
+            raise BlueprintError('No row data in blueprint.')
+        commands = [c.command for c in cells[0]]
         cmdset = set(commands)  # uniques
         if '' in cmdset:
             cmdset.remove('')
