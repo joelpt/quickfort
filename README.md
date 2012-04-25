@@ -26,42 +26,42 @@ Table of Contents
 -----------------
 
 * [Features](#features)
-* [For the impatient](#impatient)
-* [Quickfort 2.0: What's new](#qf2whatsnew)
-* [For users of Quickfort 1.x](#forqf1users)
-* [Windows Quick Start](#winquickstart)
-* [Linux/OSX Quick Start](#linuxquickstart)
-* [Windows Basic Usage](#winbasicusage)
-* [Editing Blueprints](#editing)
-  * [Area expansion syntax](#expansionsyntax)
-  * [Automatic area expansion](#autoexpansion)
-  * [Specifying a starting position](#startpos)
-  * [Multilevel blueprints](#multilevel)
-  * [Multiple build phases](#multiphase)
-  * [Manual material selection](#manualmats)
-* [Command prompt](#commandprompt)
-* [Transformations](#transforms)
-  * [Transformations: Simple repetition](#repetition)
-  * [Transformations: Simple transformation](#transformation)
-  * [Advanced transformations](#advtransforms)
-    * [Advanced transformations: alignment](#alignment)
-    * [Advanced transformations: the whirlpool pattern](#whirlpool)
-    * [Advanced transformations: multiple Z-levels](#multileveltransforms)
-    * [Advanced transformations: the ! command](#bangcommand)
-    * [Advanced transformations: Search and replace](#searchandreplace)
-    * [Advanced transformations: Change build phase](#changebuildphase)
-    * [Advanced transformations: debugging](#debugging)
-* [Stupid dwarf tricks](#stupiddwarftricks)
+* [For the impatient](#for-the-impatient)
+* [Quickfort 2.0: What's new](#quickfort-20-what's-new)
+* [For users of Quickfort 1.x](#for-users-of-quickfort-1x)
+* [Windows Quick Start](#windows-quick-start)
+* [Linux/OSX Quick Start](#linux/osx-quick-start)
+* [Windows Basic Usage](#windows-basic-usage)
+* [Editing Blueprints](#editing-blueprints)
+  * [Area expansion syntax](#area-expansion-syntax)
+  * [Automatic area expansion](#automatic-area-expansion)
+  * [Specifying a starting position](#specifying-a-starting-position)
+  * [Multilevel blueprints](#multilevel-blueprints)
+  * [Multiple build phases](#multiple-build-phases)
+  * [Manual material selection](#manual-material-selection)
+* [Command prompt](#command-prompt)
+* [Transformations](#transformations)
+  * [Transformations: Simple repetition](#transformations-simple-repetition)
+  * [Transformations: Simple transformation](#transformations-simple-transformation)
+  * [Advanced transformations](#advanced-transformations)
+    * [Advanced transformations: alignment](#advanced-transformations-alignment)
+    * [Advanced transformations: the whirlpool pattern](#advanced-transformations-the-whirlpool-pattern)
+    * [Advanced transformations: multiple Z-levels](#advanced-transformations-multiple-z-levels)
+    * [Advanced transformations: the ! command](#advanced-transformations-the--command)
+    * [Advanced transformations: Search and replace](#advanced-transformations-search-and-replace)
+    * [Advanced transformations: Change build phase](#advanced-transformations-change-build-phase)
+    * [Advanced transformations: debugging](#advanced-transformations-debugging)
+* [Stupid dwarf tricks](#stupid-dwarf-tricks)
 * [Troubleshooting](#troubleshooting)
-* [Create an Excel macro to size all columns to a uniform narrow width](#excel1)
-* [Other Excel tips](#excel2)
+* [Create an Excel macro to size all columns to a uniform narrow width](#create-an-excel-macro-to-size-all-columns-to-a-uniform narrow width)
+* [Other Excel tips](#other-excel-tips)
 * [Links](#links)
-* [Todo/Future Ideas](#todo)
+* [Todo/Future Ideas](#todo/future-ideas)
 * [Changelog](#changelog)
-* [Credits and License](#license)
+* [Credits and License](#credits-and-license)
 
 
-Features                                                             {#features}
+Features
 --------
 
 * Design complete blueprints to handle 4 main phases of DF construction
@@ -79,7 +79,7 @@ Features                                                             {#features}
 * Assortment of sample blueprints included
 
 
-For the impatient                                                   {#impatient}
+For the impatient
 -----------------
 
 ALL USERS: Please set `[MACRO_MS:0]` in your `data/init/init.txt` for best DF
@@ -101,7 +101,7 @@ Command line example using DF:
 ... then play your macro in DF with Ctrl+L, select foo, Ctrl+P.
 
 
-Quickfort 2.0: What's new                                         {#qf2whatsnew}
+Quickfort 2.0: What's new
 -------------------------
 
 Quickfort 2.0 is a major rewrite of Quickfort 1.11.
@@ -165,7 +165,7 @@ blueprints, '#meta' blueprints, and an Undo mode are all on the 2.x release
 schedule.
 
 
-For users of Quickfort 1.x                                        {#forqf1users}
+For users of Quickfort 1.x
 --------------------------
 
 A few things have changed in Quickfort's basic operation in the move from 1.0 to
@@ -184,7 +184,7 @@ A few things have changed in Quickfort's basic operation in the move from 1.0 to
   playback will be slow.
 
 
-Windows Quick Start                                             {#winquickstart}
+Windows Quick Start
 -------------------
 
 BEFORE YOU BEGIN: QF2 uses DF macros to designate your blueprints in Dwarf
@@ -214,7 +214,7 @@ Failing to do so will result in painfully slow macro playback.
 10. Wait a few seconds while the blueprint is designated.
 
 
-Linux/OSX Quick Start                                         {#linuxquickstart}
+Linux/OSX Quick Start
 ---------------------
 
 You must have Python 2.6.4 installed.
@@ -236,7 +236,7 @@ Examples:
 ... then play mymacro.mak in DF with Ctrl+L, select foo, Ctrl+P.
 
 
-Windows Basic Usage                                             {#winbasicusage}
+Windows Basic Usage
 -------------------
 
 BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
@@ -284,7 +284,7 @@ Shift+Alt+Z suspends/resumes Quickfort, useful if you find it to interfere
 with other windows. Shift+Alt+X exits Quickfort.
 
 
-Editing Blueprints                                                    {#editing}
+Editing Blueprints
 ------------------
 
 The format of Quickfort-compatible blueprint files is straightforward.
@@ -404,7 +404,7 @@ starting aliases. Blueprints/TheQuickFortress/ provides a good detailed set of
 examples covering some more complex designs.
 
 
-Area expansion syntax                                         {#expansionsyntax}
+Area expansion syntax
 ---------------------
 
 In Quickfort 2.0, the following blueprints are equivalent:
@@ -456,7 +456,7 @@ expansion syntax:
     # # # # #
 
 
-Automatic area expansion                                        {#autoexpansion}
+Automatic area expansion
 ------------------------
 
 In Quickfort 1.x, buildings larger than 1x1, like workshops, had to be placed
@@ -499,7 +499,7 @@ This can be especially helpful for laying out structures like screw pump towers
 and waterwheels, whose "center point" can be non-obvious.
 
 
-Specifying a starting position                                       {#startpos}
+Specifying a starting position
 ------------------------------
 
 You can optionally specify a cursor starting position for a particular
@@ -529,7 +529,7 @@ See Blueprints/Tests/starting-position.csv for a simple example.
 The Blueprints/TheQuickFortress/*.csv examples all utilize start().
 
 
-Multilevel blueprints                                              {#multilevel}
+Multilevel blueprints
 ---------------------
 
 Multilevel blueprints are accommodated by separating Z-levels of the blueprint
@@ -551,7 +551,7 @@ as building a screw pump tower. See Blueprints/Examples/screw-pump-tower-*.csv
 for an example.
 
 
-Multiple build phases                                              {#multiphase}
+Multiple build phases
 ---------------------
 
 A complete QF specification for a floor of your fortress may contain 4 or more
@@ -584,7 +584,7 @@ in the area before beginning the build phase. You may also wish to smooth and/or
 engrave the area before starting the build phase, as dwarves may be unable to
 access walls/floors that are behind/under built objects.
 
-Manual material selection                                          {#manualmats}
+Manual material selection
 -------------------------
 
 Quickfort supports manual material selection for #build blueprints. This enables
@@ -651,7 +651,7 @@ bottom edges of your highlighted material during memorization. This will make
 the fingerprint larger and thus less liable to later mis-identification.
 
 
-Command prompt                                                  {#commandprompt}
+Command prompt
 --------------
 
 Quickfort's command prompt can be accessed with Alt+T. Here you can enter
@@ -705,7 +705,7 @@ multirow command, therefore, you need to end with two #'s: one to end the
 preceding line and another to end the last line.
 
 
-Transformations                                                    {#transforms}
+Transformations
 ---------------
 
 Quickfort supports repeating and transforming your blueprints in various ways.
@@ -714,7 +714,7 @@ Use the Alt+R hotkey to open the transformation prompt and see a simple syntax
 primer. Enter ? to receive additional help.
 
 
-Transformations: Simple repetition                                 {#repetition}
+Transformations: Simple repetition
 ----------------------------------
 
 A blueprint can be repeated in any direction: north, south, east, west, up-z,
@@ -736,7 +736,7 @@ the first letter of the direction you want to repeat in.
     Repeats the blueprint in a 2x2x2 cube pattern (multi-z-level)
 
 
-Transformations: Simple transformation                         {#transformation}
+Transformations: Simple transformation
 --------------------------------------
 
 A blueprint can be transformed in the following ways:
@@ -757,7 +757,7 @@ A blueprint can be transformed in the following ways:
     Mirror the blueprint around both x and y axes.
 
 
-Advanced transformations                                        {#advtransforms}
+Advanced transformations
 ------------------------
 
 Repetition and transformation commands can be combined for some interesting
@@ -878,7 +878,7 @@ _Author's note:_ I would be glad to hear of any suggestions for an alternative
 approach/syntax here.
 
 
-Advanced transformations: alignment                                 {#alignment}
+Advanced transformations: alignment
 -----------------------------------
 
 Consider the state our transformation buckets were in just before returning the
@@ -979,7 +979,7 @@ direction will adjoin nicely with neighboring designated blueprints. You'll
 worry much less about halign/valign issues within complex transform sequences.
 
 
-Advanced transformations: the whirlpool pattern                     {#whirlpool}
+Advanced transformations: the whirlpool pattern
 -------------------------------------
 
 The so-called whirlpool pattern is the 'holy grail' for many symmetrical/fractal
@@ -1046,7 +1046,7 @@ For extra credit: how would you reverse the whirlpool pattern to proceed in a
 counterclockwise fashion?
 
 
-Advanced transformations: multiple Z-levels              {#multileveltransforms}
+Advanced transformations: multiple Z-levels
 -------------------------------------------
 
 Z-level repetitions are treated as a special case in Quickfort. When included in
@@ -1063,7 +1063,7 @@ Using multiple #d/#u transformations in a single sequence is not well supported.
 Prefer combining them into one transformation, e.g. `6d` instead of `3d 2d`.
 
 
-Advanced transformations: the ! command                           {#bangcommand}
+Advanced transformations: the ! command
 ---------------------------------------
 
 Normally transformations only apply to Working bucket B, leaving Memory bucket
@@ -1104,7 +1104,7 @@ then executing a separate sequence `2e` on the `rotcw` transformation's result.
     Alt+R -> rotcw ! 2e: rotate the blueprint, then repeat it twice east
 
 
-Advanced transformations: Search and replace                 {#searchandreplace}
+Advanced transformations: Search and replace
 --------------------------------------------
 
 The substitution command can be used to change the contents of cells using
@@ -1167,7 +1167,7 @@ A few more examples:
     Repeat a flooring blueprint as a checkerboard, using alternating manual mats
 
 
-Advanced transformations: Change build phase                 {#changebuildphase}
+Advanced transformations: Change build phase
 --------------------------------------------
 
 Particularly when using the `s/pattern/replacement/` substitution command, it
@@ -1188,7 +1188,7 @@ For these examples, assume we start with a #dig blueprint. Observe:
 All build phases and their first-letter abbreviations are accepted.
 
 
-Advanced transformations: debugging                                 {#debugging}
+Advanced transformations: debugging
 -----------------------------------
 
 By running `qfconvert.exe` or `qfconvert.py` from the command line, you can see
@@ -1205,7 +1205,7 @@ The use of `--mode=key` is just to avoid being spammed with DF-macro output
 (very verbose).
 
 
-Stupid dwarf tricks                                         {#stupiddwarftricks}
+Stupid dwarf tricks
 -------------------
 
 Dig a 2x2 column of up/down stairs deep into the earth:
@@ -1235,7 +1235,7 @@ Undesignate (undo) a #build blueprint (make sure you are in DF 'q' mode):
     Alt+R -> s/~/x/ phase=q
 
 
-Troubleshooting                                               {#troubleshooting}
+Troubleshooting
 ---------------
 
 * Always check QF's mousetip instructions before hitting Alt+D to begin a
@@ -1277,7 +1277,7 @@ Troubleshooting                                               {#troubleshooting}
   map are unbuildable and can seriously derail a QF designation.
 
 
-Create an Excel macro to size all columns to a uniform narrow width    {#excel1}
+Create an Excel macro to size all columns to a uniform narrow width
 -------------------------------------------------------------------
 
 This tip can help when working with a lot of files.
@@ -1300,7 +1300,7 @@ We'll create a new Ctrl+T hotkey in your local Excel installation:
 Now, hit Ctrl+T in Excel at any time to size all columns of the current sheet to
 a 2 unit width.
 
-Other Excel tips                                                       {#excel2}
+Other Excel tips
 ----------------
 
 * Save your work in XLS or XLSX file formats. Unlike CSV files, XLS/X files will
@@ -1322,7 +1322,7 @@ Other Excel tips                                                       {#excel2}
   are used in QF. For example, if Excel reports 9R x 4C, you would want to
   enter something like f(4x9) in your file.
 
-Links                                                                   {#links}
+Links
 -----
 
 ### Quickfort official links ###
@@ -1363,7 +1363,7 @@ If you look hard you can still find a few remnants of designator.ahk in the
 latest Quickfort.ahk source file!
 
 
-Todo/Future Ideas                                                        {#todo}
+Todo/Future Ideas
 -----------------
 
 
@@ -1616,7 +1616,7 @@ Changelog
 * Initial release
 
 
-Credits and License                                                   {#license}
+Credits and License
 -------------------
 
 Quickfort is written by joelpt <quickfort@joelpt.net>.
