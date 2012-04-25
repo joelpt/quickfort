@@ -18,5 +18,6 @@ robocopy /s qfconvert release\src\qfconvert\ *.py /xd release
 robocopy /s quickfort\config release\src\quickfort\config
 robocopy /s qfconvert\config release\src\qfconvert\config
 
-:: Copy readme.txt
-copy readme.txt release\readme.txt
+:: Copy readme
+copy README.md release\README.md
+copy README.md release\README.txt
