@@ -22,7 +22,7 @@ User contributed blueprints can be found [here](http://www.mediafire.com/?oujval
 See the [Links section](#links) for various tools that work with Quickfort.
 
 
-Table of Contents                                                         {#toc}
+Table of Contents
 -----------------
 
 * [Features](#features)
@@ -1381,7 +1381,7 @@ Todo/Future Ideas                                                        {#todo}
 * Undesignate feature that undesignates based on a specific blueprint
 
 
-Changelog                                                           {#changelog}
+Changelog
 ---------
 
 ### 2.04 (2012 April 24) ###
