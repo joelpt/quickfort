@@ -67,7 +67,7 @@ GetRandomFileName()
   ; remembered launch datetime. This helps ensure that if the machine date/time
   ; changes while QF is running we won't start getting out-of-order entries
   ; in the DF macro menu.
-  
+
   ; We always delete our macros after use. However DF doesn't
   ; update its macro list when macros are deleted; thus the desire to have our new
   ; macro always be sorted to the top item in DF's macro list. It allows QF to just
@@ -75,7 +75,7 @@ GetRandomFileName()
   ; be our just-created macro due to this naming methodology.
 
   global LaunchedOn, LaunchedTickCount
-  
+
   elapsedMS := A_TickCount - LaunchedTickCount
   elapsedSec := elapsedMS / 1000
   newDate := LaunchedOn
