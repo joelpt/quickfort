@@ -17,8 +17,7 @@ stockpiles, and making adjustments).
 
 Original idea and 1.0 codebase from [Valdemar's designator.ahk script](http://www.bay12games.com/forum/index.php?topic=1428.0).
 
-User contributed blueprints can be found [here](http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/)
-or in [one RAR file](http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar).
+User contributed blueprints can be found [here](http://www.mediafire.com/?oujvalbb0sggp).
 
 See the [Links section](#links) for various tools that work with Quickfort.
 
@@ -1328,41 +1327,37 @@ Links                                                                   {#links}
 
 ### Quickfort official links ###
 
-* Quickfort homepage: <http://joelpt.net/quickfort>
-* Quickfort forum thread: <http://www.bay12forums.com/smf/index.php?topic=35931.0>
-* Quickfort 2 issue/source tracker: <http://code.google.com/p/quickfort/issues/list>
-
-### Quickfort community submitted blueprints ###
-
-* <http://www.wuala.com/Aklyon/Public%20Stuff/blueprints.rar>
-* <http://www.wuala.com/Aklyon/Public%20Stuff/Blueprints/>
+* [Quickfort homepage](http://joelpt.net/quickfort)
+* [Quickfort forum thread](http://www.bay12forums.com/smf/index.php?topic=35931.0)
+* [Quickfort 2 issue/source tracker](http://code.google.com/p/quickfort/issues/list)
+* [Community blueprints repository](http://www.mediafire.com/?oujvalbb0sggp)
 
 ### Visual designers for Quickfort ###
 
 The following tools allow you to lay out multiple phases of a blueprint
 visually, and output Quickfort compatible blueprint files.
 
-* DF Designer: <http://www.bay12games.com/forum/index.php?topic=45433.0>
-* DFDrawCSV: <http://www.bay12forums.com/smf/index.php?topic=80666.0>
-* Quickfort Assist: <http://www.bay12forums.com/smf/index.php?topic=66755.0>
-* Quickfort Mapping Tool: <http://www.nickskvarla.com/dwarf/>
-* WebFort: <http://www.bay12forums.com/smf/index.php?topic=70957.0>
+* [DF Designer](http://www.bay12games.com/forum/index.php?topic=45433.0)
+* [DFDrawCSV](http://www.bay12forums.com/smf/index.php?topic=80666.0)
+* [Quickfort Assist](http://www.bay12forums.com/smf/index.php?topic=66755.0)
+* [Quickfort Mapping Tool](http://www.nickskvarla.com/dwarf/)
+* [WebFort](http://www.bay12forums.com/smf/index.php?topic=70957.0)
 
 ### Image-to-blueprint converters ###
 
 The following tools convert image files (e.g. BMP) into Quickfort CSV files.
 
-* ChromaFort: <http://www.bay12forums.com/smf/index.php?topic=55025.0>
-* image2qf: <http://www.bay12forums.com/smf/index.php?topic=86813.0>
-* DF Architect: <http://www.bay12forums.com/smf/index.php?topic=64723.0>
+* [ChromaFort](http://www.bay12forums.com/smf/index.php?topic=55025.0)
+* [image2qf](http://www.bay12forums.com/smf/index.php?topic=86813.0)
+* [DF Architect](http://www.bay12forums.com/smf/index.php?topic=64723.0)
 
 ### Similar utilities to Quickfort ###
 
 The following tools work similarly to Quickfort, operating on CSV blueprint
 files.
 
-* LinDesignator: <http://www.bay12forums.com/smf/index.php?topic=36928.0>
-* designator.ahk: <http://www.bay12games.com/forum/index.php?topic=1428.0>
+* [LinDesignator](http://www.bay12forums.com/smf/index.php?topic=36928.0)
+* [designator.ahk](http://www.bay12games.com/forum/index.php?topic=1428.0)
 
 If you look hard you can still find a few remnants of designator.ahk in the
 latest Quickfort.ahk source file!
