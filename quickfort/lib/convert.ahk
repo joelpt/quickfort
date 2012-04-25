@@ -12,7 +12,7 @@ ConvertAndPlayMacro()
   ; construct a somewhat useful title for the macro
   if (CommandLineMode)
   {
-    title := EvalMode "-cmd" 
+    title := EvalMode "-cmd"
   }
   else
   {
@@ -30,13 +30,13 @@ ConvertAndPlayMacro()
     }
     else
     {
-      title := title . buildType 
+      title := title . buildType
     }
     title := title . "-" . SelectedFilename
   }
 
-  title := GetRandomFileName() "-" SubStr(title, 1, 30)  
-  
+  title := GetRandomFileName() "-" SubStr(title, 1, 30)
+
   ; Clock how long it takes
   starttime := A_TickCount
 
@@ -45,7 +45,7 @@ ConvertAndPlayMacro()
 
   ; measure elapsed time for run
   elapsed := A_TickCount - starttime
-  
+
   ; Play the macro.
 
   ; TODO: strip this block of textplanation out if PlayMacro(0) proves to be safe
@@ -54,11 +54,11 @@ ConvertAndPlayMacro()
   ; the OS; a too-short delay here will cause DF to miss our macro-loading-and-playing
   ; keystrokes. The first time we go through this process usually is (and needs to be)
   ; much slower than subsequent runs.
-  ; PlayMacro(elapsed) 
-  
+  ; PlayMacro(elapsed)
+
   ; We'll just do a micro-delay here as it appears that we can do ^L{Enter}^P very
   ; quickly without issue, as long as we don't delete the .mak file too quickly
-  PlayMacro(0) 
+  PlayMacro(0)
 
   ; remember for repeated use of Alt+D
   LastMacroWasPlayed := true
@@ -83,7 +83,7 @@ ConvertAndSaveMacro(title)
   global
   local outfile, dfpath, destfile, result
 
-  outfile := A_ScriptDir "\" title ".mak"
+  outfile := A_Temp "\" title ".mak"
   ActivateGameWin() ; TODO try to get dfpath without focusing the game window
   dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
   SplitPath, dfpath, , dfpath
@@ -104,7 +104,7 @@ ConvertAndSaveMacro(title)
     MsgBox, Error: ConvertBlueprint() returned false
     return -1
   }
-  
+
   ; Move to DF dir
   FileMove, %outfile%, %destfile%, 1
   if (ErrorLevel > 0)
@@ -133,7 +133,7 @@ ConvertAndSendKeys(visualizing)
   global
   local outfile, output
 
-  outfile := A_ScriptDir "\keys.tmp"
+  outfile := A_Temp "\keys.tmp"
   FileDelete, %outfile%
   ActivateGameWin()
 
