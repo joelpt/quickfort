@@ -98,20 +98,21 @@ class Grid:
         New cells are added to the right and bottom as needed.
         Contraction is not supported.
         """
+
         # add empty rows to bottom if required
         if height > self.height:
-            self.rows = numpy.vstack(self.rows, [
+            self.rows = numpy.vstack((self.rows, [
                 [CommandCell('') for x in range(self.width)]
                 for y in range(height - self.height)
-            ])
+            ]))
             self.height = height
 
         # add empty columns to right if required
         if width > self.width:
-            self.rows = numpy.hstack(self.rows,
+            self.rows = numpy.hstack((self.rows,
                 [[CommandCell('')] for x in range(width - self.width)
                 for row in self.rows
-            ])
+            ]))
             self.width = width
 
         return
