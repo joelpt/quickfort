@@ -1,4 +1,4 @@
-Quickfort 2.03
+Quickfort 2.04
 ===============
 by joelpt <quickfort@joelpt.net>
 
@@ -1383,6 +1383,11 @@ Todo/Future Ideas                                                        {#todo}
 
 Changelog                                                           {#changelog}
 ---------
+
+### 2.04 (2012 April 24) ###
+
+* Conversion process is now 10-20x faster ('thinking' phase)
+
 
 ### 2.03 (2012 January 10) ###
 
