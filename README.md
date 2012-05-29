@@ -259,13 +259,14 @@ Alt+Q/W/A/S can be used to change the starting corner for the blueprint (that
 is, which corner of the blueprint you'll put the starting cursor at). The
 current starting corner setting will be shown in the QF tooltip. These hotkeys
 have no effect if the blueprint specifies a starting cursor position; see
-the [Specifying a starting position section](#startpos) for more details.
+the [Specifying a starting position section](#specifying-a-starting-position)
+for more details.
 
 Alt+R can be used to repeat a blueprint any number of times to the north, south,
 east, west, up, and down. This can be useful for digging multilevel
 staircases/shafts, repeating room complexes, etc. Alt+R can also be used to
-rotate, flip, and tesselate blueprints: see the
-[Transformations section](#transforms) for more details.
+rotate, flip, tesselate, and search-and-replace blueprints: see the
+[Transformations section](#transformations) for more details.
 
 Alt+T opens the Quickfort command line. Here you can enter a single-line
 QF-style command. Commands entered this way can be repeated with Alt+R as well.
@@ -728,8 +729,8 @@ Command prompt
 --------------
 
 Quickfort's command prompt can be accessed with Alt+T. Here you can enter
-commands as 'cells' to be played back. These can then be transformed with
-Alt+R if desired; see the [Transformations section](#transforms).
+commands as 'cells' to be played back. These can also be transformed with
+Alt+R if desired; see the [Transformations section](#transformations).
 
 Commands must be prefixed with the desired build phase, so that QF knows
 how to handle your commands properly:
@@ -939,13 +940,13 @@ see the result:
 
 Making sense yet? To get a better handle on how this all works, the best approach
 is probably to just start experimenting with the Alt+R command. Also see
-[transformation debugging](#debugging).
+[transformation debugging](#advanced-transformations-debugging).
 
 While it may seem unintuitive at first, this approach for transformation was
 intentionally chosen for Quickfort 2.0. It is meant to retain the simple
 QF1.x-style `2e 2s` repeat functionality, while also allowing the mixing of
 QF1.x repetition commands with QF2.x transformation commands and allowing for
-[interesting tesselations](#whirlpool).
+[interesting tesselations](#advanced-transformations-the-whirlpool-pattern).
 
 _Author's note:_ I would be glad to hear of any suggestions for an alternative
 approach/syntax here.
