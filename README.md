@@ -1467,6 +1467,7 @@ Changelog
 * Verified compatibility with DF 0.34.10
 * Conversion process is now 10-20x faster (the 'thinking' phase)
 * Eliminated issues with 'cent' character being used in QFAHK code (Robik)
+* Support aliases with expansion syntax, e.g. `trackNS(2x10)`
 * Numerous other bug fixes and cleanup
 
 ### 2.03 (2012 January 10) ###
