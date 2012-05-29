@@ -26,7 +26,6 @@ class BuildConfig:
         "custom" subsection will be used if forkey matches said custom
         key when treating said custom key as a regex pattern.
         """
-
         if forkey:
             custom = self.config.get('custom') or {}
             for k in custom:
