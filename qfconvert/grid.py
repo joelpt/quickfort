@@ -109,10 +109,10 @@ class Grid:
 
         # add empty columns to right if required
         if width > self.width:
-            self.rows = numpy.hstack((self.rows,
-                [[CommandCell('')] for x in range(width - self.width)
-                for row in self.rows
-            ]))
+            newcells = [[CommandCell('') for x in range(width - self.width)]
+                for y in range(self.height)
+            ]
+            self.rows = numpy.hstack((self.rows, newcells))
             self.width = width
 
         return
