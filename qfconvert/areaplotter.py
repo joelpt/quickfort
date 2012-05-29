@@ -56,7 +56,7 @@ class AreaPlotter:
 
                     # set each corner's area variable
                     for corner in area.corners:
-                        cornercell = self.grid.get_cell(corner)
+                        cornercell = self.grid.get_cell(*corner)
                         cornercell.command = command
                         cornercell.area = area
         self.label = label
