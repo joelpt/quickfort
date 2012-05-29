@@ -43,15 +43,25 @@ def apply_aliases(layers, aliases):
     Applies aliases:dict(aliasname, keystrokes) to layers:[FileLayer].
 
     Every cell in every layer will be replaced with 'keystrokes' if
-    it exactly matches 'aliasname'. Currently there is no support
-    for having multiple aliases in a single cell or mixing aliases
-    with regular keystrokes in a cell.
+    it exactly matches 'aliasname' or 'aliasname(#x#)' formats.
+
+    Currently there is no support for having multiple aliases in a
+    single cell or mixing aliases with regular keystrokes in a cell.
     """
+
+    # sort the aliases longest-first so longer aliases match first
+    keys = aliases.keys()
+    keys.sort(key=lambda x: len(x), reverse=True)
 
     for layer in layers:
         for r, row in enumerate(layer.rows):
             for c, cell in enumerate(row):
-                for alias in aliases.iterkeys():
+                for alias in keys:
                     if cell == alias:  # alias match
                         layer.rows[r][c] = aliases[alias]
+                        break
+                    testlen = len(alias) + 1
+                    if cell[0:testlen] == alias + '(': # alias(#x#) match
+                        layer.rows[r][c] = aliases[alias] + cell[testlen - 1:]
+                        break
     return layers
