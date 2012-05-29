@@ -383,6 +383,9 @@ class Blueprint:
         while keys and keys[-1] == '%':
             keys = keys[:-1]
 
+        # if the result is no keys, return a single wait key
+        keys += ['%']
+
         return keys
 
     def get_info(self):
