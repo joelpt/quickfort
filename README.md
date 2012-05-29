@@ -83,19 +83,19 @@ Features
 For the impatient
 -----------------
 
-ALL USERS: Please set `[MACRO_MS:0]` in your `data/init/init.txt` for best DF
-macro playback performance.
+WINDOWS USERS: Run Quickfort.exe for the GUI interface.
 
-Windows users: Run Quickfort.exe for the GUI interface.
+LINUX/OSX USERS: Please set `[MACRO_MS:0]` in your `data/init/init.txt`
+for best DF macro playback performance.
 
-Linux/OSX users: Run the command line conversion tool via python:
+Run the command line qfconvert tool via python to generate DF macro files:
 
     > cd src/qfconvert
     > python ./qfconvert.py
 
-or `chmod +x qfconvert.py` and run it like a shell script.
+or `chmod +x qfconvert.py` to run it like a shell script.
 
-Command line example using DF:
+Command line example using qfconvert:
 
     > python ./qfconvert.py myblueprint.xls <DF folder>/data/init/macros/foo.mak
 
@@ -239,9 +239,6 @@ Examples:
 
 Windows Basic Usage
 -------------------
-
-BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
-playback will be slow.
 
 Please see the [Troubleshooting section](#troubleshooting) for solutions to
 common problems.
