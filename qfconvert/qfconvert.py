@@ -13,7 +13,7 @@ import log
 
 from errors import ParametersError
 
-VERSION = '2.03'
+VERSION = '2.04'
 
 
 def parse_options(argv):
