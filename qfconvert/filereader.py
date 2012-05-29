@@ -144,7 +144,11 @@ def parse_file(filename, sheetid):
     lines = read_sheet(filename, sheetid)
 
     # break into the lines we want
-    (top_line, lines) = (','.join(lines[0]), lines[1:])
+    if lines[0][0] and lines[0][0][0] == '#':
+        (top_line, lines) = (','.join(lines[0]), lines[1:])
+    else:
+        # top line missing, assume #dig
+        top_line = '#dig'
 
     # parse top line details
     details = parse_sheet_details(top_line)
