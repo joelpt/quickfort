@@ -427,7 +427,7 @@ def split_keystring_into_keycodes(keystring):
 
         if k[0] == '{':
             # check for keycodes like {Right 5}
-            match = re.match(r'\{(\w+) (\d+)\}', k)
+            match = re.match(r'\{(\w+|[&^+%!]) (\d+)\}', k)
             if match is None:
                 codes.append(k)  # preserve whole key-combos
             else:
