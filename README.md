@@ -1471,6 +1471,7 @@ Changelog
 * Conversion process is now 10-20x faster (the 'thinking' phase)
 * Eliminated issues with 'cent' character being used in QFAHK code (Robik)
 * Support aliases with expansion syntax, e.g. `trackNS(2x10)`
+* Assume #dig for blueprints with no #phase top line (VenomIreland)
 * Numerous other bug fixes and cleanup
 
 ### 2.03 (2012 January 10) ###
@@ -1725,6 +1726,7 @@ resulted in improvements to Quickfort:
     Thundercraft
     kurzedmetal
     Robik
+    VenomIreland
 
 Copyright 2012 Joel Thornton
 
