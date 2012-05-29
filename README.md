@@ -190,7 +190,7 @@ A few things have changed in Quickfort's basic operation in the move from 1.0 to
 Windows Quick Start
 -------------------
 
-1. Download and extract the Quickfort2...zip file.
+1. Download and extract the Quickfort2.##.zip file from https://github.com/joelpt/quickfort/downloads
 2. Run Quickfort.exe.
 3. Launch Dwarf Fortress and get into a Fortress mode game.
 4. Press Alt+F to open the Quickfort file browser.
