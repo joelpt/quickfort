@@ -181,23 +181,12 @@ A few things have changed in Quickfort's basic operation in the move from 1.0 to
   QF1's key-sending approach, though that approach is still supported; use Alt+K
   to toggle modes.
 
-* BE SURE TO SET `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
-  playback will be slow.
+* LINUX/OSX: Be sure to set `[MACRO_MS:0]` in your DF's `data/init/init.txt` or
+  macro playback will be painfully slow.
 
 
 Windows Quick Start
 -------------------
-
-BEFORE YOU BEGIN: QF2 uses DF macros to designate your blueprints in Dwarf
-Fortress. To ensure your experience doesn't suck:
-
-* Quit Dwarf Fortress if it is running.
-* Edit your DF's `data/init/init.txt` file and set the `MACRO_MS` option
-  to `[MACRO_MS:0]`.
-
-Failing to do so will result in painfully slow macro playback.
-
-### First time usage ###
 
 1. Download and extract the Quickfort2...zip file.
 2. Run Quickfort.exe.
