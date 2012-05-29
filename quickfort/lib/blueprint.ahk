@@ -48,6 +48,7 @@ GetBlueprintInfo(filename)
   local params
   local outfile
   local result
+  local parseChar
 
   Tip("Reading blueprint...")
 
@@ -55,15 +56,18 @@ GetBlueprintInfo(filename)
   outfile := A_ScriptDir "\" GetRandomFileName() ".tmp"
   result := ExecQfConvert(filename, outfile, params)
 
+  ; Obtain a non printing ASCII character for use in Loop, Parse as a delimiter
+  Transform, parseChar, Chr, 1
+
   ClearTip()
 
   if (result)
   {
     ; prepare data for Loop Parse
-    StringReplace, result, result, >>>>, ¢, All
+    StringReplace, result, result, >>>>, %parseChar%, All
     ; parse contents out
     cnt := 0
-    Loop, Parse, result, ¢
+    Loop, Parse, result, %parseChar%
     {
       info = %A_LoopField% ; AHK style whitespace trim
       if (StrLen(info) > 3)
@@ -99,9 +103,9 @@ GetBlueprintInfo(filename)
 
 
 ;; ---------------------------------------------------------------------------
-;; Checks if SelectedFile has been modified and resets LastMacro/LastSend vars 
+;; Checks if SelectedFile has been modified and resets LastMacro/LastSend vars
 ;; to false if so
-CheckIfSelectedFileModified() 
+CheckIfSelectedFileModified()
 {
   global CommandLineMode, SelectedModifiedOn, SelectedFile, LastMacroWasPlayed, LastSendKeys
 
