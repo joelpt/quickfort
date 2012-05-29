@@ -105,6 +105,8 @@ Command line example using qfconvert:
 Quickfort 2.0: What's new
 -------------------------
 
+See the [changelog](#changelog) for newer changes since version 2.00.
+
 Quickfort 2.0 is a major rewrite of Quickfort 1.11.
 
 The new blueprint conversion engine 'qfconvert' has been rewritten in cross-
