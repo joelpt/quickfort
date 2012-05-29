@@ -1,0 +1,12 @@
+#build Minetracks test,,,,,,,,,,,,,,,,,
+trackNE,trackE,trackE,trackE,trackE,trackE,CSddd,,,trackNSEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackNSEW
+trackN,,,,,,,,,trackNS,,,,,,,,trackNS
+trackN,,,trackE(3x1),`,`,CSddd,,,trackNS,,,,,,,,trackNS
+trackN,,,,,,,,,trackNS,,,,,,,,trackNS
+trackN,,,trackNS(2x5),`,,rollerV,,,trackNS,,,,,,,,trackNS
+trackN,,,`,`,,rollerV,,,trackNS,,,,,,,,trackNS
+trackN,,,`,`,,,,,trackNS,,,,,,,,trackNS
+trackN,,,`,`,,Mrs,,,trackNS,,,,,,,,trackNS
+trackN,,,`,`,,Mrqsq,,,trackNSEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackNSEW
+,,,,,,,,,,,,,,,,,
+trackstopW,trackEW,trackEW,trackEW,rollerHqq,rollerHqq,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackEW,trackstopE
