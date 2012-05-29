@@ -39,6 +39,7 @@ Table of Contents
   * [Multilevel blueprints](#multilevel-blueprints)
   * [Multiple build phases](#multiple-build-phases)
   * [Manual material selection](#manual-material-selection)
+  * [Minecart tracks](#minecart-tracks)
 * [Command prompt](#command-prompt)
 * [Transformations](#transformations)
   * [Transformations: Simple repetition](#transformations-simple-repetition)
@@ -584,6 +585,7 @@ in the area before beginning the build phase. You may also wish to smooth and/or
 engrave the area before starting the build phase, as dwarves may be unable to
 access walls/floors that are behind/under built objects.
 
+
 Manual material selection
 -------------------------
 
@@ -649,6 +651,80 @@ the Dist column).
 If QF mis-selects a material you memorized, try to click nearer the top and
 bottom edges of your highlighted material during memorization. This will make
 the fingerprint larger and thus less liable to later mis-identification.
+
+
+Minecart tracks
+---------------
+
+Quickfort supports the designation of minecart tracks, stops, and rollers
+through the normal mechanisms, e.g. a #build blueprint with `CS` in a cell
+will designate a track stop.
+
+For track segments (`CT...`), you must select from DF's menu to choose the
+desired track segment, then send `{Enter}` to select it. For example, to
+designate a "Track (E)" segment, which is the third item in the track
+segments menu, you would use:
+
+    CT{+ 2}{Enter}
+
+To simplify such designations, a series of aliases have been created for
+the various track-related designations. You can use these instead of the
+aforementioned approach.
+
+The aliases are:
+
+    -- Track segments --
+    trackN
+    trackS
+    trackE
+    trackW
+    trackNS
+    trackNE
+    trackNW
+    trackSE
+    trackSW
+    trackEW
+    trackNSE
+    trackNSW
+    trackNEW
+    trackSEW
+    trackNSEW
+
+    -- Track/ramp segments --
+    trackrampN
+    trackrampS
+    trackrampE
+    trackrampW
+    trackrampNS
+    trackrampNE
+    trackrampNW
+    trackrampSE
+    trackrampSW
+    trackrampEW
+    trackrampNSE
+    trackrampNSW
+    trackrampNEW
+    trackrampSEW
+    trackrampNSEW
+
+    -- Horizontal and vertical roller segments --
+    rollerH
+    rollerV
+
+    -- Track stops that dump to N/S/E/W --
+    trackstopN
+    trackstopS
+    trackstopE
+    trackstopW
+
+For example, to create an E-W track with stops at each end
+that dump to their outside directions, you could use the
+following blueprint:
+
+    #build Example track
+    trackstopW trackEW trackEW trackEW trackstopE
+
+See `Blueprints/Tests/minetracks.csv` for a larger example.
 
 
 Command prompt
@@ -980,7 +1056,7 @@ worry much less about halign/valign issues within complex transform sequences.
 
 
 Advanced transformations: the whirlpool pattern
--------------------------------------
+-----------------------------------------------
 
 The so-called whirlpool pattern is the 'holy grail' for many symmetrical/fractal
 layouts. It can make for very attractive and effective fortress layouts. The
@@ -1042,8 +1118,8 @@ This effect can be trivially made larger. Try these and compare the results:
 
     Alt+R -> 2e 2s rotcw 2e fliph flipv 2s
 
-For extra credit: how would you reverse the whirlpool pattern to proceed in a
-counterclockwise fashion?
+For extra credit: how would you reverse the whirlpool transform to proceed in a
+counterclockwise fashion (starting with `rotccw`)?
 
 
 Advanced transformations: multiple Z-levels
@@ -1218,21 +1294,21 @@ Undesignate a large chunk of the map on multiple z-levels:
     Alt+T -> dig x(100x100)
     Alt+R -> 10d
 
+Undesignate (undo) a #dig or #place blueprint:
+
+    Alt+R -> s/~/x/
+
+Undesignate (undo) a #build blueprint (make sure you are in DF 'q' mode first):
+
+    Alt+R -> phase=q s/~/x/
+
 Manually choose and use the same material for all walls in a #build blueprint:
 
     Alt+R -> s/Cw/Cw:foo/
 
-Turn all 'd' cells of a #dig blueprint into 'Cf' flooring using #build phase:
+Add 'Cf' flooring in #build mode on top of each 'd' cell of a #dig blueprint:
 
     Alt+R -> phase=build s/d/Cf/ s/~Cf//
-
-Undesignate (undo) a #dig blueprint:
-
-    Alt+R -> s/~/x/
-
-Undesignate (undo) a #build blueprint (make sure you are in DF 'q' mode):
-
-    Alt+R -> s/~/x/ phase=q
 
 
 Troubleshooting
@@ -1300,6 +1376,7 @@ We'll create a new Ctrl+T hotkey in your local Excel installation:
 Now, hit Ctrl+T in Excel at any time to size all columns of the current sheet to
 a 2 unit width.
 
+
 Other Excel tips
 ----------------
 
@@ -1321,6 +1398,7 @@ Other Excel tips
   Note that the way Excel reports the numbers are the OPPOSITE of how they
   are used in QF. For example, if Excel reports 9R x 4C, you would want to
   enter something like f(4x9) in your file.
+
 
 Links
 -----
@@ -1366,9 +1444,8 @@ latest Quickfort.ahk source file!
 Todo/Future Ideas
 -----------------
 
-
 * [COMPLETE] Refactor codebase
-* Support 'repeat' keyword in QF command line
+* Support 'transform'/'tx' keyword in QF command line
 * [COMPLETE] Support multiline entries in QF command line
 * Test/support every placeable DF object/command
 * Support top/repeatable middle/bottom multilevel blueprints
@@ -1384,10 +1461,13 @@ Todo/Future Ideas
 Changelog
 ---------
 
-### 2.04 (2012 April 24) ###
+### 2.04 (2012 May 29) ###
 
-* Conversion process is now 10-20x faster ('thinking' phase)
-
+* Added support and aliases for mine tracks; see related section in README
+* Verified compatibility with DF 0.34.10
+* Conversion process is now 10-20x faster (the 'thinking' phase)
+* Eliminated issues with 'cent' character being used in QFAHK code (Robik)
+* Numerous other bug fixes and cleanup
 
 ### 2.03 (2012 January 10) ###
 
@@ -1624,7 +1704,7 @@ Quickfort is written by joelpt <quickfort@joelpt.net>.
 Thanks to the following individuals whose code contributions are present
 in Quickfort:
 
-    bakergo (proper CSV file parsing)
+    bakergo (proper CSV file parsing; many good suggestions)
     Valdemar (author of designator.ahk, which QF 1.00 was based on)
 
 Thanks to the following individuals whose bug-hunting or feature-requesting
@@ -1640,8 +1720,9 @@ resulted in improvements to Quickfort:
     Root Infinity
     Thundercraft
     kurzedmetal
+    Robik
 
-Copyright 2011 Joel Thornton
+Copyright 2012 Joel Thornton
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
