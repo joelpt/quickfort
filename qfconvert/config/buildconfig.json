@@ -7,7 +7,7 @@
 // Format:
 // {
 //     "phase-name": {
-//         "key": "value", 
+//         "key": "value",
 //         ...,
 //         "custom": {
 //             "cell-regex-key": {
@@ -16,7 +16,7 @@
 //             },
 //             ...
 //         }
-//     }, 
+//     },
 //     ...
 // }
 //
@@ -30,11 +30,11 @@
 //             'menu': sends keystroke to enter a new submenu (not needed if we're in the desired submenu)
 //             'setsize': runs the setsize function (see below) to adjust size of designation
 //             'setmats': runs the setmats function (see below) to select mats for constructions
-//             '&' '%' '@', '%>': abbreviations for {Enter}, {Wait}, {Shift Enter}, {WaitForNext}
+//             '&' '%' '@', '%>', '^': abbreviations for {Enter}, {Wait}, {Shift Enter}, {WaitForNext}, {Esc}
 //  samecmd: pattern to use for 'cmd' in 'designate' value when last cell had the same command as this cell
-//  diffcmd: pattern to use for 'cmd' in 'designate' value when last cell had a different command 
+//  diffcmd: pattern to use for 'cmd' in 'designate' value when last cell had a different command
 //  submenukeys: list of keys that open a DF submenu when pressed (e.g. 'w' opens build->workshops submenu)
-//  sizebounds: sets min and max size limits for area auto-expansion: [minwidth, maxwidth, minheight, maxheight] 
+//  sizebounds: sets min and max size limits for area auto-expansion: [minwidth, maxwidth, minheight, maxheight]
 //  setsize: name of Python function which will return keys needed to size a designation appropriately
 //  setmats: name of Python function which will return keys needed to select required mats for constructions
 //  custom: list of key-value pairs that can be used to customize QF's key patterns for specific designations.
@@ -72,8 +72,15 @@
                           "designate": ["exitmenu", "cmd", "moveto", "setsize", "&"]
                         },
 
-            // all constructions
-            "C.":       { "sizebounds": [1, 10, 1, 10] },
+            // all constructions except tracks and track stops
+            "C[^ST]":    { "sizebounds": [1, 10, 1, 10] },
+
+            // track segments
+            "CT":       { "sizebounds": [1, 10, 1, 10],
+                          "designate": ["exitmenu", "menu", "%>", "cmd", "moveto", "setsize", "setmats", "^"] },
+
+            // track stops
+            "CS":       { "designate": ["exitmenu", "menu", "%>", "cmd", "moveto", "setmats"] },
 
             // paved roads
             "o":        { "sizebounds": [1, 10, 1, 10],
@@ -114,11 +121,22 @@
                         },
 
             // screw pump
-            "Ms":      { "designate": ["exitmenu", "menu", "cmd", "moveto", "&", "&", "&", "&", "%"] },
+            "Ms":       { "designate": ["exitmenu", "menu", "cmd", "moveto", "&", "&", "&", "&", "%"] },
 
             // horizontal and vertical axles
-            "Mh":      { "sizebounds": [1, 10, 1, 1] },
-            "Mv":      { "sizebounds": [1, 1, 1, 10] }
+            "Mh":       { "sizebounds": [1, 10, 1, 1] },
+            "Mv":       { "sizebounds": [1, 1, 1, 10] },
+
+            // track rollers - horizontal orientation
+            "Mr.*s":    { "sizebounds": [1, 10, 1, 1],
+                          "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "setmats", "@"]
+                        },
+
+            // track rollers - vertical orientation
+            "Mr[^s]*(?!s)$":
+                        { "sizebounds": [1, 1, 1, 10],
+                          "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "setmats", "@"]
+                        }
 
             }
     },
