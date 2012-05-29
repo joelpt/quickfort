@@ -77,3 +77,51 @@ growlastcropall: a{/}&b{/}&c{/}&d{/}&
 
 # Like growlastcropall but grows the first one in the list instead.
 growfirstcropall: a&b&c&d&
+
+##################################
+# mining tracks
+##################################
+
+# The following aliases make it more convenient to build the various types of mine tracks.
+# For example, to build a north/south track 'Track (NS)', you would put trackNS in a cell(s).
+trackN: CT{Enter}
+trackS: CT{+ 1}{Enter}
+trackE: CT{+ 2}{Enter}
+trackW: CT{+ 3}{Enter}
+trackNS: CT{+ 4}{Enter}
+trackNE: CT{+ 5}{Enter}
+trackNW: CT{+ 6}{Enter}
+trackSE: CT{+ 7}{Enter}
+trackSW: CT{+ 8}{Enter}
+trackEW: CT{+ 9}{Enter}
+trackNSE: CT{+ 10}{Enter}
+trackNSW: CT{+ 11}{Enter}
+trackNEW: CT{+ 12}{Enter}
+trackSEW: CT{+ 13}{Enter}
+trackNSEW: CT{+ 14}{Enter}
+trackrampN: CT{+ 15}{Enter}
+trackrampS: CT{+ 15}{+ 1}{Enter}
+trackrampE: CT{+ 15}{+ 2}{Enter}
+trackrampW: CT{+ 15}{+ 3}{Enter}
+trackrampNS: CT{+ 15}{+ 4}{Enter}
+trackrampNE: CT{+ 15}{+ 5}{Enter}
+trackrampNW: CT{+ 15}{+ 6}{Enter}
+trackrampSE: CT{+ 15}{+ 7}{Enter}
+trackrampSW: CT{+ 15}{+ 8}{Enter}
+trackrampEW: CT{+ 15}{+ 9}{Enter}
+trackrampNSE: CT{+ 15}{+ 10}{Enter}
+trackrampNSW: CT{+ 15}{+ 11}{Enter}
+trackrampNEW: CT{+ 15}{+ 12}{Enter}
+trackrampSEW: CT{+ 15}{+ 13}{Enter}
+trackrampNSEW: CT{+ 15}{+ 14}{Enter}
+
+# Aliases for building track rollers; use e.g. rollerHqqq to make a low-speed horizontal roller
+rollerH: Mrs
+rollerV: Mr
+
+# Aliases for building track stops that dump in each of the four directions
+trackstopN: CSd
+trackstopS: CSdd
+trackstopE: CSddd
+trackstopW: CSdddd
+
