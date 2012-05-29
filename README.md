@@ -181,8 +181,8 @@ A few things have changed in Quickfort's basic operation in the move from 1.0 to
   QF1's key-sending approach, though that approach is still supported; use Alt+K
   to toggle modes.
 
-* LINUX/OSX: Be sure to set `[MACRO_MS:0]` in your DF's `data/init/init.txt` or
-  macro playback will be painfully slow.
+* Be sure to set `[MACRO_MS:0]` in your DF's `data/init/init.txt` or macro
+  playback will be painfully slow.
 
 
 Windows Quick Start
