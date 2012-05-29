@@ -273,14 +273,27 @@ QF-style command. Commands entered this way can be repeated with Alt+R as well.
 
 After a build completes, Alt+D can be used to designate the same blueprint
 again, or use Alt+F again to select a new blueprint. Alt+E can be used to select
-a different worksheet from a currently selected multisheet XLS/XLSX file.
+a different worksheet from a currently selected multisheet XLS/XLSX file, or
+just view the information for the current CSV or worksheet.
+
+Alt+N can be used to save a named macro to DF's macros folder. This can be
+useful if you designate a particular blueprint often and would rather access
+it from DF's Ctrl+L menu than go through Quickfort every time.
 
 Alt+H can be used to hide QF's mouse tooltip; all hotkeys will continue to
 work. Alt+M toggles from QF's rather wordy mousetip to a minimal one, if you
 know what you're doing.
 
+Alt+K toggles between macro and keys modes. In macro mode, QF will utilize
+DF's built-in macro functionality to execute commands. In keys mode, QF will
+literally send keystrokes to the DF window to perform those same commands
+(this was QF1.x's approach). Keys mode is a bit slower, but if you're having
+trouble designating with macro mode, try switching to keys mode.
+
 Shift+Alt+Z suspends/resumes Quickfort, useful if you find it to interfere
-with other windows. Shift+Alt+X exits Quickfort.
+with other windows.
+
+Shift+Alt+X exits Quickfort.
 
 
 Editing Blueprints
