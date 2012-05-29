@@ -3,7 +3,13 @@
 :Also depends on robocopy.exe being on the PATH.
 @echo on
 
-@echo Cleaning before we begin..
+cls
+
+@echo ---------------------------------------------------------------------------------
+@echo ----- CLEAN
+@echo ---------------------------------------------------------------------------------
+
+call cleanrelease.bat
 
 @echo ---------------------------------------------------------------------------------
 @echo ----- BUILDING QFCONVERT
