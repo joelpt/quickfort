@@ -1409,7 +1409,8 @@ Links
 
 * [Quickfort homepage](http://joelpt.net/quickfort)
 * [Quickfort forum thread](http://www.bay12forums.com/smf/index.php?topic=35931.0)
-* [Quickfort 2 issue/source tracker](http://code.google.com/p/quickfort/issues/list)
+* [Quickfort 2 source repository](https://github.com/joelpt/quickfort/)
+* [Quickfort 2 issue tracker](https://github.com/joelpt/quickfort/issues?direction=desc&page=1&sort=created&state=open)
 * [Community blueprints repository](http://www.mediafire.com/?oujvalbb0sggp)
 
 ### Visual designers for Quickfort ###
