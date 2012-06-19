@@ -143,6 +143,11 @@ def parse_file(filename, sheetid):
     # read lines in
     lines = read_sheet(filename, sheetid)
 
+    # raise error on completely empty sheets
+    if (len(lines) == 0):
+        raise FileError("Sheet is empty, file %s, worksheet id %s" % (
+            filename, sheetid))
+
     # break into the lines we want
     if lines[0][0] and lines[0][0][0] == '#':
         (top_line, lines) = (','.join(lines[0]), lines[1:])

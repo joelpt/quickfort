@@ -24,7 +24,7 @@ from grid import GridLayer, Grid
 from keystroker import Keystroker
 from transformer import Transformer
 
-from errors import BlueprintError, ParametersError
+from errors import BlueprintError, FileError, ParametersError
 
 
 def get_blueprint_info(path, transform_str):
@@ -71,7 +71,7 @@ def get_blueprint_info(path, transform_str):
             # add this sheet's info to the result string
             result += '>>>> Sheet id %d\n' % sheet[1]
             result += formatted + '\n'
-        except BlueprintError as ex:
+        except FileError as ex:
             continue    # ignore blank/missing sheets
 
     if result:
