@@ -5,9 +5,9 @@
 // Format:
 // {
 //     "output-type": {
-//         "qf-keycode": "output-code", 
+//         "qf-keycode": "output-code",
 //         ...
-//     }, 
+//     },
 //     ...
 // }
 //
