@@ -34,7 +34,7 @@ SendKeys(keystrokes)
 {
   global
   local key, testkeys, keylen, ch, asc, msg, success, waitAfterNext
-  
+
   waitAfterNext := false
 
   ; count number of , chars in the keys string
@@ -44,13 +44,13 @@ SendKeys(keystrokes)
 
   SetKeyDelay, KeyDelay, KeyPressDuration
   SetKeyDelay, 1, 1, Play
-  
+
   InitMemorizedMats()
-  
+
   ActivateGameWin()
   ReleaseModifierKeys()
   Sleep, 0
-  
+
   ; loop through the keys
   Loop, parse, keystrokes, `,
   {
@@ -78,7 +78,7 @@ SendKeys(keystrokes)
     {
       if (!WaitForMenuAfterSending(key, WaitForMatMenuMaxMS)) ; sends keystroke and waits for screen change
       {
-        if (!Building) 
+        if (!Building)
           return ; user hit Alt+C to cancel
         MsgBox, Error: Quickfort timed out waiting for DF menu. Aborting playback.
         return
@@ -91,7 +91,7 @@ SendKeys(keystrokes)
     {
       ; Handle {SelectMat label count} manual material selection.
       success := HandleSelectMatKeycode(key)
-      
+
       if (!success)
         return ; User cancelled process or there was an error, abort playback.
 
@@ -122,22 +122,34 @@ SendKeys(keystrokes)
 
       ; Send desired keys "safely"
       SetKeyDelay, 150, 25
-      Send, %keys%
+      Send, %key%
       SetKeyDelay, KeyDelay, KeyPressDuration
     }
     else if (SendMode = "SendPlay")
+    {
       SendPlay, %key%
+    }
     else if (SendMode = "SendInput")
-      SendInput %key%
+    {
+      SendInput, %key%
+      ; Insert artificial delay for SendInput, which does not obey SetKeyDelay
+      Sleep, %KeyDelay%
+    }
     else if (SendMode = "Send")
-      Send %key%
+    {
+      Send, %key%
+    }
     else if (SendMode = "SendEvent")
-      SendEvent %key%
-    else if (SendMode = "ControlSend") {
+    {
+      SendEvent, %key%
+    }
+    else if (SendMode = "ControlSend")
+    {
       ReleaseModifierKeys()
       ControlSend,, %key% ,Dwarf Fortress
     }
-    else {
+    else
+    {
       MsgBox, Unsupported SendMode '%SendMode%'.
       return
     }
