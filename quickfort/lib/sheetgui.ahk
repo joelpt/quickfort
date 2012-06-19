@@ -64,7 +64,7 @@ ShowSheetInfoGui()
 
   ; Update gui to our current sheet
   UpdateGuiSheetInfo(GuiSelectedSheetIndex)
-  
+
   ; Set keyboard focus properly
   if (listViewEnabled)
   {
@@ -199,7 +199,7 @@ UpdateGuiSheetInfo(index)
   newtext := newtext "`n`n"
   newtext := newtext Comment%index%
   newtext := newtext "`n"
-  
+
   if (UsesManualMats%index% = "true")
   {
     newtext := newtext "`n** This blueprint uses manual material selection **`n"

@@ -49,6 +49,9 @@ GetBlueprintInfo(filename)
   local outfile
   local result
   local parseChar
+  local needle
+  local info
+  local cnt
 
   Tip("Reading blueprint...")
 
@@ -78,7 +81,7 @@ GetBlueprintInfo(filename)
           MsgBox, Error reading blueprint information from qfconvert.py output file %outfile%
           return False
         }
-
+        SheetIndex%cnt% := matches1
         Name%cnt% := matches2
         BuildType%cnt% := matches3
         StringReplace, Comment%cnt%, matches4, \n, `n, All

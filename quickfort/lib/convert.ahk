@@ -96,7 +96,7 @@ ConvertAndSaveMacro(title)
   }
   else
   {
-    result := ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "macro", title, StartPos, RepeatPattern, false)
+    result := ConvertBlueprint(SelectedFile, outfile, SheetIndex%SelectedSheetIndex%, "macro", title, StartPos, RepeatPattern, false)
   }
 
   if (!result)
@@ -143,7 +143,7 @@ ConvertAndSendKeys(visualizing)
   }
   else
   {
-    result := ConvertBlueprint(SelectedFile, outfile, SelectedSheetIndex, "keylist", "", StartPos, RepeatPattern, visualizing)
+    result := ConvertBlueprint(SelectedFile, outfile, SheetIndex%SelectedSheetIndex%, "keylist", "", StartPos, RepeatPattern, visualizing)
   }
 
   if (!result)
