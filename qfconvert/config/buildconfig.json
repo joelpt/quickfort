@@ -102,14 +102,31 @@
                           "setsize": "setsize_fixed"
                         },
 
+            // 5x5 kennels
+            "k":        { "sizebounds": [5, 5, 5, 5],
+                          "setsize": "setsize_fixed"
+                        },
+
             // metalsmith forge, magma forge
             "w[fv]":    { "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "&", "%", "@", "%"],
                           "sizebounds": [3, 3, 3, 3],
                           "setsize": "setsize_fixed"
                         },
 
+            // ashery
+            "wy":       { "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "&", "%", "&", "%", "&", "%"],
+                          "sizebounds": [3, 3, 3, 3],
+                          "setsize": "setsize_fixed"
+                        },
+
+            // dyer and soapmaker
+            "w[dS]":    { "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "&", "%", "&", "%", "&", "%"],
+                          "sizebounds": [3, 3, 3, 3],
+                          "setsize": "setsize_fixed"
+                        },
+
             // 3x3 workshops & furnaces other than those already accounted for
-            "w[^sfv]|e.":
+            "w[^sfvydS]|e.":
                         { "sizebounds": [3, 3, 3, 3],
                           "setsize": "setsize_fixed"
                         },
@@ -127,13 +144,14 @@
             "Mh":       { "sizebounds": [1, 10, 1, 1] },
             "Mv":       { "sizebounds": [1, 1, 1, 10] },
 
-            // track rollers - horizontal orientation
-            "Mr.*s":    { "sizebounds": [1, 10, 1, 1],
+            // track rollers - EW or WE orientation
+            "^(Mr[^s]*s[^s]*|Mr[^s]*sss[^s]*)$":
+                        { "sizebounds": [1, 10, 1, 1],
                           "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "setmats", "@"]
                         },
 
-            // track rollers - vertical orientation
-            "Mr[^s]*(?!s)$":
+            // track rollers - NS or SN orientation
+            "^(Mr[^s]*(?!s)|Mr[^s]*ss[^s]*)$":
                         { "sizebounds": [1, 1, 1, 10],
                           "designate": ["exitmenu", "menu", "cmd", "moveto", "setsize", "setmats", "@"]
                         }
