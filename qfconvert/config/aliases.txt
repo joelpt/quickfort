@@ -118,6 +118,10 @@ trackrampNSEW: CT{+ 15}{+ 14}{Enter}
 # Aliases for building track rollers; use e.g. rollerHqqq to make a low-speed horizontal roller
 rollerH: Mrs
 rollerV: Mr
+rollerNS: Mr
+rollerSN: Mrss
+rollerEW: Mrs
+rollerWE: Mrsss
 
 # Aliases for building track stops that dump in each of the four directions
 trackstopN: CSd
