@@ -159,7 +159,7 @@ class Transformer:
         Apply the requested transformation to 2D lists [[]] a and possibly b,
         and return the result.
         """
-        #b = deepcopy(b)  # ensure a and b are different objects
+        b = deepcopy(b)  # ensure a and b are different objects
         count, action = trans
 
         if action == 'sub':
