@@ -52,6 +52,7 @@ Table of Contents
     * [Advanced transformations: Search and replace](#advanced-transformations-search-and-replace)
     * [Advanced transformations: Change build phase](#advanced-transformations-change-build-phase)
     * [Advanced transformations: debugging](#advanced-transformations-debugging)
+    * [Advanced transformations: transforming blueprint files](#advanced-transformations-transforming-blueprint-files)
 * [Stupid dwarf tricks](#stupid-dwarf-tricks)
 * [Troubleshooting](#troubleshooting)
 * [Create an Excel macro to size all columns to a uniform narrow width](#create-an-excel-macro-to-size-all-columns-to-a-uniform-narrow-width)
@@ -340,13 +341,19 @@ dug-out area:
     Cw Cw Cw Cw #
     Cw b  h  Cw #
     Cw       Cw #
-    Cw Cw d  Cw #
+    Cw Cw    Cw #
     #  #  #  #  #
 
-Note my generosity - I've placed a bed (b), chest (h) and door (d) here as
+Note my generosity - I've placed a bed (b) and chest (h) here for the dwarf as
 well. Note that you must use the full series of keys needed to build something
 in each cell, e.g. 'Cw' enters DF's constructions submenu (C) and selects
 walls (w).
+
+Note: as of DF 0.34.x, it is no longer possible to build doors (d) at the same
+time that you build adjacent walls (Cw). Doors must now be built *after* walls
+are constructed for them to be next to. This does not affect the more common
+case where walls exist as a side-effect of having dug-out a room in a #dig
+blueprint.
 
 I'd also like to place a booze stockpile in the 2 unoccupied tiles in the room.
 
@@ -662,6 +669,8 @@ Quickfort supports the designation of minecart tracks, stops, and rollers
 through the normal mechanisms, e.g. a #build blueprint with `CS` in a cell
 will designate a track stop.
 
+Note: track carving (#dig `T` in cells) is not yet supported.
+
 For track segments (`CT...`), you must select from DF's menu to choose the
 desired track segment, then send `{Enter}` to select it. For example, to
 designate a "Track (E)" segment, which is the third item in the track
@@ -712,6 +721,10 @@ The aliases are:
     -- Horizontal and vertical roller segments --
     rollerH
     rollerV
+    rollerNS
+    rollerSN
+    rollerEW
+    rollerWE
 
     -- Track stops that dump to N/S/E/W --
     trackstopN
@@ -1181,6 +1194,13 @@ then executing a separate sequence `2e` on the `rotcw` transformation's result.
     Alt+R -> rotcw 2e: rotate B, then repeat AB twice east
     Alt+R -> rotcw ! 2e: rotate the blueprint, then repeat it twice east
 
+Quickfort will also interpret the semicolon `;` character as synonymous with
+the `!` character; this style may be more recognizable to programmers. The
+following commands do the same thing:
+
+    Alt+R -> rotcw ! 2e
+    Alt+R -> rotcw; 2e
+
 
 Advanced transformations: Search and replace
 --------------------------------------------
@@ -1222,9 +1242,9 @@ the following:
     Alt+R -> s/oo/ee/
 
 will turn cells containing `booze` into `beeze`. To require the entire cell
-to match, use regex's `^` (match at start) and `&` (match at end) codes:
+to match, use regex's `^` (match at start) and `$` (match at end) codes:
 
-    Alt+R -> s/^oo&/ee/
+    Alt+R -> s/^oo$/ee/
     Used on cell `booze`, has no effect - cell stays as `booze`;
     used on cell `oo`, cell becomes `ee`
 
@@ -1283,6 +1303,24 @@ The use of `--mode=key` is just to avoid being spammed with DF-macro output
 (very verbose).
 
 
+Advanced transformations: transforming blueprint files
+------------------------------------------------------
+
+`qfconvert` can be used with the --mode=csv flag to transform your blueprint
+files into new CSV files.
+
+A simple example rotating obama.csv 90 degrees clockwise and saving the resultant
+blueprint as rotatedobama.csv:
+
+    > qfconvert.exe blueprints/Tests/obama.csv --mode=csv --transform="rotcw" > rotatedobama.csv
+
+or using abbreviated syntax:
+
+    > qfconvert.exe blueprints/Tests/obama.csv -mcsv -t "rotcw" > rotatedobama.csv
+
+Note that only CSV output is supported at this time.
+
+
 Stupid dwarf tricks
 -------------------
 
@@ -1323,6 +1361,12 @@ Troubleshooting
   (including ONTO the QF mousetip). Doing so will cause DF to stop playing
   your macro. It is usually safe to move the mouse (not too quickly) around
   the DF window itself.
+
+* As of DF 0.34.x, it is no longer possible to build doors (d) at the same
+  time that you build adjacent walls (Cw). Doors must now be built *after* walls
+  are constructed for them to be next to. This does not affect the more common
+  case where walls exist as a side-effect of having dug-out a room in a #dig
+  blueprint.
 
 * If you use a non-English keyboard layout, QF2 may require some tweaking first.
   The simplest solution is to switch to an English keyboard layout while running
