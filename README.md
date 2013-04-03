@@ -17,7 +17,7 @@ stockpiles, and making adjustments).
 
 Original idea and 1.0 codebase from [Valdemar's designator.ahk script](http://www.bay12games.com/forum/index.php?topic=1428.0).
 
-User contributed blueprints can be found [here](http://www.mediafire.com/?oujvalbb0sggp).
+User contributed blueprints can be found [here](http://www.mediafire.com/df_qfcommunity).
 
 See the [Links section](#links) for various tools that work with Quickfort.
 
@@ -1455,7 +1455,7 @@ Links
 * [Quickfort forum thread](http://www.bay12forums.com/smf/index.php?topic=35931.0)
 * [Quickfort 2 source repository](https://github.com/joelpt/quickfort/)
 * [Quickfort 2 issue tracker](https://github.com/joelpt/quickfort/issues?direction=desc&page=1&sort=created&state=open)
-* [Community blueprints repository](http://www.mediafire.com/?oujvalbb0sggp)
+* [Community blueprints repository](http://www.mediafire.com/df_qfcommunity)
 
 ### Visual designers for Quickfort ###
 
