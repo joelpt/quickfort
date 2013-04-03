@@ -85,7 +85,7 @@ ConvertAndSaveMacro(title)
 
   outfile := A_Temp "\" title ".mak"
   ActivateGameWin() ; TODO try to get dfpath without focusing the game window
-  dfpath := GetWinPath("A") ; active window is the instance of DF we want to send to
+  dfpath := GetActiveWinPath()
   SplitPath, dfpath, , dfpath
   destfile := dfpath "\data\init\macros\" title ".mak"
 

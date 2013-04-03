@@ -16,10 +16,10 @@ CheckDFMacroMS()
 
   if (val == -255)
     return  ; file/setting not found
-  
+
   if (val == 0)
     return  ; already set to 0ms
-  
+
   msg =
   (
 Quickfort has detected that this instance of Dwarf Fortress has a
@@ -68,7 +68,7 @@ CANCEL: Don't modify and never ask me again
 ;; Returns the setting's value, or -255 if file or setting could not be found.
 GetDFInitTxtSetting(name)
 {
-  dfpath := GetWinPath("A") ; active window is the instance of DF we want 
+  dfpath := GetActiveWinPath() ; active window is the instance of DF we want
   SplitPath, dfpath, , dfpath
   initpath := dfpath "\data\init\init.txt"
 
@@ -97,7 +97,7 @@ GetDFInitTxtSetting(name)
 ;; Returns the setting's new value, or -255 if file could not be found.
 SetDFInitTxtSetting(name, newValue)
 {
-  dfpath := GetWinPath("A") ; active window is the instance of DF we want 
+  dfpath := GetActiveWinPath()
   SplitPath, dfpath, , dfpath
   initpath := dfpath "\data\init\init.txt"
 
