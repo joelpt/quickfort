@@ -207,6 +207,11 @@ UpdateGuiSheetInfo(index)
 
   newtext := newtext "`nCommand usage frequencies:`n" CommandUseCounts%index%
   newtext := newtext "`n`nDimensions: " Width%index% "w x " Height%index% "h"
+
+  if (LayerCount%index% > 1) {
+    newtext := newtext " x " LayerCount%index% "z"
+  }
+
   newtext := newtext "`n`n" BlueprintPreview%index%
   GuiControl,, SheetName, %newtitle%
   GuiControl,, SheetInfo, %newtext%
