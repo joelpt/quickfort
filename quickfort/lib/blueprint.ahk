@@ -75,6 +75,10 @@ GetBlueprintInfo(filename)
       info = %A_LoopField% ; AHK style whitespace trim
       if (StrLen(info) > 3)
       {
+        if (StrLen(info) > 20000) {
+            ; trim to avoid causing RegExMatch to improperly fail (AHK bug)
+            info := Substr(info, 1, 20000)
+        }
         needle := "Sheet id (\d+)\RBlueprint name: (.+)\RBuild type: (.+)\RComment: (.*)\RStart position: (.+)\RStart comment: (.*)\RFirst layer width: (.+)\RFirst layer height: (.+)\RLayer count: (.+)\RUses manual material selection: (.+)\RCommand use counts: (.*)\RBlueprint preview:\R((.+\R)+)#"
         if (!RegExMatch(info, needle, matches))
         {
